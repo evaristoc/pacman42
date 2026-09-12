@@ -1,0 +1,45 @@
+[project]
+name = "pacman42"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = "==3.11"
+authors = [
+    { name = "ecarabal", email = "ecarabal@student.codam.nl" },
+	{ name = "kfletter", email = "kfletter@student.codam.nl" }
+]
+
+[tool.mypy]
+files = ["src"]
+ignore_missing_imports = true
+strict = false # Optional: enforces strict typing
+
+
+[tool.flake8]
+files = ["src"]
+max-line-length = 127
+exclude = [".git", "__pycache__", "build", "dist"]
+select = ["E9", "F63", "F7", "F82", "E", "W", "F"]
+
+[dependency-groups]
+req = [
+	"python-dotenv==1.2.2",
+]
+
+dev = [
+    "black==24.0.0",
+    "isort==5.13.0",
+    "uv==10.0.1",
+    "pymermaider==0.1.6",
+]
+
+linters = [
+    "pylint==4.0.8",
+    "flake8==7.0.0",
+	"flake8-myproject==1.2.4",
+    "mypy==1.9.0",
+]
+
+test = [
+    "pytest>=8.0.0",
+]
