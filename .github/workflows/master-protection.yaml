@@ -1,0 +1,26 @@
+name: Enforce GitFlow Master Protection Rule
+
+on:
+  pull_request:
+    branches:
+      - master
+      - development
+
+jobs:
+  check-source-branch:
+    name: Verify GitFlow Rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Protect master Branch for PR but development
+        if: github.base_ref == 'master' && github.head_ref != 'development'
+        run: |
+          echo "❌ ERROR: Pull Requests directly to 'master' are only allowed from 'development'."
+          echo "Current source branch: ${{ github.head_ref }}"
+          exit 1
+      -name: Protect Backward Merge
+      if: github.base_ref == 'development' && github.head_ref != 'master'
+      run: |
+         echo "❌ ERROR: Cannot merge 'master' back into 'development'."
+         exit 1
+      - name: Success Message
+        run: echo "✅ Branch validation passed. PR is from 'development' to 'master'."
