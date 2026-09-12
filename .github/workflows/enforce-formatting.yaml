@@ -20,11 +20,11 @@ jobs:
         uses: astral-sh/setup-uv@v10.0.1
         with:
           version: "0.12.5"
-          python-version: "3.11"
+          python-version: "3.11.16"
           enable-cache: true
       - name: Install Selected Dependencies
         run: uv sync --group linters --group req
       - name: Run Flake8 Linter
-        run: uv run flake8
+        run: uv run flake8 src
       - name: Run Mypy Type Checker
-        run: uv run mypy
+        run: uv run mypy src
