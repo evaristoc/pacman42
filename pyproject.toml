@@ -32,7 +32,6 @@ dev = [
 
 linters = [
     "flake8==7.0.0",
-	"flake8-myproject==1.2.4",
     "mypy==1.9.0",
 ]
 
