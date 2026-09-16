@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "pacman42"
 version = "0.1.0"
@@ -24,6 +28,8 @@ select = ["E9", "F63", "F7", "F82", "E", "W", "F"]
 [dependency-groups]
 req = [
 	"python-dotenv==1.2.2",
+    "maze-generator",
+    "minilibx"
 ]
 
 dev = [
@@ -38,3 +44,10 @@ linters = [
 test = [
     "pytest>=8.0.0",
 ]
+
+[tool.uv.sources]
+maze-generator = { path = "./src/wheels/mazegenerator-00001-py3-none-any.whl" }
+minilibx = { path = "./src/wheels/minilibx/mlx-2.2-py3-ubuntu-any.whl" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
