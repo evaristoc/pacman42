@@ -18,13 +18,14 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actdions/setup-python@v7
-        with:
-          python-version: "3.11"
+      # - name: Set up Python
+      #   uses: actdions/setup-python@v7
+      #   with:
+      #     python-version: "3.11"
       - name: Install uv
         uses: astral-sh/setup-uv@v10.0.1
         with:
+          python-version: ">=3.11,<3.12"
           version: "0.12.5"
           enable-cache: true
       - name: Install Selected Dependencies
