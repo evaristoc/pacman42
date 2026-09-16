@@ -28,8 +28,8 @@ select = ["E9", "F63", "F7", "F82", "E", "W", "F"]
 [dependency-groups]
 req = [
 	"python-dotenv==1.2.2",
-    "maze-generator",
-    "minilibx"
+    "mazegenerator",
+#    "mlx"
 ]
 
 dev = [
@@ -46,8 +46,9 @@ test = [
 ]
 
 [tool.uv.sources]
-maze-generator = { path = "./src/wheels/mazegenerator-00001-py3-none-any.whl" }
-minilibx = { path = "./src/wheels/minilibx/mlx-2.2-py3-ubuntu-any.whl" }
+mazegenerator = { path = "./src/wheels/mazegenerator/mazegenerator-2.1.0-py3-none-any.whl" }
+# mazegenerator = { path = "./src/wheels/mazegenerator/mazegenerator-00001-py3-none-any.whl" }
+# mlx = { path = "./src/wheels/minilibx/mlx-2.2-py3-ubuntu-any.whl" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
