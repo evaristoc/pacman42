@@ -29,8 +29,12 @@ ubuntu-*.log
 __pycache__
 .mypy_cache
 
+
 # log files #
 *.egg-info/
+
+# uv files
+uv.lock
 
 ###########
 # C related
