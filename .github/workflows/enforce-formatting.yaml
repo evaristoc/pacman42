@@ -1,4 +1,6 @@
 name: Code Quality (Linting)
+permissions:
+  contents: read # access to check out code and install dependencies
 
 on:
   #push:
@@ -17,7 +19,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Set up Python
-        uses: actdions/setup-python@v5
+        uses: actdions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Install uv
