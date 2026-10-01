@@ -12,8 +12,7 @@ authors = [
 [tool.mypy]
 files = ["src"]
 ignore_missing_imports = true
-strict = false # Optional: enforces strict typing
-
+strict = false
 
 [tool.flake8]
 files = ["src"]
@@ -23,11 +22,16 @@ select = ["E9", "F63", "F7", "F82", "E", "W", "F"]
 
 [dependency-groups]
 req = [
-	"python-dotenv==1.2.2",
+    "python-dotenv==1.2.2",
+    "mazegenerator",
+    "mlx",
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
 ]
 
 dev = [
     "uv==0.12.5",
+    "pyinstaller==6.11.0",
 ]
 
 linters = [
@@ -38,3 +42,7 @@ linters = [
 test = [
     "pytest>=8.0.0",
 ]
+
+[tool.uv.sources]
+mazegenerator = { path = "src/wheels/mazegenerator-2.1.0-py3-none-any.whl" }
+mlx = { path = "src/wheels/mlx-2.4-py3-none-any.whl" }
