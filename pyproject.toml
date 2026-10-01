@@ -24,7 +24,9 @@ select = ["E9", "F63", "F7", "F82", "E", "W", "F"]
 req = [
     "python-dotenv==1.2.2",
     "mazegenerator",
-    "mlx"
+    "mlx",
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
 ]
 
 dev = [
