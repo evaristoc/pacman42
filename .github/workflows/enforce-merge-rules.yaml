@@ -1,12 +1,10 @@
-name: Code Quality (Linting)
+name: Merge Rules
 permissions:
   contents: read # access to check out code and install dependencies
 
 on:
-  #push:
-  #  branches-ignore:
-  #    - master
   pull_request:
+    types: [opened, reopened]
     branches:
       - development
       - master
@@ -15,8 +13,11 @@ on:
 
 jobs:
   test:
+    name: Testing
+    runs-on: ubuntu-latest
+    steps: 
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       # - name: Set up Python
       #   uses: actdions/setup-python@v7
       #   with:
@@ -43,7 +44,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       # - name: Set up Python
       #   uses: actdions/setup-python@v7
       #   with:
