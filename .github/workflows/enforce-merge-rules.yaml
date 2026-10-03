@@ -65,6 +65,6 @@ jobs:
       - name: Run Flake8 Linter
         run: uv run flake8 src
       - name: Run Mypy Type Checker
-        run:
+        run: |
           uv run mypy --disallow_untyped_defs src
 
