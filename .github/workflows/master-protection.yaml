@@ -8,7 +8,7 @@ on:
 
 jobs:
   check-source-branch:
-    name: Protect Master
+    name: protect_master
     runs-on: ubuntu-latest
     steps:
       - name: Protect master Branch for PR but development
