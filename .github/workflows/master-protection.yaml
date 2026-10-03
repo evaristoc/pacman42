@@ -18,8 +18,8 @@ jobs:
           echo "Current source branch: ${{ github.head_ref }}"
           exit 1
       -name: Protect Backward Merge
-      if: github.base_ref == 'development' && github.head_ref != 'master'
-      run: |
+        if: github.base_ref == 'development' && github.head_ref == 'master'
+        run: |
          echo "❌ ERROR: Cannot merge 'master' back into 'development'."
          exit 1
       - name: Success Message
