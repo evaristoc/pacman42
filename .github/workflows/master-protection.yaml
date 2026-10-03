@@ -4,11 +4,11 @@ on:
   pull_request:
     branches:
       - master
-      - development
+      # - development
 
 jobs:
   check-source-branch:
-    name: Protect Master
+    name: protect_master
     runs-on: ubuntu-latest
     steps:
       - name: Protect master Branch for PR but development
@@ -17,10 +17,10 @@ jobs:
           echo "❌ ERROR: Pull Requests directly to 'master' are only allowed from 'development'."
           echo "Current source branch: ${{ github.head_ref }}"
           exit 1
-      # -name: Protect Backward Merge
-      #   if: github.base_ref == 'development' && github.head_ref == 'master'
-      #   run: |
-      #    echo "❌ ERROR: Cannot merge 'master' back into 'development'."
-      #    exit 1
+#       # -name: Protect Backward Merge
+#       #   if: github.base_ref == 'development' && github.head_ref == 'master'
+#       #   run: |
+#       #    echo "❌ ERROR: Cannot merge 'master' back into 'development'."
+#       #    exit 1
       - name: Success Message
         run: echo "✅ Branch validation passed. PR is from 'development' to 'master'."
