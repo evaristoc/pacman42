@@ -34,7 +34,7 @@ jobs:
           Running Unit Test
           # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
         run: |
-          pytest
+          uv run pytest
 
   lint:
     name: Linters
@@ -57,11 +57,6 @@ jobs:
           enable-cache: true
       - name: Install Selected Dependencies
         run: uv sync --group linters --group req
-      - name:
-          Running Unit Test
-          # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
-        run: |
-          uv run pytest
       - name: Run Flake8 Linter
         run: uv run flake8 src
       - name: Run Mypy Type Checker
