@@ -1,12 +1,10 @@
-name: Code Quality (Linting)
+name: Merge Rules
 permissions:
   contents: read # access to check out code and install dependencies
 
 on:
-  #push:
-  #  branches-ignore:
-  #    - master
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - development
       - master
@@ -15,8 +13,11 @@ on:
 
 jobs:
   test:
+    name: Testing
+    runs-on: ubuntu-latest
+    steps: 
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       # - name: Set up Python
       #   uses: actdions/setup-python@v7
       #   with:
@@ -33,7 +34,7 @@ jobs:
           Running Unit Test
           # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
         run: |
-          pytest
+          uv run pytest -o cache_dir=/dev/null
 
   lint:
     name: Linters
@@ -43,7 +44,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       # - name: Set up Python
       #   uses: actdions/setup-python@v7
       #   with:
@@ -56,14 +57,9 @@ jobs:
           enable-cache: true
       - name: Install Selected Dependencies
         run: uv sync --group linters --group req
-      - name:
-          Running Unit Test
-          # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
-        run: |
-          pytest
       - name: Run Flake8 Linter
         run: uv run flake8 src
       - name: Run Mypy Type Checker
-        run:
+        run: |
           uv run mypy --disallow_untyped_defs src
 
