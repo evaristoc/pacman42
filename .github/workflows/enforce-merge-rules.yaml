@@ -1,0 +1,65 @@
+name: Merge Rules
+permissions:
+  contents: read # access to check out code and install dependencies
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - development
+      - master
+    # paths:
+    #  - '.github/workflows/enforce-formatting.yml'
+
+jobs:
+  test:
+    name: Testing
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout Code
+        uses: actions/checkout@v6
+      # - name: Set up Python
+      #   uses: actdions/setup-python@v7
+      #   with:
+      #     python-version: "3.11"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          python-version: ">=3.11,<3.12"
+          version: "0.12.5"
+          enable-cache: true
+      - name: Install Selected Dependencies
+        run: uv sync --group req --group test
+      - name:
+          Running Unit Test
+          # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
+        run: |
+          uv run pytest -o cache_dir=/dev/null
+
+  lint:
+    name: Linters
+    needs: test
+    if: ${{ needs.test.result == 'success'}}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+      # - name: Set up Python
+      #   uses: actdions/setup-python@v7
+      #   with:
+      #     python-version: "3.11"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          python-version: ">=3.11,<3.12"
+          version: "0.12.5"
+          enable-cache: true
+      - name: Install Selected Dependencies
+        run: uv sync --group linters --group req
+      - name: Run Flake8 Linter
+        run: uv run flake8 src
+      - name: Run Mypy Type Checker
+        run: |
+          uv run mypy --disallow_untyped_defs src
+

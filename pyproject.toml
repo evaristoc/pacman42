@@ -27,6 +27,8 @@ req = [
     "mazegenerator",
     "mlx",
     pygame-ce == 2.5.8,
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
 ]
 
 dev = [
