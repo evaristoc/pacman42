@@ -16,7 +16,7 @@ jobs:
         run: |
           echo "❌ ERROR: Pull Requests directly to 'master' are only allowed from 'development'."
           echo "Current source branch: ${{ github.head_ref }}"
-#           exit 1
+          exit 1
 #       # -name: Protect Backward Merge
 #       #   if: github.base_ref == 'development' && github.head_ref == 'master'
 #       #   run: |
