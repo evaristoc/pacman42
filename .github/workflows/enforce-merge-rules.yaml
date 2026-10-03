@@ -61,7 +61,7 @@ jobs:
           Running Unit Test
           # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
         run: |
-          pytest
+          uv run pytest
       - name: Run Flake8 Linter
         run: uv run flake8 src
       - name: Run Mypy Type Checker
