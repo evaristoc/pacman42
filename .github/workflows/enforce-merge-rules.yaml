@@ -4,7 +4,7 @@ permissions:
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, synchronize, reopened]
     branches:
       - development
       - master
@@ -34,7 +34,7 @@ jobs:
           Running Unit Test
           # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
         run: |
-          uv run pytest
+          uv run pytest -o cache_dir=/dev/null
 
   lint:
     name: Linters
