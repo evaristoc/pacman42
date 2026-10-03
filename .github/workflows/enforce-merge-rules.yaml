@@ -33,8 +33,8 @@ jobs:
         run: uv sync --group linters --group req --group test
       - name:
           Running Unit Test
-        run: |
           # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
+        run: |
           pytest
       - name: Run Flake8 Linter
         run: uv run flake8 src
