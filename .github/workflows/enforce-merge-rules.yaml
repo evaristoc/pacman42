@@ -31,9 +31,9 @@ jobs:
           enable-cache: true
       - name: Install Selected Dependencies
         run: uv sync --group linters --group req --group test
-      - name: |
+      - name:
           Running Unit Test
-        run:
+        run: |
           # if no test, I could do pytest --supress-no-test-exit-code, but I prefer to add dummy
           pytest
       - name: Run Flake8 Linter
