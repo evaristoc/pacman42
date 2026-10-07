@@ -48,15 +48,10 @@ test = [
 ]
 
 [tool.uv.sources]
-<<<<<<< HEAD
 mazegenerator = { path = "src/PacMan/vendors/mazegenerator-2.1.0-py3-none-any.whl" }
 mlx = { path = "src/PacMan/vendors/mlx-2.4-py3-none-any.whl" }
-=======
-mazegenerator = { path = "src/wheels/mazegenerator-2.1.0-py3-none-any.whl" }
-mlx = { path = "src/wheels/mlx-2.4-py3-none-any.whl" }
 
 [tool.uv.workspace]
 members = [
     "tests",
 ]
->>>>>>> development
