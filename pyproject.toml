@@ -3,7 +3,7 @@ name = "pacman42"
 version = "0.1.0"
 description = ""
 readme = "README.md"
-requires-python = ">=3.11,<3.12"
+requires-python = ">=3.11,<3.15"
 authors = [
     { name = "ecarabal", email = "ecarabal@student.codam.nl" },
 	{ name = "kfletter", email = "kfletter@student.codam.nl" }
@@ -47,3 +47,8 @@ test = [
 [tool.uv.sources]
 mazegenerator = { path = "src/wheels/mazegenerator-2.1.0-py3-none-any.whl" }
 mlx = { path = "src/wheels/mlx-2.4-py3-none-any.whl" }
+
+[tool.uv.workspace]
+members = [
+    "tests",
+]
