@@ -47,6 +47,12 @@ uv.lock
 ############
 node_modules/*
 
+############
+# pi related
+############
+.pi/*
+AGENTS.md
+
 ###########
 # other folders
 ###########
