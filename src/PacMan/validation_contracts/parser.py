@@ -25,7 +25,8 @@ class DataProcessor:
             logger.critical("FATAL: unable to load config json.")
             raise SystemExit()
         except Exception:
-            logger.critical("FATAL: unknown error when trying to load config json.")
+            logger.critical("FATAL: unknown error when trying to"
+                            "load config json.")
             raise SystemExit()
 
     @classmethod

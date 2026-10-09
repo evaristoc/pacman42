@@ -2,6 +2,7 @@ import pygame
 import numpy as np
 from typing import Tuple, Any
 
+
 class PyGMiniLibXEmulator:
     def __init__(self,
                  width: int,

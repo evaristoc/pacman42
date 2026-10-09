@@ -13,7 +13,7 @@ class PacManApp:
         return "I am PacMan!"
 
     def get_config(self, path_to_config: str) -> ValidAppEntriesConfig:
-        #path_to_config: str = str(Path.cwd / 'configs' / 'configs.json')
+        # path_to_config: str = str(Path.cwd / 'configs' / 'configs.json')
         raw_data = DataProcessor.load_dataset(path_to_config)
         return DataProcessor.resolve_and_validate(**raw_data)
 
@@ -32,4 +32,3 @@ class PacManApp:
         except Exception as err:
             logger.exception(err)
             raise SystemExit()
-        
