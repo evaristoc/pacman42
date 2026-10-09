@@ -27,5 +27,3 @@ class RendererFactory:
         else:
             logger.error("FATAL: height or width found to be None.")
             raise SystemExit()
-
-
