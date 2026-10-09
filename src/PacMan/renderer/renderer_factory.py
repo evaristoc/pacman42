@@ -25,7 +25,7 @@ class RendererFactory:
                          f"perfect True, seed 42, config: {self._config}")
 
     def init_engine(self) -> PyGMiniLibXEmulator:
-        return PyGMiniLibXEmulator(self.width * 100,
-                                   self.height * 100)
+        return PyGMiniLibXEmulator(self._config.width * 100,
+                                   self._config.height * 100)
 
 

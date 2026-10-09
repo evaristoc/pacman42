@@ -19,7 +19,7 @@ class PacManApp:
 
     def init_board(self, config: ValidBoardConfig) -> None:
         try:
-            renderer = RendererFactory(config.width, config.height)
+            renderer = RendererFactory(config)
             maze = renderer.init_maze()
             print(maze.__dict__)
             pygmlx = renderer.init_engine()
