@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class PacManApp:
-    def __str__(self) -> None:
+    def __str__(self) -> str:
         return "I am PacMan!"
 
     def get_config(self, path_to_config: str) -> ValidAppEntriesConfig:

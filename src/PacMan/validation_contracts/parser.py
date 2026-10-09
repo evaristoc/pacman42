@@ -16,7 +16,7 @@ class DataProcessor:
         """
         try:
             with open(valid_path, "r", encoding="utf-8") as f:
-                raw_data = json.load(f)
+                raw_data: dict[str, Any] = json.load(f)
             if raw_data is None:
                 raise FileNotFoundError("config file not found at:"
                                         f"{valid_path}")

@@ -1,17 +1,18 @@
 import logging
 import fire
 from pathlib import Path
-from rich.console import Console
+from src.PacMan.app_config.console import console
 #import PacMan
 from src import PacMan
+from src.PacMan.app_config.setup import setup
 
-console = Console()
 logger = logging.getLogger(__name__)
 
 
 class Controller:
     def load_game(self,
                   config: str) -> None:
+        setup()
         if not PacMan:
             console.log("[bold red]FATAL: library was not found.[/bold red]")
             raise SystemExit()

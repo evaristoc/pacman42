@@ -61,5 +61,5 @@ jobs:
         run: uv run flake8 src
       - name: Run Mypy Type Checker
         run: |
-          uv run mypy --disallow_untyped_defs src
+          uv run mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs src
 
