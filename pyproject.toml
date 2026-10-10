@@ -9,6 +9,7 @@ authors = [
 	{ name = "kfletter", email = "kfletter@student.codam.nl" }
 ]
 dependencies = [
+    "numpy>=2.4.6",
     "rich==13.0.0",
 ]
 
@@ -32,6 +33,8 @@ req = [
     "pygame-ce==2.5.8",
     "rich==13.0.0",
     "pydantic==2.0.0",
+    "fire==0.6.0",
+    "numpy>=2.0.0"
 ]
 
 dev = [
@@ -40,18 +43,19 @@ dev = [
 
 linters = [
     "flake8==7.0.0",
-    "mypy==1.9.0",
+    "mypy==1.9.0"
 ]
 
 test = [
     "pytest==8.0.0",
 ]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.uv.sources]
 mazegenerator = { path = "src/PacMan/vendors/mazegenerator-2.1.0-py3-none-any.whl" }
 mlx = { path = "src/PacMan/vendors/mlx-2.4-py3-none-any.whl" }
 
-[tool.uv.workspace]
-members = [
-    "tests",
-]
+
+
