@@ -1,4 +1,4 @@
-from .entities import GameEntity
+from .characters.entities import GameCharacter
 from .ghostsai import AIStrategy, BlinkyAI, ClydeAI, PinkyAI, InkyAI
 from enum import Enum
 
@@ -24,7 +24,7 @@ class GhostStateError(GhostError):
     pass
 
 
-class Ghost(GameEntity):
+class Ghost(GameCharacter):
     def __init__(self, name: GhostName) -> None:
         self.name: GhostName = name
         self.state: GhostState = GhostState.CHASING

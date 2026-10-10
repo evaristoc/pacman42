@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class GameEntity(ABC):
+class GameCharacter(ABC):
     @abstractmethod
     def update(self, delta_time: float) -> None:
         """

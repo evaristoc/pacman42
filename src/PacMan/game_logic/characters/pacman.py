@@ -1,7 +1,7 @@
-from .entities import GameEntity
+from characterABC import GameCharacter
 
 
-class Pacman(GameEntity):
+class Pacman(GameCharacter):
     def __init__(self) -> None:
         self.spawn_point = self._get_spawn_point()
 
