@@ -27,6 +27,8 @@ class PyGMiniLibXEmulator:
         self.screen = pygame.display.set_mode((self.width,
                                                self.height))
         pygame.display.set_caption(title)
+        self._loop_hook: TLoopHookCB | None = None
+        self._loop_param: Any = None
 
     def pygmlx_new_image(self,
                          width: int,
@@ -46,7 +48,7 @@ class PyGMiniLibXEmulator:
         pygame.display.flip()
 
     def mlx_loop_hook(self,
-                      funct_ptr: TLoopHookCB,
+                      funct_ptr: TLoopHookCB | None,
                       param: Any = None
                       ) -> None:
         self._loop_hook = funct_ptr
@@ -108,7 +110,7 @@ class PyGMLXImageEmulator:
         line_size = self.width * 4
         return self.buffer, 32, line_size
 
-    def pygmlx_process_pixels_loop(self) -> None:
+    def pygll_process_pixels_loop(self) -> None:
         """
         Example loop iterating through the 3D array space
         (simulating manual pixel manipulation like mlx_pixel_put)
@@ -121,12 +123,12 @@ class PyGMLXImageEmulator:
                 # to test loop modification
                 self.buffer[y, x, 0] = 255 - r
 
-    def pygmlx_save_img(self, filepath: str) -> None:
+    def pygll_save_img(self, filepath: str) -> None:
         """Export the NumPy buffer back to an image file via Pillow"""
         pil_img = Image.fromarray(self.buffer, mode="RGBA")
         pil_img.save(filepath)
 
-    def resize(self, new_width: int, new_height: int) -> None:
+    def pygll_resize(self, new_width: int, new_height: int) -> None:
         pil_img = Image.fromarray(self.buffer, mode="RGBA")
         resized_img = pil_img.resize((new_width,
                                       new_height),

@@ -31,7 +31,8 @@ class Controller:
 if __name__ == "__main__":
     # python pac-man.py load_game --config configs/configs.json
     try:
-        fire.Fire(Controller)
+        c = Controller()
+        fire.Fire(c.load_game)
     except Exception as err:
         logger.exception(err)
         console.print("FATAL: the following error ocurred:"
