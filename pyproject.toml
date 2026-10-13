@@ -51,6 +51,13 @@ test = [
     "pytest==8.0.0",
 ]
 
+[tool.mypy]
+files = ["src"]
+ignore_missing_imports = true
+warn_unused_ignore = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
