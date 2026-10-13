@@ -1,14 +1,14 @@
 ---
 name: 'Sprint (iternum) : <short description>'
-about: Sprints; a subissue of a domain; iternum is the iteration of that sprint
+about: Sprint task; a subissue of a DOMAIN; iternum is the iteration of that sprint
 title: 'Sprint (iternum) : <short description>'
-labels: SPRINT GOALS
+labels: TASK
 assignees: ''
 ---
 
 (_NOTE: always confirm the following:_
-* _this is not a sub-issue_
-* _it is not assigned to someone_
+* _this is a sub-issue associated to a related DOMAIN_
+* _it is better if assigned to someone_
 * _it is better if a priority is given_
 _It should have a Backlog status_)
 
