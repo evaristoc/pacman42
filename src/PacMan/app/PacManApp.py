@@ -23,14 +23,21 @@ class PacManApp:
         try:
             renderer = RendererFactory(config)
             maze = renderer.init_maze()
-            print(maze.__dict__)
             pygmlx = renderer.init_engine()
-            imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
-            img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
-            imgmlx01.pygput_from_png(str(img01_path))
-            print("Loaded image successfully: "
-                  f"{imgmlx01.width}x{imgmlx01.height}")
-            pygmlx.pygmlx_put_image_to_window(imgmlx01, 0, 0)
+            imgmlxbg = pygmlx.pygmlx_new_image(config.size,
+                                               config.size)
+            renderer.draw(imgmlxbg,
+                          maze.grid,
+                          None)
+            pygmlx.pygmlx_put_image_to_window(imgmlxbg,
+                                              0,
+                                              0)
+            # imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
+            # img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
+            # imgmlx01.pygput_from_png(str(img01_path))
+            # print("Loaded image successfully: "
+            #       f"{imgmlx01.width}x{imgmlx01.height}")
+            # pygmlx.pygmlx_put_image_to_window(imgmlx01, 0, 0)
             imgmlx02 = pygmlx.pygmlx_new_image(500, 500)
             img02_path = cwd.parent / 'assets' / 'ghosts' / 'blue.png'
             imgmlx02.pygput_from_png(str(img02_path))
