@@ -1,5 +1,5 @@
 from mazegenerator import MazeGenerator
-from tile import Tile
+from src.PacMan.game_logic.map.tile import Tile
 from typing import Union
 
 
@@ -41,10 +41,9 @@ class Map:
             [None for _ in range(self.width)] for _ in range(self.height)
         ]
 
-        for i, _ in enumerate(range(self.height)):
-            for j, _ in enumerate(range(self.width)):
-                grid[i][j] = Tile(self.outerbound_maze[i][j])
-
+        for i, _ in enumerate(range(self.height)):  # rows?
+            for j, _ in enumerate(range(self.width)):  # cols?
+                grid[i][j] = Tile(self.outerbound_maze[i][j], i, j)
         return grid
 
     def __repr__(self):
@@ -61,14 +60,15 @@ class Map:
 
 
 class MapFactory:
-    def __init__(self):
-        self.mazegen = MazeGenerator()
+    def __init__(self, nb_cells: int):
+        self.mazegen = MazeGenerator(size=(nb_cells, nb_cells),
+                                     perfect=True,
+                                     seed=42)
 
     def make_map(self) -> Map:
         return Map(self.mazegen.maze)
 
-
-if __name__ == '__main__':
-    factory = MapFactory()
-    map = factory.make_map()
-    print(map)
+# if __name__ == '__main__':
+#     factory = MapFactory()
+#     map = factory.make_map()
+#     print(map)
