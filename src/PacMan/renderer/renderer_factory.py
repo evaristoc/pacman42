@@ -15,16 +15,20 @@ class RendererFactory:
         "fourtytwo": 0xFFFFFFFF,
         "entrance": 0xFF00FF00,
         "exit": 0xFFFF00FF,
-        "walls": 0xFF00AAAA,
-        "path": 0xFF00FF00,
+        # "walls": 0xFF00AAAA,
+        # "path": 0xFF00FF00,
+        "walls": 0xFF00FF00,
     }
 
     def __init__(self, config: ValidBoardConfig) -> None:
         self._config = config
         self.__perc_wall = .2
         # self.__perc_padding = .2
-        # self.__total_cell_size = total_cell_size
-        self.__total_cell_size = int(self._config.size / self._config.nb_cells)
+        self.__total_cell_size = int(
+            self._config.size / self._config.nb_cells
+            + self.__perc_wall * int(
+                self._config.size / self._config.nb_cells
+            ))
         self.__wall_thickness = int(
             self.__total_cell_size * self.__perc_wall
         )
@@ -96,20 +100,20 @@ class RendererFactory:
 
     # def __get_total_size(
     #     self,
-    #     # num_cells_x: int,
-    #     # num_cells_y: int
+    #     num_cells_x: int,
+    #     num_cells_y: int
     # ) -> tuple[int, int]:
     #     """Compute total pixel size from maze grid dimensions."""
-    #     # total_w = (
-    #     #     num_cells_x * self.__total_cell_size
-    #     #     - self.__wall_thickness * (num_cells_x - 1)
-    #     # )
-    #     # total_h = (
-    #     #     num_cells_y * self.__total_cell_size
-    #     #     - self.__wall_thickness * (num_cells_y - 1)
-    #     # )
-    #     total_w = self._config.size / self._config.nb_cells
-    #     total_h = total_w
+    #     total_w = (
+    #         num_cells_x * self.__total_cell_size
+    #         - self.__wall_thickness * (num_cells_x - 1)
+    #     )
+    #     total_h = (
+    #         num_cells_y * self.__total_cell_size
+    #         - self.__wall_thickness * (num_cells_y - 1)
+    #     )
+    #     # total_w = self._config.size / self._config.nb_cells
+    #     # total_h = total_w
     #     return total_w, total_h
 
     # def __draw_all_background(
@@ -164,27 +168,28 @@ class RendererFactory:
         color: int
     ) -> None:
         """Draw visible walls of a cell based on wall flags."""
-        x_cell = cell.cell_position_x * self.__total_cell_size
-        y_cell = cell.cell_position_y * self.__total_cell_size
+        x_cell = cell.cell_position_x
+        y_cell = cell.cell_position_y
+        # print("in draw cell walls", x_cell, y_cell)
         total = self.__total_cell_size
         wall = self.__wall_thickness
         inter = self.__interior_cell_size
         start_x = x_cell * (total - wall)
         start_y = y_cell * (total - wall)
-        if cell.wall_north:
+        if cell.wall_north.value != 1:
             for dx in range(total):
                 for dy in range(wall):
                     target_img.pygput_pixel(start_x + dx, start_y + dy, color)
-        if cell.wall_west:
+        if cell.wall_west.value != 1:
             for dx in range(wall):
                 for dy in range(total):
                     target_img.pygput_pixel(start_x + dx, start_y + dy, color)
-        if cell.wall_east:
+        if cell.wall_east.value != 1:
             wall_x = start_x + inter + wall
             for dx in range(wall):
                 for dy in range(total):
                     target_img.pygput_pixel(wall_x + dx, start_y + dy, color)
-        if cell.wall_south:
+        if cell.wall_south.value != 1:
             wall_y = start_y + inter + wall
             for dy in range(wall):
                 for dx in range(total):

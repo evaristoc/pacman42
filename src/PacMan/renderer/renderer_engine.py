@@ -26,6 +26,8 @@ class PyGMiniLibXEmulator:
         self.height = height
         self.screen = pygame.display.set_mode((self.width,
                                                self.height))
+        self.view_w, self.view_h = self.screen.get_size()
+        
         pygame.display.set_caption(title)
         self._loop_hook: TLoopHookCB | None = None
         self._loop_param: Any = None
@@ -90,8 +92,9 @@ class PyGMLXImageEmulator:
         g: int = (color >> 8) & 0xFF
         b: int = color & 0xFF
         a: int = 255  # Fully opaque default unless an alpha channel is packed
-        if y > 300 or x > 300:
-            return
+        # if y > 300 or x > 300:
+        #     return
+        # print("inside put", x, y)
         self.buffer[y, x, RGBA.R] = r
         self.buffer[y, x, RGBA.G] = g
         self.buffer[y, x, RGBA.B] = b

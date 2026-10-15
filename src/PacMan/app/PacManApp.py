@@ -24,27 +24,45 @@ class PacManApp:
             renderer = RendererFactory(config)
             maze = renderer.init_maze()
             pygmlx = renderer.init_engine()
-            imgmlxbg = pygmlx.pygmlx_new_image(config.size,
-                                               config.size)
+            print(pygmlx.view_w, pygmlx.view_h)
+            imgmlxbg = pygmlx.pygmlx_new_image(pygmlx.view_w,
+                                               pygmlx.view_h)
             renderer.draw(imgmlxbg,
                           maze.grid,
                           None)
-            pygmlx.pygmlx_put_image_to_window(imgmlxbg,
-                                              0,
-                                              0)
-            # imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
-            # img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
-            # imgmlx01.pygput_from_png(str(img01_path))
-            # print("Loaded image successfully: "
-            #       f"{imgmlx01.width}x{imgmlx01.height}")
-            # pygmlx.pygmlx_put_image_to_window(imgmlx01, 0, 0)
+            pygmlx.pygmlx_put_image_to_window(
+                imgmlxbg,
+                3,
+                3
+                )
+            imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
+            img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
+            imgmlx01.pygput_from_png(str(img01_path))
+            print("Loaded image successfully: "
+                  f"{imgmlx01.width}x{imgmlx01.height}")
+            imgmlx01.pygll_resize(
+                int(pygmlx.view_w / (2 * config.nb_cells)),
+                int(pygmlx.view_h / (2 * config.nb_cells))
+                )
+            pygmlx.pygmlx_put_image_to_window(
+                imgmlx01,
+                int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 11,
+                int(pygmlx.view_w / config.nb_cells * .4)
+                )
             imgmlx02 = pygmlx.pygmlx_new_image(500, 500)
             img02_path = cwd.parent / 'assets' / 'ghosts' / 'blue.png'
             imgmlx02.pygput_from_png(str(img02_path))
-            imgmlx02.pygll_resize(20, 20)
+            imgmlx02.pygll_resize(
+                int(pygmlx.view_w / (2 * config.nb_cells)),
+                int(pygmlx.view_h / (2 * config.nb_cells))
+                )
             print("Loaded image successfully: "
                   f"{imgmlx02.width}x{imgmlx02.height}")
-            pygmlx.pygmlx_put_image_to_window(imgmlx02, 200, 200)
+            pygmlx.pygmlx_put_image_to_window(
+                imgmlx02,
+                int(pygmlx.view_w / 3),
+                int(pygmlx.view_w / 3)
+                )
             pygmlx.pygmlx_loop()
             # img = pygmlx.pygmlx_new_image(pygmlx.width,
             #                               pygmlx.height)
