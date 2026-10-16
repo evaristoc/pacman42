@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
@@ -6,6 +7,7 @@ from src.PacMan.validation_contracts.parser import DataProcessor
 from src.PacMan.renderer.renderer_factory import RendererFactory
 
 logger = logging.getLogger(__name__)
+cwd = Path(__file__).resolve().parent
 
 
 class PacManApp:
@@ -21,14 +23,52 @@ class PacManApp:
         try:
             renderer = RendererFactory(config)
             maze = renderer.init_maze()
-            print(maze.__dict__)
             pygmlx = renderer.init_engine()
-            img = pygmlx.pygmlx_new_image(pygmlx.width,
-                                          pygmlx.height)
-            pixels, _, _ = img.pygget_data_addr()
-            pixels[50:150, 50:150] = [255, 0, 0, 255]
-            pygmlx.pygmlx_put_image_to_window(img, 0, 0)
-
+            print(pygmlx.view_w, pygmlx.view_h)
+            imgmlxbg = pygmlx.pygmlx_new_image(pygmlx.view_w,
+                                               pygmlx.view_h)
+            renderer.draw(imgmlxbg,
+                          maze.grid,
+                          None)
+            pygmlx.pygmlx_put_image_to_window(
+                imgmlxbg,
+                3,
+                3
+                )
+            imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
+            img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
+            imgmlx01.pygput_from_png(str(img01_path))
+            print("Loaded image successfully: "
+                  f"{imgmlx01.width}x{imgmlx01.height}")
+            imgmlx01.pygll_resize(
+                int(pygmlx.view_w / (2 * config.nb_cells)),
+                int(pygmlx.view_h / (2 * config.nb_cells))
+                )
+            pygmlx.pygmlx_put_image_to_window(
+                imgmlx01,
+                int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 3,
+                int(pygmlx.view_w / config.nb_cells * .4)
+                )
+            imgmlx02 = pygmlx.pygmlx_new_image(500, 500)
+            img02_path = cwd.parent / 'assets' / 'ghosts' / 'blue.png'
+            imgmlx02.pygput_from_png(str(img02_path))
+            imgmlx02.pygll_resize(
+                int(pygmlx.view_w / (2 * config.nb_cells)),
+                int(pygmlx.view_h / (2 * config.nb_cells))
+                )
+            print("Loaded image successfully: "
+                  f"{imgmlx02.width}x{imgmlx02.height}")
+            pygmlx.pygmlx_put_image_to_window(
+                imgmlx02,
+                int(pygmlx.view_w / 3),
+                int(pygmlx.view_w / 3)
+                )
+            pygmlx.pygmlx_loop()
+            # img = pygmlx.pygmlx_new_image(pygmlx.width,
+            #                               pygmlx.height)
+            # pixels, _, _ = img.pygget_data_addr()
+            # pixels[50:150, 50:150] = [255, 0, 0, 255]
+            # pygmlx.pygmlx_put_image_to_window(img, 0, 0)
         except Exception as err:
             logger.exception(err)
-            raise SystemExit()
+            raise SystemExit(1)

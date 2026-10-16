@@ -3,8 +3,8 @@ from pydantic import Field, BaseModel, model_validator
 
 
 class ValidBoardConfig(BaseModel):
-    width: Optional[int] = Field(default=None, ge=3, le=20)
-    height: Optional[int] = Field(default=None, ge=3, le=20)
+    size: Optional[int] = Field(default=None, ge=100, le=900)
+    nb_cells: Optional[int] = Field(default=None, ge=10, le=30)
 
 
 class ValidAppEntriesConfig(BaseModel):
@@ -15,7 +15,7 @@ class ValidAppEntriesConfig(BaseModel):
     def assemble_sub_configs(cls, data: dict) -> dict:
         if "board" not in data:
             data["board"] = {
-                "width": data.get("width"),
-                "height": data.get("height")
+                "size": data.get("size"),
+                "nb_cells": data.get("nb_cells")
             }
         return data
