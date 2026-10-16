@@ -2,13 +2,40 @@ from enum import Enum
 
 
 class WallState(Enum):
+    """Defines the possible states of a wall on a tile face."""
     OPEN = 1
     NORMALWALL = 2
     OUTERWALL = 3
 
 
+class TileBits(Enum):
+    """Bitmasks used to determine wall states from a tilebyte.
+
+    Bits 0-3 represent normal walls, and bits 4-7 represent outer boundaries.
+    """
+    NORTH_NORMAL = 1
+    EAST_NORMAL = 2
+    SOUTH_NORMAL = 4
+    WEST_NORMAL = 8
+    NORTH_OUTER = 16
+    EAST_OUTER = 32
+    SOUTH_OUTER = 64
+    WEST_OUTER = 128
+
+
 class Tile:
+    """Represents a single cell in the maze.
+
+    Parses a tilebyte to determine the state (Open, Normal Wall, or Outer Wall)
+    of each of its four faces.
+    """
+
     def __init__(self, tilebyte: int) -> None:
+        """Initializes a Tile and parses its wall states.
+
+        Args:
+            tilebyte: An integer (0-255) encoding the wall states.
+        """
         self.tilebyte = tilebyte
         self.wall_north: WallState = WallState.OPEN
         self.wall_south: WallState = WallState.OPEN
@@ -19,10 +46,21 @@ class Tile:
 
     @property
     def tilebyte(self) -> int:
+        """The raw integer byte representation of the tile's walls."""
         return self._tilebyte
 
     @tilebyte.setter
     def tilebyte(self, tilebyte: int) -> None:
+        """Sets the tilebyte after validating it is an integer
+        between 0 and 255.
+
+        Args:
+            tilebyte: The integer value to set.
+
+        Raises:
+            ValueError: If the value is not an integer or
+            is outside the 0-255 range.
+        """
         if not isinstance(tilebyte, int):
             raise ValueError("Tilebyte is not a valid integer.")
         if tilebyte < 0 or tilebyte > 255:
@@ -31,23 +69,36 @@ class Tile:
         self._tilebyte = tilebyte
 
     def _set_open_walls_from_tilebyte(self) -> None:
-        if self.tilebyte & 1:
+        """Updates WallState properties based on the bits set in tilebyte.
+
+        Normal wall bits are checked first, then outer boundary bits,
+        ensuring outer walls take precedence.
+        """
+        if self.tilebyte & TileBits.NORTH_NORMAL.value:
             self.wall_north = WallState.NORMALWALL
-        if self.tilebyte & 2:
+
+        if self.tilebyte & TileBits.EAST_NORMAL.value:
             self.wall_east = WallState.NORMALWALL
-        if self.tilebyte & 4:
+
+        if self.tilebyte & TileBits.SOUTH_NORMAL.value:
             self.wall_south = WallState.NORMALWALL
-        if self.tilebyte & 8:
+
+        if self.tilebyte & TileBits.WEST_NORMAL.value:
             self.wall_west = WallState.NORMALWALL
-        if self.tilebyte & 16:
+
+        if self.tilebyte & TileBits.NORTH_OUTER.value:
             self.wall_north = WallState.OUTERWALL
-        if self.tilebyte & 32:
+
+        if self.tilebyte & TileBits.EAST_OUTER.value:
             self.wall_east = WallState.OUTERWALL
-        if self.tilebyte & 64:
+
+        if self.tilebyte & TileBits.SOUTH_OUTER.value:
             self.wall_south = WallState.OUTERWALL
-        if self.tilebyte & 128:
+
+        if self.tilebyte & TileBits.WEST_OUTER.value:
             self.wall_west = WallState.OUTERWALL
 
     def __repr__(self):
+        """Returns a string representation of the wall states for each face."""
         return (f"N: {self.wall_north.value}, E: {self.wall_east.value}, "
                 f"S: {self.wall_south.value}, W: {self.wall_west.value}")

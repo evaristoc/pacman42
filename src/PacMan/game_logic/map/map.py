@@ -1,16 +1,50 @@
 from mazegenerator import MazeGenerator
-from tile import Tile
+from tile import Tile, TileBits
 from typing import Union
 
 
 class Map:
+    """Represents a maze as a grid of tiles with enforced outer boundaries.
+
+    Each tile is encoded as a byte. The four least-significant bits represent
+    its north, east, south, and west walls. The four most-significant bits
+    represent whether those same faces are outer boundaries:
+
+        Bit:       7       6       5       4       3       2       1       0
+        Face:    west    south    east    north   west    south    east   north
+        Meaning: outer   outer    outer   outer   wall    wall     wall   wall
+
+    When a tile lies on the map's edge, its corresponding outer-boundary bit
+    is set and its normal wall bit is cleared.
+    """
+
     def __init__(self, maze: list[list]) -> None:
+        """Initializes the map from a two-dimensional maze grid.
+
+        Args:
+            maze: A rectangular grid of integer cell values. Each value must
+                be between 0 and 15, inclusive.
+
+        Raises:
+            ValueError: If a cell value is outside the valid range.
+        """
         self.height = len(maze)
         self.width = len(maze[0])
         self.outerbound_maze = self._find_outerbounds(maze)
         self.grid: list[list[Tile | None]] = self._build_grid()
 
     def _find_outerbounds(self, maze: list[list]) -> list[list]:
+        """Adds outer-boundary wall bits to the maze cells.
+
+        Args:
+            maze: A rectangular grid of integer cell values.
+
+        Returns:
+            A new grid with the outer-boundary wall bits added to edge cells.
+
+        Raises:
+            ValueError: If a cell value is outside the valid range.
+        """
         outerbound_maze = [
             [0 for _ in range(self.width)] for _ in range(self.height)
         ]
@@ -18,25 +52,35 @@ class Map:
             for j, _ in enumerate(range(self.width)):
                 temp_var = maze[i][j]
                 if temp_var < 0 or temp_var > 15:
-                    raise ValueError("Invalid value in maze passed to "
-                                     "self._find_outerbounds() in Map-class")
+                    raise ValueError(
+                        "Invalid value in maze passed to "
+                        "self._find_outerbounds() in Map-class"
+                    )
 
-                # Adding to the bitmask to account for outer bounds of the map
+                # Add bits for the map's outer boundaries.
                 if i == 0:
-                    temp_var += (16 - 1)
+                    temp_var += (TileBits.NORTH_OUTER.value -
+                                 TileBits.NORTH_NORMAL.value)
                 if j == self.width - 1:
-                    temp_var += (32 - 2)
+                    temp_var += (TileBits.EAST_OUTER.value -
+                                 TileBits.EAST_NORMAL.value)
                 if i == self.height - 1:
-                    temp_var += (64 - 4)
+                    temp_var += (TileBits.SOUTH_OUTER.value -
+                                 TileBits.SOUTH_NORMAL.value)
                 if j == 0:
-                    temp_var += (128 - 8)
+                    temp_var += (TileBits.WEST_OUTER.value -
+                                 TileBits.WEST_NORMAL.value)
 
                 outerbound_maze[i][j] = temp_var
 
         return outerbound_maze
 
     def _build_grid(self) -> list[list[Tile | None]]:
+        """Creates a grid of Tile objects from the bounded maze.
 
+        Returns:
+            A two-dimensional grid containing a Tile for each maze cell.
+        """
         grid: list[list[Union[None | Tile]]] = [
             [None for _ in range(self.width)] for _ in range(self.height)
         ]
@@ -47,24 +91,37 @@ class Map:
 
         return grid
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Returns a printable, row-by-row representation of the tile grid.
+
+        Returns:
+            The grid formatted with vertical separators between columns.
+        """
         result = str()
         for i, _ in enumerate(range(self.height)):
             if i > 0:
-                result += '\n'
+                result += "\n"
             for j, _ in enumerate(range(self.width)):
                 if j < self.width - 1:
-                    result += (str(self.grid[i][j]) + '   |    ')
+                    result += str(self.grid[i][j]) + "   |    "
                 else:
                     result += str(self.grid[i][j])
         return result
 
 
 class MapFactory:
-    def __init__(self):
+    """Creates Map instances using a MazeGenerator."""
+
+    def __init__(self) -> None:
+        """Initializes the maze generator used by this factory."""
         self.mazegen = MazeGenerator()
 
     def make_map(self) -> Map:
+        """Generates a maze and wraps it in a Map.
+
+        Returns:
+            A Map built from the maze generated by the factory's MazeGenerator.
+        """
         return Map(self.mazegen.maze)
 
 
