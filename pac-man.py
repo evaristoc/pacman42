@@ -2,7 +2,7 @@ import logging
 import fire
 from pathlib import Path
 from src.PacMan.app_config.console import console
-#import PacMan
+# import PacMan
 from src import PacMan
 from src.PacMan.app_config.setup import setup
 
@@ -25,7 +25,7 @@ class Controller:
             console.log("[bold red]FATAL: library was not found.[/bold red]")
             raise SystemExit()
         console.print(valconfig)
-        pacman.init_board(config=valconfig.board)     
+        pacman.init_board(config=valconfig.board)
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ class PyGMiniLibXEmulator:
         self.screen = pygame.display.set_mode((self.width,
                                                self.height))
         self.view_w, self.view_h = self.screen.get_size()
-        
+
         pygame.display.set_caption(title)
         self._loop_hook: TLoopHookCB | None = None
         self._loop_param: Any = None

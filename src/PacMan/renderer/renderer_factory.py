@@ -168,7 +168,6 @@ class RendererFactory:
         color: int
     ) -> None:
         """Draw visible walls of a cell based on wall flags."""
-        print(cell)
         x_cell = cell.cell_position_x
         y_cell = cell.cell_position_y
         # print("in draw cell walls", x_cell, y_cell)
