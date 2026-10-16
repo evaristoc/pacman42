@@ -1,6 +1,5 @@
 from mazegenerator import MazeGenerator
-from src.PacMan.game_logic.map.tile import Tile
-from tile import Tile, TileBits
+from src.PacMan.game_logic.map.tile import Tile, TileBits
 from typing import Union
 
 
@@ -112,10 +111,8 @@ class Map:
 class MapFactory:
     """Creates Map instances using a MazeGenerator."""
 
-    def __init__(self) -> None:
-        """Initializes the maze generator used by this factory."""
-        self.mazegen = MazeGenerator()
     def __init__(self, nb_cells: int):
+        """Initializes the maze generator used by this factory."""
         self.mazegen = MazeGenerator(size=(nb_cells, nb_cells),
                                      perfect=True,
                                      seed=42)
