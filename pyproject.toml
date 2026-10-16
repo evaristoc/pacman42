@@ -16,6 +16,9 @@ dependencies = [
 [tool.mypy]
 files = ["src"]
 ignore_missing_imports = true
+warn_unused_ignore = true
+check_untyped_defs = true
+disallow_untyped_defs = true
 strict = false
 
 [tool.flake8]
@@ -34,7 +37,9 @@ req = [
     "rich==13.0.0",
     "pydantic==2.0.0",
     "fire==0.6.0",
-    "numpy>=2.0.0"
+    "numpy==2.4.6",
+    "Pillow==12.3.0"
+
 ]
 
 dev = [
@@ -43,7 +48,8 @@ dev = [
 
 linters = [
     "flake8==7.0.0",
-    "mypy==1.9.0"
+    "mypy==1.9.0",
+    "autopep8==2.*"
 ]
 
 test = [

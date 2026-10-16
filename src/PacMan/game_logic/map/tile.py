@@ -36,11 +36,14 @@ class Tile:
         Args:
             tilebyte: An integer (0-255) encoding the wall states.
         """
+    def __init__(self, tilebyte: int, x: int, y: int) -> None:
         self.tilebyte = tilebyte
         self.wall_north: WallState = WallState.OPEN
         self.wall_south: WallState = WallState.OPEN
         self.wall_west: WallState = WallState.OPEN
         self.wall_east: WallState = WallState.OPEN
+        self.cell_position_x: int = x
+        self.cell_position_y: int = y
 
         self._set_open_walls_from_tilebyte()
 
@@ -101,4 +104,5 @@ class Tile:
     def __repr__(self):
         """Returns a string representation of the wall states for each face."""
         return (f"N: {self.wall_north.value}, E: {self.wall_east.value}, "
-                f"S: {self.wall_south.value}, W: {self.wall_west.value}")
+                f"S: {self.wall_south.value}, W: {self.wall_west.value}"
+                f", location: (X={self.cell_position_x}, Y={self.cell_position_y})")
