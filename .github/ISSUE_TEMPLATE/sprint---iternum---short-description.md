@@ -13,27 +13,24 @@ assignees: ''
 _It should have a Backlog status_)
 
 ## User Story (associated to sprint goals and specific to DOMAIN):
->*_ sss _*
+>*_ as user I would like to see | taste | smell | enjoy | .... _*
 
 ## Acceptance Criteria (should be in tune with Sprint Goals, but specific to DOMAIN):
-- [ ] sss
+(_NOTE: use checkout - [ ]_)
 
-## Technical _must have_ (technical implementations that are required by the subject):
-- [ ] ssss
-or
-* ssss
+## Technical _haves_
 
-## Technical _must not have_ (technical limitations based on requirements):
-- [ ] ssss
-or
-* ssss
+#### Technical _must have_ (technical implementations that are required by the subject):
+(_NOTE: use checkout - [ ] or list \*_)
 
-## Technical _should have_ (technical implementations that are not required by subject but that would help to fulfil the user stories and acceptance criteria):
-- [ ] ssss
-or
-* ssss
+#### Technical _must not have_ (technical limitations based on requirements):
+(_NOTE: use checkout - [ ] or list \*_)
 
-## Technical _wish have_ (technical implementations that are not required):
-- [ ] ssss
-or
-* ssss
+#### Technical _should have_ (technical implementations that are not required by subject but that would help to fulfil the user stories and acceptance criteria):
+(_NOTE: use checkout - [ ] or list \*_)
+
+#### Technical _wont have_ (technical implementations that either not for the sprint, cancelled, unfeasible or moved to another deadline):
+(_NOTE: use checkout - [ ] or list \*_)
+
+#### Technical _wish have_ (technical implementations that are not required):
+(_NOTE: use checkout - [ ] or list \*_)

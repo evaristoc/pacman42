@@ -13,9 +13,7 @@ assignees: ''
 _It should be in Sprint Increment status_)
 
 ## User Story (associated to sprint goals):
->*_ sss _*
+>*_ as user I would like to see | taste | smell | enjoy | .... _*
 
 ## Acceptance Criteria (for the sprint increment, always looking to comply with assignment requirements):
-- [ ] sss
-or
-* ssss
+(_NOTE: use checkout - [ ]_)
