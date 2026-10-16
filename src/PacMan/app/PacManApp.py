@@ -46,7 +46,7 @@ class PacManApp:
                 )
             pygmlx.pygmlx_put_image_to_window(
                 imgmlx01,
-                int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 11,
+                int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 3,
                 int(pygmlx.view_w / config.nb_cells * .4)
                 )
             imgmlx02 = pygmlx.pygmlx_new_image(500, 500)

@@ -52,4 +52,5 @@ class Tile:
 
     def __repr__(self):
         return (f"N: {self.wall_north.value}, E: {self.wall_east.value}, "
-                f"S: {self.wall_south.value}, W: {self.wall_west.value}")
+                f"S: {self.wall_south.value}, W: {self.wall_west.value}"
+                f", location: (X={self.cell_position_x}, Y={self.cell_position_y})")

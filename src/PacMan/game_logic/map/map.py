@@ -43,7 +43,7 @@ class Map:
 
         for i, _ in enumerate(range(self.height)):  # rows?
             for j, _ in enumerate(range(self.width)):  # cols?
-                grid[j][i] = Tile(self.outerbound_maze[j][i], j, i)
+                grid[j][i] = Tile(self.outerbound_maze[j][i], i, j)
         return grid
 
     def __repr__(self):
