@@ -26,17 +26,21 @@ class PacManApp:
             pygmlx = renderer.init_engine()
             drawer = renderer.init_drawer()
             print(pygmlx.view_w, pygmlx.view_h)
-            imgmlxbg = pygmlx.pygmlx_new_image(pygmlx.view_w,
-                                               pygmlx.view_h)
-            
+            print(drawer.tot_cell_size[0])
+            print(drawer.interior_cell_size[0])
+            print(drawer.wall_thickness[0])
+            print(drawer.corrected_size[0], drawer.corrected_size[1])  
+            imgmlxbg = pygmlx.pygmlx_new_image(drawer.corrected_size[0],
+                                               drawer.corrected_size[0])
+         
             drawer.draw(imgmlxbg,
                         maze.grid,
                         None)
             # cell_size = int(pygmlx.view_w / config.nb_cells)
             pygmlx.pygmlx_put_image_to_window(
                 imgmlxbg,
-                0,
-                0
+                int(drawer.corrected_size[1] / 2),
+                int(drawer.corrected_size[1] / 2)
                 )
             imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
             img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
@@ -54,15 +58,12 @@ class PacManApp:
             # print((cell_size - 2 * cell_size * .2 - img_resize) / 2)
             # print(drawer.tot_cell_size)
             # padding = (cell_size - 2 * cell_size * .2 - img_resize) / 2
-            print(drawer.tot_cell_size[0])
-            print(drawer.interior_cell_size[0])
-            print(drawer.wall_thickness[0])
             pygmlx.pygmlx_put_image_to_window(
                 imgmlx01,
                 # int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 3,
                 # int(pygmlx.view_w / config.nb_cells * .4)
-                int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 0,
-                int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 9
+                int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 6 + int(drawer.corrected_size[1] / 2),
+                int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 7 + int(drawer.corrected_size[1] / 2)
                 # int(cell_size * .2 + padding) + cell_size * 0,
                 # int(cell_size * .2 + padding) + cell_size * 9,
                 )
