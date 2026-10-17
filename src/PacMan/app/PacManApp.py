@@ -4,7 +4,7 @@ from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
 from src.PacMan.validation_contracts.parser import DataProcessor
-from src.PacMan.renderer.renderer_factory import RendererFactory
+from src.PacMan.renderer.renderer_assembler import RendererAssembler
 
 logger = logging.getLogger(__name__)
 cwd = Path(__file__).resolve().parent
@@ -21,40 +21,57 @@ class PacManApp:
 
     def init_board(self, config: ValidBoardConfig) -> None:
         try:
-            renderer = RendererFactory(config)
+            renderer = RendererAssembler(config)
             maze = renderer.init_maze()
             pygmlx = renderer.init_engine()
+            drawer = renderer.init_drawer()
             print(pygmlx.view_w, pygmlx.view_h)
             imgmlxbg = pygmlx.pygmlx_new_image(pygmlx.view_w,
                                                pygmlx.view_h)
-            renderer.draw(imgmlxbg,
-                          maze.grid,
-                          None)
+            
+            drawer.draw(imgmlxbg,
+                        maze.grid,
+                        None)
+            # cell_size = int(pygmlx.view_w / config.nb_cells)
             pygmlx.pygmlx_put_image_to_window(
                 imgmlxbg,
-                3,
-                3
+                0,
+                0
                 )
             imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
             img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
             imgmlx01.pygput_from_png(str(img01_path))
             print("Loaded image successfully: "
                   f"{imgmlx01.width}x{imgmlx01.height}")
+            img_resize = int(pygmlx.view_w / (2 * config.nb_cells))
             imgmlx01.pygll_resize(
-                int(pygmlx.view_w / (2 * config.nb_cells)),
-                int(pygmlx.view_h / (2 * config.nb_cells))
+                img_resize,
+                img_resize
                 )
+            # print(cell_size)
+            # print(img_resize)
+            # print((cell_size - img_resize) / 2)
+            # print((cell_size - 2 * cell_size * .2 - img_resize) / 2)
+            # print(drawer.tot_cell_size)
+            # padding = (cell_size - 2 * cell_size * .2 - img_resize) / 2
+            print(drawer.tot_cell_size[0])
+            print(drawer.interior_cell_size[0])
+            print(drawer.wall_thickness[0])
             pygmlx.pygmlx_put_image_to_window(
                 imgmlx01,
-                int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 3,
-                int(pygmlx.view_w / config.nb_cells * .4)
+                # int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 3,
+                # int(pygmlx.view_w / config.nb_cells * .4)
+                int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 0,
+                int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 9
+                # int(cell_size * .2 + padding) + cell_size * 0,
+                # int(cell_size * .2 + padding) + cell_size * 9,
                 )
             imgmlx02 = pygmlx.pygmlx_new_image(500, 500)
             img02_path = cwd.parent / 'assets' / 'ghosts' / 'blue.png'
             imgmlx02.pygput_from_png(str(img02_path))
             imgmlx02.pygll_resize(
-                int(pygmlx.view_w / (2 * config.nb_cells)),
-                int(pygmlx.view_h / (2 * config.nb_cells))
+                img_resize,
+                img_resize
                 )
             print("Loaded image successfully: "
                   f"{imgmlx02.width}x{imgmlx02.height}")
