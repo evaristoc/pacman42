@@ -23,24 +23,39 @@ class DrawerEngine:
     }
 
     def __init__(self, config: ValidBoardConfig) -> None:
+        # self.__perc_wall = .2
+        # # self.__perc_padding = .2
+        # self.__total_cell_size = config.size // config.nb_cells
+        # self.__wall_thickness = int(
+        #     self.__total_cell_size * self.__perc_wall
+        # )
+        # self.__interior_cell_size = int(
+        #     self.__total_cell_size - 2 * self.__wall_thickness
+        # )
+        # self.__real_length = self.__interior_cell_size *\
+        #     config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
+
+        # diff = config.size - self.__real_length
+        # self.__wall_thickness += int(self.__wall_thickness / config.size * diff)
+        # self.__interior_cell_size += int(self.__interior_cell_size / config.size * diff)
+        # self.__total_cell_size = self.__interior_cell_size + 2 * self.__wall_thickness
+        self._config = config
         self.__perc_wall = .2
         # self.__perc_padding = .2
-        self.__total_cell_size = config.size // config.nb_cells
+        self.__total_cell_size = int(
+            self._config.size / self._config.nb_cells
+            + self.__perc_wall * int(
+                self._config.size / self._config.nb_cells
+            ))
         self.__wall_thickness = int(
             self.__total_cell_size * self.__perc_wall
         )
-        self.__interior_cell_size = int(
+        self.__interior_cell_size = (
             self.__total_cell_size - 2 * self.__wall_thickness
         )
-        self.__real_length = self.__interior_cell_size *\
+        self.__corrected_size = self.__interior_cell_size *\
             config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
-
-        diff = config.size - self.__real_length
-        self.__wall_thickness += int(self.__wall_thickness / config.size * diff)
-        self.__interior_cell_size += int(self.__interior_cell_size / config.size * diff)
-        self.__total_cell_size = self.__interior_cell_size + 2 * self.__wall_thickness
-
-        
+        self.__diff = self._config.size - self.__corrected_size
         # self.__padding = int(
         #     self.__interior_cell_size * self.__perc_padding
         # )
@@ -84,6 +99,14 @@ class DrawerEngine:
             self.__perc_wall,
             f"% calculated against interior cell size "
             f"{self.__interior_cell_size} : {self.__perc_wall}"
+            )
+
+    @property
+    def corrected_size(self) -> tuple[int, int, str]:
+        return (
+            self.__corrected_size,
+            self.__diff,
+            "corrected size and diff against given size"
             )
 
     def draw(
