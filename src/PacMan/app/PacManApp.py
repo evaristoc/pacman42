@@ -29,9 +29,9 @@ class PacManApp:
             print(drawer.tot_cell_size[0])
             print(drawer.interior_cell_size[0])
             print(drawer.wall_thickness[0])
-            print(drawer.corrected_size[0], drawer.corrected_size[1])  
+            print(drawer.corrected_size[0], drawer.corrected_size[1])
             imgmlxbg = pygmlx.pygmlx_new_image(drawer.corrected_size[0],
-                                               drawer.corrected_size[0])
+                                               drawer.corrected_size[0] + int(drawer.corrected_size[0] / 3))
          
             drawer.draw(imgmlxbg,
                         maze.grid,
@@ -42,7 +42,7 @@ class PacManApp:
                 int(drawer.corrected_size[1] / 2),
                 int(drawer.corrected_size[1] / 2)
                 )
-            imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
+            imgmlx01 = pygmlx.pygmlx_new_png_image(500, 500)
             img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
             imgmlx01.pygput_from_png(str(img01_path))
             print("Loaded image successfully: "
@@ -67,7 +67,7 @@ class PacManApp:
                 # int(cell_size * .2 + padding) + cell_size * 0,
                 # int(cell_size * .2 + padding) + cell_size * 9,
                 )
-            imgmlx02 = pygmlx.pygmlx_new_image(500, 500)
+            imgmlx02 = pygmlx.pygmlx_new_png_image(500, 500)
             img02_path = cwd.parent / 'assets' / 'ghosts' / 'blue.png'
             imgmlx02.pygput_from_png(str(img02_path))
             imgmlx02.pygll_resize(
@@ -81,6 +81,14 @@ class PacManApp:
                 int(pygmlx.view_w / 3),
                 int(pygmlx.view_w / 3)
                 )
+            imgmlxtext = pygmlx.pygmlx_new_text_image(drawer.corrected_size[0],
+                                                      int(drawer.corrected_size[0] / 3))
+            imgmlxtext.pygput_from_text(0, 0, "I am Pacman.")
+            pygmlx.pygmlx_put_image_to_window(
+                imgmlxtext,
+                14,
+                drawer.corrected_size[0] + 7,
+            )
             pygmlx.pygmlx_loop()
             # img = pygmlx.pygmlx_new_image(pygmlx.width,
             #                               pygmlx.height)

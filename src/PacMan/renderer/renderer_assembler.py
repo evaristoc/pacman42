@@ -21,7 +21,7 @@ class RendererAssembler:
     def init_engine(self) -> PyGMiniLibXEmulator:
         if self._config.size is not None:
             return PyGMiniLibXEmulator(self._config.size,
-                                       self._config.size)
+                                       self._config.size + int(self._config.size / 3))
         else:
             logger.error("FATAL: height or width found to be None.")
             raise SystemExit()
