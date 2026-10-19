@@ -71,18 +71,21 @@ class RendererAssembler:
                 for file in files:
                     img = Image.open(_assets / file)
                     org_w, org_h = img.size
-                    fname = Path(img).name
+                    fname = Path(file).stem
+                    print(fname, org_w)
                     if fname not in _dict:
                         _dict[fname] = PyMLXPNGEmulator(
                             org_w,
                             org_h
-                        ).pygput_from_png(
+                        )
+                        _dict[fname].pygput_from_png(
                             str(_assets / file)
                         )
                         _dict[fname].pygll_resize(
                             rsize,
                             rsize
                         )
+            return _dict
         except Exception as err:
             logger.exception(f"FATAL: we could not load images : {err}")
             raise SystemExit(1)
