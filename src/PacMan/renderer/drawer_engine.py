@@ -1,15 +1,14 @@
 import logging
 from typing import cast
+from src.PacMan.validation_contracts.valid_game_config import (
+    ValidBoardConfig)
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
 from src.PacMan.game_logic.map.tile import Tile
-from src.PacMan.game_logic.map.map import Map, MapFactory
-from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
-from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
 logger = logging.getLogger(__name__)
 
 
-class RendererFactory:
+class DrawerEngine:
     DEFAULT_COLORS = {
         "background": 0xFF5500FF,
         "fourtytwo": 0xFFFFFFFF,
@@ -20,7 +19,25 @@ class RendererFactory:
         "walls": 0xFF00FF00,
     }
 
+    BOTTOMPARTSCREEN = 5
+
     def __init__(self, config: ValidBoardConfig) -> None:
+        # self.__perc_wall = .2
+        # # self.__perc_padding = .2
+        # self.__total_cell_size = config.size // config.nb_cells
+        # self.__wall_thickness = int(
+        #     self.__total_cell_size * self.__perc_wall
+        # )
+        # self.__interior_cell_size = int(
+        #     self.__total_cell_size - 2 * self.__wall_thickness
+        # )
+        # self.__real_length = self.__interior_cell_size *\
+        #     config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
+
+        # diff = config.size - self.__real_length
+        # self.__wall_thickness += int(self.__wall_thickness / config.size * diff)
+        # self.__interior_cell_size += int(self.__interior_cell_size / config.size * diff)
+        # self.__total_cell_size = self.__interior_cell_size + 2 * self.__wall_thickness
         self._config = config
         self.__perc_wall = .2
         # self.__perc_padding = .2
@@ -35,6 +52,9 @@ class RendererFactory:
         self.__interior_cell_size = (
             self.__total_cell_size - 2 * self.__wall_thickness
         )
+        self.__corrected_size = self.__interior_cell_size *\
+            config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
+        self.__diff = self._config.size - self.__corrected_size
         # self.__padding = int(
         #     self.__interior_cell_size * self.__perc_padding
         # )
@@ -42,20 +62,58 @@ class RendererFactory:
         #     self.__interior_cell_size - 2 * self.__padding
         # )
 
-    def init_maze(self) -> Map:
-        try:
-            return MapFactory(self._config.nb_cells).make_map()
-        except Exception:
-            logger.error("FATAL: maze couldnot be made with following params: "
-                         f"perfect True, seed 42, config: {self._config}")
+    @property
+    def tot_cell_size(self) -> tuple[int, str]:
+        return (
+            self.__total_cell_size,
+            "after correcting for initial size / num cells"
+            )
 
-    def init_engine(self) -> PyGMiniLibXEmulator:
-        if self._config.size is not None:
-            return PyGMiniLibXEmulator(self._config.size,
-                                       self._config.size)
-        else:
-            logger.error("FATAL: height or width found to be None.")
-            raise SystemExit()
+    @property
+    def interior_cell_size(self) -> tuple[int, str]:
+        return (
+                self.__interior_cell_size,
+                "calculated as total cell size - wall thickness"
+                )
+
+    @property
+    def wall_thickness(self) -> tuple[int, float, str]:
+        return (
+            self.__wall_thickness,
+            self.__perc_wall,
+            f"% calculated against interior cell size "
+            f"{self.__interior_cell_size} : {self.__perc_wall}"
+            )
+
+    @property
+    def corrected_size(self) -> tuple[int, int, str]:
+        return (
+            self.__corrected_size,
+            self.__diff,
+            "corrected size and diff against given size"
+            )
+
+    @property
+    def bottom_h(self) -> int:
+        return int(self.corrected_size[0] / self.BOTTOMPARTSCREEN)
+
+    @property
+    def resized(self) -> int:
+        return int(self.corrected_size[0] / (2 * self._config.nb_cells))
+
+    @property
+    def margin(self) -> int:
+        return int(self.corrected_size[1] / 2 )
+
+    def next_char_coord(self, v: int) -> int:
+        img_size = self.resized
+        tot_cell_size = self.tot_cell_size[0]
+        # internal placing of the image on the cell
+        refpos = int((tot_cell_size - img_size) / 2)
+        unit_step = (self.interior_cell_size[0]
+                     + self.wall_thickness[0])
+        margin = self.margin
+        return refpos + unit_step * v + margin
 
     def draw(
         self,
@@ -168,7 +226,6 @@ class RendererFactory:
         color: int
     ) -> None:
         """Draw visible walls of a cell based on wall flags."""
-        print(cell)
         x_cell = cell.cell_position_x
         y_cell = cell.cell_position_y
         # print("in draw cell walls", x_cell, y_cell)
@@ -195,3 +252,4 @@ class RendererFactory:
             for dy in range(wall):
                 for dx in range(total):
                     target_img.pygput_pixel(start_x + dx, wall_y + dy, color)
+

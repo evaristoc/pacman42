@@ -1,16 +1,30 @@
 import logging
-from pathlib import Path
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
 from src.PacMan.validation_contracts.parser import DataProcessor
-from src.PacMan.renderer.renderer_factory import RendererFactory
+from src.PacMan.renderer.renderer_engine import (
+                                PyGMiniLibXEmulator,
+                                PyGMLXImageEmulator,
+                                PyMLXPNGEmulator, 
+                                PyGMLXTextEmulator)
+from src.PacMan.renderer.renderer_assembler import RendererAssembler
+from src.PacMan.renderer.drawer_engine import DrawerEngine
+from src.PacMan.game_logic.map.map import Map
 
 logger = logging.getLogger(__name__)
-cwd = Path(__file__).resolve().parent
 
 
 class PacManApp:
+    def __init__(self) -> None:
+        self.assembler: RendererAssembler | None = None
+        self.drawer: DrawerEngine | None = None
+        self.pygmlx: PyGMiniLibXEmulator | None = None
+        self.maze: Map | None = None
+        self.board: dict[PyGMLXImageEmulator] | None = None
+        self.ghosts_imgs: dict[PyMLXPNGEmulator] | None = None
+        self.pacman_imgs: dict[PyMLXPNGEmulator] | None = None
+
     def __str__(self) -> str:
         return "I am PacMan!"
 
@@ -19,56 +33,73 @@ class PacManApp:
         raw_data = DataProcessor.load_dataset(path_to_config)
         return DataProcessor.resolve_and_validate(**raw_data)
 
-    def init_board(self, config: ValidBoardConfig) -> None:
+    def load_game(self, config: ValidBoardConfig) -> None:
+        """
+        gets config and keep the state of initial values to
+        assemble the whole board relative to those values
+        """
         try:
-            renderer = RendererFactory(config)
-            maze = renderer.init_maze()
-            pygmlx = renderer.init_engine()
-            print(pygmlx.view_w, pygmlx.view_h)
-            imgmlxbg = pygmlx.pygmlx_new_image(pygmlx.view_w,
-                                               pygmlx.view_h)
-            renderer.draw(imgmlxbg,
-                          maze.grid,
-                          None)
-            pygmlx.pygmlx_put_image_to_window(
-                imgmlxbg,
-                3,
-                3
-                )
-            imgmlx01 = pygmlx.pygmlx_new_image(500, 500)
-            img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
-            imgmlx01.pygput_from_png(str(img01_path))
-            print("Loaded image successfully: "
-                  f"{imgmlx01.width}x{imgmlx01.height}")
-            imgmlx01.pygll_resize(
-                int(pygmlx.view_w / (2 * config.nb_cells)),
-                int(pygmlx.view_h / (2 * config.nb_cells))
-                )
-            pygmlx.pygmlx_put_image_to_window(
-                imgmlx01,
-                int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 3,
-                int(pygmlx.view_w / config.nb_cells * .4)
-                )
-            imgmlx02 = pygmlx.pygmlx_new_image(500, 500)
-            img02_path = cwd.parent / 'assets' / 'ghosts' / 'blue.png'
-            imgmlx02.pygput_from_png(str(img02_path))
-            imgmlx02.pygll_resize(
-                int(pygmlx.view_w / (2 * config.nb_cells)),
-                int(pygmlx.view_h / (2 * config.nb_cells))
-                )
-            print("Loaded image successfully: "
-                  f"{imgmlx02.width}x{imgmlx02.height}")
-            pygmlx.pygmlx_put_image_to_window(
-                imgmlx02,
-                int(pygmlx.view_w / 3),
-                int(pygmlx.view_w / 3)
-                )
-            pygmlx.pygmlx_loop()
-            # img = pygmlx.pygmlx_new_image(pygmlx.width,
-            #                               pygmlx.height)
-            # pixels, _, _ = img.pygget_data_addr()
-            # pixels[50:150, 50:150] = [255, 0, 0, 255]
-            # pygmlx.pygmlx_put_image_to_window(img, 0, 0)
+            # assembler is a short live object only for assembling
+            assembler = RendererAssembler(config)
+            # drawer will control all relevant metrics
+            # it will also paint the canvas
+            self.drawer = assembler.init_drawer()
+            size = self.drawer.corrected_size[0]
+            bottom = self.drawer.bottom_h
+            self.pygmlx = assembler.init_engine(size,
+                                                bottom)
+            self.maze = assembler.init_maze()
+            self.board_img = assembler.init_board(size)
+            rsized = self.drawer.resized
+            self.ghosts_imgs = assembler.register_imgs(rsized,
+                                                       "ghosts")
+            self.pacman_imgs = assembler.register_imgs(rsized,
+                                                       "pacman")
+
         except Exception as err:
             logger.exception(err)
             raise SystemExit(1)
+
+    def run(self) -> None:
+        """
+        mount the different parts and start the game
+        """
+        # if self.drawer is None or self.pygmlx is None or self.maze is None or self.board_img is None or self.ghosts_imgs is None or self.pacman_imgs is None:
+        #     logger.exception("FATAL: no assembler was defined.")
+        #     raise SystemExit(1)
+        self.drawer.draw(self.board_img["board"],
+                         self.maze.grid,
+                         None)
+        # print(self.drawer.corrected_size[0], self.drawer.corrected_size[1], self.drawer.margin)
+        # # board_margin = int(self.drawer.corrected_size[1] / 2)
+        self.pygmlx.pygmlx_put_image_to_window(
+            self.board_img["board"],
+            self.drawer.margin / 2,
+            self.drawer.margin / 2
+            )
+        print(self.ghosts_imgs)
+        for i, g in enumerate(self.ghosts_imgs):
+            self.pygmlx.pygmlx_put_image_to_window(
+                self.ghosts_imgs[g],
+                self.drawer.next_char_coord(i),
+                self.drawer.next_char_coord(0)
+            )
+        for i, p in enumerate(self.pacman_imgs):
+            self.pygmlx.pygmlx_put_image_to_window(
+                self.pacman_imgs[p],
+                self.drawer.next_char_coord(i),
+                self.drawer.next_char_coord(1)
+            )
+        imgmlxtext: PyGMLXTextEmulator = self.pygmlx.pygmlx_new_text_image(
+            self.drawer.corrected_size[0],
+            self.drawer.bottom_h,
+            40)
+        imgmlxtext.pygput_from_text(0, 0, "I am Pacman.")
+        self.pygmlx.pygmlx_put_image_to_window(
+            imgmlxtext,
+            14,
+            self.drawer.corrected_size[0] + 7,
+        )
+        self.pygmlx.pygmlx_loop()
+
+
