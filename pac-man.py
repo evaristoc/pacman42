@@ -13,19 +13,20 @@ class Controller:
     def load_game(self,
                   config: str) -> None:
         setup()
+        project_root = Path(__file__).resolve().parent
+        path_to_config = str((project_root / Path(config)).resolve())
+        pacman = PacMan.PacMan()
         if not PacMan:
             console.log("[bold red]FATAL: library was not found.[/bold red]")
             raise SystemExit()
         console.print(PacMan)
-        pacman = PacMan.PacMan()
-        project_root = Path(__file__).resolve().parent
-        path_to_config = str((project_root / Path(config)).resolve())
         valconfig = pacman.get_config(path_to_config=path_to_config)
         if not valconfig:
             console.log("[bold red]FATAL: library was not found.[/bold red]")
             raise SystemExit()
         console.print(valconfig)
-        pacman.init_board(config=valconfig.board)
+        pacman.load_game(config=valconfig.board)
+        pacman.run()
 
 
 if __name__ == "__main__":

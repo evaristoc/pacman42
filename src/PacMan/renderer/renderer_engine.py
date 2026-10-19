@@ -46,8 +46,13 @@ class PyGMiniLibXEmulator:
 
     def pygmlx_new_text_image(self,
                               width: int,
-                              height: int) -> 'PyGMLXTextEmulator':
-        return PyGMLXTextEmulator(width, height)
+                              height: int,
+                              font: int = 16,
+                              color: int = 0xFFF) -> 'PyGMLXTextEmulator':
+        return PyGMLXTextEmulator(
+            width=width,
+            height=height,
+            font_size=font)
 
     def pygmlx_put_image_to_window(self,
                                    img: 'PyGMLXImageEmulator',

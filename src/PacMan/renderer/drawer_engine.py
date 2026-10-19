@@ -101,6 +101,20 @@ class DrawerEngine:
     def resized(self) -> int:
         return int(self.corrected_size[0] / (2 * self._config.nb_cells))
 
+    @property
+    def margin(self) -> int:
+        return int(self.corrected_size[1] / 2 )
+
+    def next_char_coord(self, v: int) -> int:
+        img_size = self.resized
+        tot_cell_size = self.tot_cell_size[0]
+        # internal placing of the image on the cell
+        refpos = int((tot_cell_size - img_size) / 2)
+        unit_step = (self.interior_cell_size[0]
+                     + self.wall_thickness[0])
+        margin = self.margin
+        return refpos + unit_step * v + margin
+
     def draw(
         self,
         target_img: PyGMLXImageEmulator,
