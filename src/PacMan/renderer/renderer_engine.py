@@ -111,7 +111,7 @@ class PyGMiniLibXEmulator:
                 if event.type == pygame.QUIT:
                     self.running = False
             if self._loop_hook is not None:
-                result: int = self._loop_hook(self._loop_param)
+                result: int = self.mlx_loop_hook(self._loop_param)
                 if result == 0:
                     break
             clock.tick(60)
