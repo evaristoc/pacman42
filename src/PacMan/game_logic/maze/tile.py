@@ -78,6 +78,19 @@ class Tile:
                              "that is not in range 0-255.")
         self._tilebyte = tilebyte
 
+    def get_open_walls(self) -> list[tuple[int, int]]:
+        open_walls = []
+        if self.wall_north == WallState.OPEN:
+            open_walls.append((0, -1))
+        if self.wall_east == WallState.OPEN:
+            open_walls.append((1, 0))
+        if self.wall_south == WallState.OPEN:
+            open_walls.append((0, 1))
+        if self.wall_west == WallState.OPEN:
+            open_walls.append((-1, 0))
+        return open_walls
+
+
     def _set_open_walls_from_tilebyte(self) -> None:
         """Updates WallState properties based on the bits set in tilebyte.
 

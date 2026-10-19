@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from .ghosts import GhostState
+from src.PacMan.game_logic.characters.ghosts import Ghost
+from src.PacMan.game_logic.maze.tile import Tile
 import random
 
 
@@ -12,13 +13,8 @@ class AIStrategy(ABC):
     fleeing, and returning to spawn.
     """
 
-    def __init__(self, spawn_pos: tuple[float, float]):
-        """Initialize a ghost strategy with its spawn position.
-
-        Args:
-            spawn_pos: The (x, y) coordinates where the ghost respawns when
-            caught or when exiting frightened mode.
-        """
+    def __init__(self, context: Ghost, spawn_pos: tuple[float, float] = (3, 3)):
+        self.context = context
         self.spawn_pos = spawn_pos
 
     @abstractmethod
@@ -26,7 +22,6 @@ class AIStrategy(ABC):
         self,
         ghost_pos: tuple[float, float],
         pacman_pos: tuple[float, float],
-        mode: GhostState
     ) -> tuple[float, float]:
         """Determine the next move for the ghost based on current game state.
 
@@ -74,8 +69,13 @@ class AIStrategy(ABC):
             A random direction vector: one of (1, 0), (-1, 0), (0, 1), or 
             (0, -1).
         """
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-        return random.choice(directions)
+        temp_tile = self.context.maze.grid[self.context.position[1]][self.context.position[0]]
+        if isinstance(temp_tile, Tile):
+            possible_directions = temp_tile.get_open_walls()
+        else:
+            raise ValueError("Getting a tile from the maze failed.")
+
+        return random.choice(possible_directions)
 
     def _pathfind_to(
         self,

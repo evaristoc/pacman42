@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class GameCharacter(ABC):
     @abstractmethod
-    def update(self, delta_time: float) -> None:
+    def update(self, delta_ticks: int) -> None:
         """
         Update the entity's state for the current frame.
 

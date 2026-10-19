@@ -6,6 +6,7 @@ from src.PacMan.game_logic.characters.ghostsai import (AIStrategy,
                                                        InkyAI)
 from src.PacMan.game_logic.characters.ghostsm import (IGhostState,
                                                       ChasingGhostState)
+from src.PacMan.game_logic.maze.maze import Maze
 
 from enum import Enum
 
@@ -26,7 +27,7 @@ class GhostError(Exception):
 class Ghost(GameCharacter):
     """A ghost entity that pursues Pac-Man using a specific AI strategy."""
 
-    def __init__(self, name: GhostName) -> None:
+    def __init__(self, name: GhostName, maze: Maze) -> None:
         """Initializes a Ghost with a name, default state, and AI strategy.
 
         Args:
@@ -34,18 +35,23 @@ class Ghost(GameCharacter):
             spawn point.
         """
         self.name: GhostName = name
-        self.state: IGhostState = ChasingGhostState()
-        self.spawn_point: tuple[float, float] = self._get_spawn_point()
+        self.maze: Maze = maze
+        self.state: IGhostState = ChasingGhostState(self)
+        self.spawn_point: tuple[int, int] = self._get_spawn_point()
         self.strategy: AIStrategy = self._get_ghost_ai()
-        self.position: tuple[float, float] = self.spawn_point
+        self.position: tuple[int, int] = self.spawn_point
 
-    def update(self, delta_time: float) -> None:
+    def update(self, delta_ticks: int) -> None:
         """Updates the ghost's position and state based on game time.
 
         Args:
             delta_time: The time elapsed since the last update frame.
         """
-        pass
+        self.state.update(delta_ticks)
+        print(f"I'm {self.name.name}. My position is {self.position}")
+
+    def set_state(self, new_state: IGhostState) -> None:
+        self.state = new_state
 
     def get_position(self) -> tuple[float, float]:
         """Returns the current coordinates of the ghost.
@@ -56,7 +62,6 @@ class Ghost(GameCharacter):
         return self.position
 
     def big_pellet_activated(self) -> None:
-        """Transitions the ghost into the FRIGHTENED state."""
         self.state.big_pellet_activated()
 
     def collide_with_pacman(self) -> None:
@@ -81,18 +86,18 @@ class Ghost(GameCharacter):
         """
         match self.name:
             case GhostName.BLINKY:
-                return BlinkyAI(self.spawn_point)
+                return BlinkyAI(self, self.spawn_point)
             case GhostName.CLYDE:
-                return ClydeAI(self.spawn_point)
+                return ClydeAI(self, self.spawn_point)
             case GhostName.INKY:
-                return InkyAI(self.spawn_point)
+                return InkyAI(self, self.spawn_point)
             case GhostName.PINKY:
-                return PinkyAI(self.spawn_point)
+                return PinkyAI(self, self.spawn_point)
             case _:
                 raise GhostError("Stored invalid name in Ghost-object, "
                                  "so can't determine valid AIStrategy.")
 
-    def _get_spawn_point(self) -> tuple[float, float]:
+    def _get_spawn_point(self) -> tuple[int, int]:
         """Returns the default starting coordinates for the specific ghost.
 
         Returns:
@@ -103,27 +108,27 @@ class Ghost(GameCharacter):
         """  # TODO
         match self.name:
             case GhostName.BLINKY:
-                return (0, 0)
+                return (1, 1)
             case GhostName.CLYDE:
-                return (0, 0)
+                return (2, 2)
             case GhostName.INKY:
-                return (0, 0)
+                return (3, 3)
             case GhostName.PINKY:
-                return (0, 0)
+                return (4, 4)
             case _:
                 raise GhostError("Stored invalid name in Ghost-object, "
                                  "so can't determine valid AIStrategy.")
 
 
 class GhostManager:
-    def __init__(self) -> None:
+    def __init__(self, maze: Maze) -> None:
         self.ghosts = {
-            GhostName.BLINKY: Ghost(GhostName.BLINKY),
-            GhostName.CLYDE: Ghost(GhostName.CLYDE),
-            GhostName.INKY: Ghost(GhostName.INKY),
-            GhostName.PINKY: Ghost(GhostName.PINKY)
+            GhostName.BLINKY: Ghost(GhostName.BLINKY, maze),
+            GhostName.CLYDE: Ghost(GhostName.CLYDE, maze),
+            GhostName.INKY: Ghost(GhostName.INKY, maze),
+            GhostName.PINKY: Ghost(GhostName.PINKY, maze)
         }
 
-    def update(self)
-    for ghost in self.ghosts.items:
-        ghost.update()
+    def update(self):
+        for ghost in self.ghosts.values:
+            ghost.update()
