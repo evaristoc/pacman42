@@ -1,2 +1,3 @@
 class CollisionManager:
-    pass
+    def check_collisions(self) -> None:
+        pass

@@ -1,8 +1,8 @@
 import logging
 from typing import cast
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
-from src.PacMan.game_logic.map.tile import Tile
-from src.PacMan.game_logic.map.map import Map, MapFactory
+from src.PacMan.game_logic.maze.tile import Tile
+from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
@@ -42,9 +42,9 @@ class RendererFactory:
         #     self.__interior_cell_size - 2 * self.__padding
         # )
 
-    def init_maze(self) -> Map:
+    def init_maze(self) -> Maze:
         try:
-            return MapFactory(self._config.nb_cells).make_map()
+            return MazeFactory(self._config.nb_cells).make_map()
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")

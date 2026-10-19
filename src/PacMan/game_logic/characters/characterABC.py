@@ -22,15 +22,6 @@ class GameCharacter(ABC):
         pass
 
     @abstractmethod
-    def render(self) -> None:
-        """Render the entity to the screen.
-
-        This method is called once per frame after all entities have updated.
-        Implement drawing logic here (e.g., blit sprites, draw rectangles).
-        """
-        pass
-
-    @abstractmethod
     def get_position(self) -> tuple[float, float]:
         """Return the entity's current position as (x, y).
 

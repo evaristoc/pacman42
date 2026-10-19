@@ -45,7 +45,7 @@ class AIStrategy(ABC):
         """
         pass
 
-    def _return_to_spawn(
+    def return_to_spawn(
         self,
         ghost_pos: tuple[float, float]
     ) -> tuple[float, float]:
@@ -63,7 +63,7 @@ class AIStrategy(ABC):
         """
         return self._pathfind_to(ghost_pos, self.spawn_pos)
 
-    def _random_move(self) -> tuple[float, float]:
+    def random_move(self) -> tuple[float, float]:
         """Select a random direction for the ghost to move.
 
         Used when the ghost is in frightened mode, causing erratic,

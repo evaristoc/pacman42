@@ -4,14 +4,10 @@ from src.PacMan.game_logic.characters.ghostsai import (AIStrategy,
                                                        ClydeAI,
                                                        PinkyAI,
                                                        InkyAI)
+from src.PacMan.game_logic.characters.ghostsm import (IGhostState,
+                                                      ChasingGhostState)
+
 from enum import Enum
-
-
-class GhostState(Enum):
-    """Defines the behavioral state of a ghost."""
-    CHASING = 1
-    FRIGHTENED = 2
-    EATEN = 3
 
 
 class GhostName(Enum):
@@ -27,11 +23,6 @@ class GhostError(Exception):
     pass
 
 
-class GhostStateError(GhostError):
-    """Exception raised when a ghost enters an invalid or undefined state."""
-    pass
-
-
 class Ghost(GameCharacter):
     """A ghost entity that pursues Pac-Man using a specific AI strategy."""
 
@@ -43,7 +34,7 @@ class Ghost(GameCharacter):
             spawn point.
         """
         self.name: GhostName = name
-        self.state: GhostState = GhostState.CHASING
+        self.state: IGhostState = ChasingGhostState()
         self.spawn_point: tuple[float, float] = self._get_spawn_point()
         self.strategy: AIStrategy = self._get_ghost_ai()
         self.position: tuple[float, float] = self.spawn_point
@@ -56,21 +47,17 @@ class Ghost(GameCharacter):
         """
         pass
 
-    def render(self) -> None:
-        """Draws the ghost on the screen."""
-        pass
-
     def get_position(self) -> tuple[float, float]:
         """Returns the current coordinates of the ghost.
 
         Returns:
             A tuple of (x, y) coordinates.
         """
-        return (0, 0)  # TODO
+        return self.position
 
-    def become_frightened(self) -> None:
+    def big_pellet_activated(self) -> None:
         """Transitions the ghost into the FRIGHTENED state."""
-        pass
+        self.state.big_pellet_activated()
 
     def collide_with_pacman(self) -> None:
         """Handles the logic when the ghost collides with Pac-Man.
@@ -80,17 +67,7 @@ class Ghost(GameCharacter):
         Raises:
             GhostStateError: If the ghost is in an undefined state.
         """
-        match self.state:
-            case GhostState.CHASING:
-                return
-            case GhostState.FRIGHTENED:
-                self.state = GhostState.EATEN
-                return
-            case GhostState.EATEN:
-                return
-            case _:
-                raise GhostStateError("Somehow self.state inside a Ghost"
-                                      "-object was an invalid state.")
+        self.state.collide_with_pacman()
 
     def _get_ghost_ai(self) -> AIStrategy:
         """Determines the AI strategy based on the ghost's name.
@@ -136,3 +113,17 @@ class Ghost(GameCharacter):
             case _:
                 raise GhostError("Stored invalid name in Ghost-object, "
                                  "so can't determine valid AIStrategy.")
+
+
+class GhostManager:
+    def __init__(self) -> None:
+        self.ghosts = {
+            GhostName.BLINKY: Ghost(GhostName.BLINKY),
+            GhostName.CLYDE: Ghost(GhostName.CLYDE),
+            GhostName.INKY: Ghost(GhostName.INKY),
+            GhostName.PINKY: Ghost(GhostName.PINKY)
+        }
+
+    def update(self)
+    for ghost in self.ghosts.items:
+        ghost.update()
