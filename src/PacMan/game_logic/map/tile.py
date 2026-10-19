@@ -7,6 +7,11 @@ class WallState(Enum):
     NORMALWALL = 2
     OUTERWALL = 3
 
+class PelletState(Enum):
+    """Defines the possible states of a pellet on a tile."""
+    NOPELLET = 0
+    NORMALPELLET = 1
+    POWERPELLET = 2
 
 class TileBits(Enum):
     """Bitmasks used to determine wall states from a tilebyte.
@@ -22,6 +27,8 @@ class TileBits(Enum):
     SOUTH_OUTER = 64
     WEST_OUTER = 128
 
+class TileError(Exception):
+    pass
 
 class Tile:
     """Represents a single cell in the maze.
@@ -36,10 +43,12 @@ class Tile:
         self.wall_south: WallState = WallState.OPEN
         self.wall_west: WallState = WallState.OPEN
         self.wall_east: WallState = WallState.OPEN
+        self.pellet_state: PelletState = PelletState.NORMALPELLET
         self.cell_position_x: int = x
         self.cell_position_y: int = y
 
         self._set_open_walls_from_tilebyte()
+        self.pellet_state = self._set_pellet_state_from_tilebyte()
 
     @property
     def tilebyte(self) -> int:
@@ -94,6 +103,18 @@ class Tile:
 
         if self.tilebyte & TileBits.WEST_OUTER.value:
             self.wall_west = WallState.OUTERWALL
+
+    def _set_pellet_state_from_tilebyte(self) -> PelletState:
+        if self.tilebyte.bit_count() == 4:
+            print(self)
+            return PelletState.NOPELLET
+        temporary_tilebyte = self.tilebyte >> 4 & 0x0F
+        if temporary_tilebyte.bit_count() > 1:
+            print(self)
+            return PelletState.POWERPELLET
+        return PelletState.NORMALPELLET
+
+        
 
     def __repr__(self) -> str:
         """Returns a string representation of the wall states for each face."""
