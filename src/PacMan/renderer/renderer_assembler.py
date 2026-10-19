@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from PIL import Image
 from src.PacMan.renderer.drawer_engine import DrawerEngine
-from src.PacMan.game_logic.map.map import Map, MapFactory
+from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
 from src.PacMan.renderer.renderer_engine import (PyGMiniLibXEmulator,
                                                  PyGMLXImageEmulator,
@@ -28,9 +28,9 @@ class RendererAssembler:
     # def ref_w(self, val: int) -> None:
     #     self._reference_w = val
 
-    def init_maze(self) -> Map:
+    def init_maze(self) -> Maze:
         try:
-            return MapFactory(self._config.nb_cells).make_map()
+            return MazeFactory(self._config.nb_cells).make_maze()
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")

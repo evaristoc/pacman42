@@ -10,7 +10,9 @@ from src.PacMan.renderer.renderer_engine import (
                                 PyGMLXTextEmulator)
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
-from src.PacMan.game_logic.map.map import Map
+from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.characters.ghosts import GhostName
+from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ class PacManApp:
         self.assembler: RendererAssembler | None = None
         self.drawer: DrawerEngine | None = None
         self.pygmlx: PyGMiniLibXEmulator | None = None
-        self.maze: Map | None = None
+        self.maze: Maze | None = None
         self.board: dict[PyGMLXImageEmulator] | None = None
         self.ghosts_imgs: dict[PyMLXPNGEmulator] | None = None
         self.pacman_imgs: dict[PyMLXPNGEmulator] | None = None
@@ -70,8 +72,8 @@ class PacManApp:
         self.drawer.draw(self.board_img["board"],
                          self.maze.grid,
                          None)
-        # print(self.drawer.corrected_size[0], self.drawer.corrected_size[1], self.drawer.margin)
-        # # board_margin = int(self.drawer.corrected_size[1] / 2)
+        print(self.drawer.corrected_size[0], self.drawer.corrected_size[1], self.drawer.margin)
+        # board_margin = int(self.drawer.corrected_size[1] / 2)
         self.pygmlx.pygmlx_put_image_to_window(
             self.board_img["board"],
             self.drawer.margin / 2,
@@ -100,6 +102,15 @@ class PacManApp:
             14,
             self.drawer.corrected_size[0] + 7,
         )
+
+        # gamelogicmanager = GameLogicManager(20)
+        # steps = 20
+        # while steps > 0:
+        #     gamelogicmanager.update_logic()
+        #     if steps == 18:
+        #         gamelogicmanager.character_manager.ghost_mng.ghosts[GhostName.BLINKY].big_pellet_activated()
+        #     steps -= 1
+
         self.pygmlx.pygmlx_loop()
 
 

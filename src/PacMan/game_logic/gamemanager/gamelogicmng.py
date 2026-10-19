@@ -28,12 +28,12 @@ class GameLogicManager:
         return MazeFactory(nb_cells).make_maze()
 
 
-if __name__ == '__main__':
-    gamelogicmanager = GameLogicManager(20)
-    steps = 20
-    while steps > 0:
-        gamelogicmanager.update_logic()
-        if steps == 18:
-            gamelogicmanager.character_manager.ghost_mng.ghosts[GhostName.BLINKY].big_pellet_activated()
-        steps -= 1
+# if __name__ == '__main__':
+#     gamelogicmanager = GameLogicManager(20)
+#     steps = 20
+#     while steps > 0:
+#         gamelogicmanager.update_logic()
+#         if steps == 18:
+#             gamelogicmanager.character_manager.ghost_mng.ghosts[GhostName.BLINKY].big_pellet_activated()
+#         steps -= 1
 
