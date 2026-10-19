@@ -3,7 +3,7 @@ from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
 from src.PacMan.validation_contracts.parser import DataProcessor
-from src.PacMan.renderer.drawer_engine import PyGMX
+from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 
@@ -67,10 +67,11 @@ class PacManApp:
                          self.maze.grid,
                          None)
         # cell_size = int(pygmlx.view_w / config.nb_cells)
+        margin = int(self.drawer.corrected_size[1] / 2)
         self.pygmlx.pygmlx_put_image_to_window(
             self.board_img["board"],
-            int(self.drawer.corrected_size[1] / 2),  # margins
-            int(self.rawer.corrected_size[1] / 2)
+            margin,
+            margin
             )
         
         for i, g in enumerate(self.ghosts_imgs):
