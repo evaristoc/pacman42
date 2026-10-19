@@ -19,6 +19,8 @@ class DrawerEngine:
         "walls": 0xFF00FF00,
     }
 
+    BOTTOMPARTSCREEN = 5
+
     def __init__(self, config: ValidBoardConfig) -> None:
         # self.__perc_wall = .2
         # # self.__perc_padding = .2
@@ -90,6 +92,14 @@ class DrawerEngine:
             self.__diff,
             "corrected size and diff against given size"
             )
+
+    @property
+    def bottom_h(self) -> int:
+        return int(self.corrected_size[0] / self.BOTTOMPARTSCREEN)
+
+    @property
+    def resized(self) -> int:
+        return int(self.corrected_size[0] / (2 * self._config.nb_cells))
 
     def draw(
         self,

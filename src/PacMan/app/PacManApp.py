@@ -3,7 +3,9 @@ from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
 from src.PacMan.validation_contracts.parser import DataProcessor
+from src.PacMan.renderer.drawer_engine import PyGMX
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
+from src.PacMan.renderer.drawer_engine import DrawerEngine
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +13,12 @@ logger = logging.getLogger(__name__)
 class PacManApp:
     def __init__(self) -> None:
         self.assembler: RendererAssembler | None = None
+        self.drawer: DrawerEngine | None = None
+        self.pygmlx: PyGMiniLibXEmulator | None = None
+        self.maze: Map | None = None
+        self.board: dict[] | None = None
+        self.ghosts_imgs: dict[] | None = None
+        self.pacman_imgs: dict[] | None = None
 
     def __str__(self) -> str:
         return "I am PacMan!"
@@ -27,7 +35,23 @@ class PacManApp:
         assemble the whole board relative to those values
         """
         try:
-            cls.RendererAssembler(config)
+            # assembler is a short live object only for assembling
+            assembler = RendererAssembler(config)
+            # drawer will control all relevant metrics
+            # it will also paint the canvas
+            cls.drawer = assembler.init_drawer()
+            size = cls.drawer.corrected_size[0]
+            bottom = cls.drawer.bottom_h
+            cls.pygmlx = assembler.init_engine(size,
+                                               bottom)
+            cls.maze = assembler.init_maze()
+            cls.board_img = assembler.init_board(size)
+            rsized = cls.drawer.resized
+            cls.ghosts_imgs = assembler.register_imgs(rsized,
+                                                      "ghosts")
+            cls.pacman_imgs = assembler.register_imgs(rsized,
+                                                      "pacman")
+
         except Exception as err:
             logger.exception(err)
             raise SystemExit(1)
@@ -36,70 +60,46 @@ class PacManApp:
         """
         mount the different parts and start the game
         """
-        if self.assembler is None:
+        if self.drawer is None or self.pygmlx is None or self.maze is None or self.board_img is None or self.ghosts_imgs is None or self.pacman_imgs is None:
             logger.exception("FATAL: no assembler was defined.")
             raise SystemExit(1)
-        drawer = self.assembler.init_drawer()
-        maze = self.assembler.init_maze()
-        pygmlx = self.assembler.init_engine(drawer.corrected_size[0])
-        # print(pygmlx.view_w, pygmlx.view_h)
-        # print(drawer.tot_cell_size[0])
-        # print(drawer.interior_cell_size[0])
-        # print(drawer.wall_thickness[0])
-        # print(drawer.corrected_size[0], drawer.corrected_size[1])
-        imgmlxbg = pygmlx.pygmlx_new_image(drawer.corrected_size[0],
-                                           drawer.corrected_size[0]\
-                                           + int(drawer.corrected_size[0] / 3))
-        drawer.draw(imgmlxbg,
-                    maze.grid,
-                    None)
+        self.drawer.draw(self.board_img["board"],
+                         self.maze.grid,
+                         None)
         # cell_size = int(pygmlx.view_w / config.nb_cells)
-        pygmlx.pygmlx_put_image_to_window(
-            imgmlxbg,
-            int(drawer.corrected_size[1] / 2),
-            int(drawer.corrected_size[1] / 2)
+        self.pygmlx.pygmlx_put_image_to_window(
+            self.board_img["board"],
+            int(self.drawer.corrected_size[1] / 2),  # margins
+            int(self.rawer.corrected_size[1] / 2)
             )
-        imgmlx01 = pygmlx.pygmlx_new_png_image(500, 500)
-        img01_path = cwd.parent / 'assets' / 'ghosts' / 'orange.png'
-        imgmlx01.pygput_from_png(str(img01_path))
-        print("Loaded image successfully: "
-                f"{imgmlx01.width}x{imgmlx01.height}")
-        img_resize = int(pygmlx.view_w / (2 * config.nb_cells))
-        imgmlx01.pygll_resize(
-            img_resize,
-            img_resize
+        
+        for i, g in enumerate(self.ghosts_imgs):
+            self.pygmlx.pygmlx_put_image_to_window(
+                self.ghosts_imgs[g],
+                int((drawer.tot_cell_size[0] - img_refpos) / 2)
+                + (drawer.interior_cell_size[0]
+                   + drawer.wall_thickness[0]) * i
+                + int(drawer.corrected_size[1] / 2),
+                int((drawer.tot_cell_size[0] - img_refpos) / 2)
+                + (drawer.interior_cell_size[0]
+                   + drawer.wall_thickness[0]) * 0
+                + int(drawer.corrected_size[1] / 2)
             )
-        # print(cell_size)
-        # print(img_resize)
-        # print((cell_size - img_resize) / 2)
-        # print((cell_size - 2 * cell_size * .2 - img_resize) / 2)
-        # print(drawer.tot_cell_size)
-        # padding = (cell_size - 2 * cell_size * .2 - img_resize) / 2
-        pygmlx.pygmlx_put_image_to_window(
-            imgmlx01,
-            # int(pygmlx.view_w / config.nb_cells * .4) + int(pygmlx.view_w / config.nb_cells - .7) * 3,
-            # int(pygmlx.view_w / config.nb_cells * .4)
-            int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 6 + int(drawer.corrected_size[1] / 2),
-            int((drawer.tot_cell_size[0] - img_resize) / 2) + (drawer.interior_cell_size[0] + drawer.wall_thickness[0]) * 7 + int(drawer.corrected_size[1] / 2)
-            # int(cell_size * .2 + padding) + cell_size * 0,
-            # int(cell_size * .2 + padding) + cell_size * 9,
+        for i, g in enumerate(pacman_imgs):
+            self.pygmlx.pygmlx_put_image_to_window(
+                self.ghosts_imgs[g],
+                int((drawer.tot_cell_size[0] - img_refpos) / 2)
+                + (drawer.interior_cell_size[0]
+                   + drawer.wall_thickness[0]) * i
+                + int(drawer.corrected_size[1] / 2),
+                int((drawer.tot_cell_size[0] - img_refpos) / 2)
+                + (drawer.interior_cell_size[0]
+                   + drawer.wall_thickness[0]) * 0
+                + int(drawer.corrected_size[1] / 2)
             )
-        imgmlx02 = pygmlx.pygmlx_new_png_image(500, 500)
-        img02_path = cwd.parent / 'assets' / 'ghosts' / 'blue.png'
-        imgmlx02.pygput_from_png(str(img02_path))
-        imgmlx02.pygll_resize(
-            img_resize,
-            img_resize
-            )
-        print("Loaded image successfully: "
-                f"{imgmlx02.width}x{imgmlx02.height}")
-        pygmlx.pygmlx_put_image_to_window(
-            imgmlx02,
-            int(pygmlx.view_w / 3),
-            int(pygmlx.view_w / 3)
-            )
-        imgmlxtext = pygmlx.pygmlx_new_text_image(drawer.corrected_size[0],
-                                                    int(drawer.corrected_size[0] / 3))
+        imgmlxtext = pygmlx.pygmlx_new_text_image(
+            drawer.corrected_size[0],
+            0)
         imgmlxtext.pygput_from_text(0, 0, "I am Pacman.")
         pygmlx.pygmlx_put_image_to_window(
             imgmlxtext,
@@ -107,8 +107,10 @@ class PacManApp:
             drawer.corrected_size[0] + 7,
         )
         pygmlx.pygmlx_loop()
-        # img = pygmlx.pygmlx_new_image(pygmlx.width,
-        #                               pygmlx.height)
-        # pixels, _, _ = img.pygget_data_addr()
-        # pixels[50:150, 50:150] = [255, 0, 0, 255]
-        # pygmlx.pygmlx_put_image_to_window(img, 0, 0)
+
+    def _next_char_coord(self, v: int) -> int:
+        img_size = int(
+            self.assembler.ref_w / (2 * self.assembler._config.nb_cells)
+            )
+        img_refpos = int((self.drawer.tot_cell_size[0] - img_refpos) / 2)
+        return
