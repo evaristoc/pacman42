@@ -3,7 +3,9 @@ from abc import ABC, abstractmethod
 
 class GameCharacter(ABC):
     @abstractmethod
-    def update(self, delta_time: float) -> None:
+    def update(self, *,
+               delta_ticks: int
+               ) -> None:
         """
         Update the entity's state for the current frame.
 
@@ -18,15 +20,6 @@ class GameCharacter(ABC):
 
         Returns:
             None
-        """
-        pass
-
-    @abstractmethod
-    def render(self) -> None:
-        """Render the entity to the screen.
-
-        This method is called once per frame after all entities have updated.
-        Implement drawing logic here (e.g., blit sprites, draw rectangles).
         """
         pass
 

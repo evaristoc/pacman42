@@ -1,15 +1,19 @@
-from .characters.entities import GameCharacter
-from .ghostsai import AIStrategy, BlinkyAI, ClydeAI, PinkyAI, InkyAI
+from src.PacMan.game_logic.characters.characterABC import GameCharacter
+from src.PacMan.game_logic.characters.ghostsai import (AIStrategy,
+                                                       BlinkyAI,
+                                                       ClydeAI,
+                                                       PinkyAI,
+                                                       InkyAI)
+from src.PacMan.game_logic.characters.ghostsm import (IGhostState,
+                                                      ChasingGhostState)
+from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.characters.pacman import Pacman
+
 from enum import Enum
 
 
-class GhostState(Enum):
-    CHASING = 1
-    FRIGHTENED = 2
-    EATEN = 3
-
-
 class GhostName(Enum):
+    """The unique identities of the ghosts."""
     BLINKY = 1
     PINKY = 2
     INKY = 3
@@ -17,70 +21,128 @@ class GhostName(Enum):
 
 
 class GhostError(Exception):
-    pass
-
-
-class GhostStateError(GhostError):
+    """Base exception for ghost-related errors."""
     pass
 
 
 class Ghost(GameCharacter):
-    def __init__(self, name: GhostName) -> None:
+    """A ghost entity that pursues Pac-Man using a specific AI strategy."""
+
+    def __init__(self, name: GhostName, maze: Maze, pacman: Pacman) -> None:
+        """Initializes a Ghost with a name, default state, and AI strategy.
+
+        Args:
+            name: The GhostName identity used to determine the AI and
+            spawn point.
+        """
         self.name: GhostName = name
-        self.state: GhostState = GhostState.CHASING
-        self.spawn_point: tuple[float, float] = self._get_spawn_point()
-        self.strategy: AIStrategy = self._get_ghost_ai()
-        self.position: tuple[float, float] = self.spawn_point
+        self.maze: Maze = maze
+        self.spawn_point: tuple[int, int] = self._get_spawn_point()
+        self.strategy: AIStrategy = self._get_ghost_ai(maze)
+        self.position: tuple[int, int] = self.spawn_point
+        self.state: IGhostState = ChasingGhostState(self.strategy)
+        self.pacman: Pacman = pacman
 
-    def update(self, delta_time: float) -> None:
-        pass
+    def update(self, *, delta_ticks: int) -> None:
+        """Updates the ghost's position and state based on game time.
 
-    def render(self) -> None:
-        pass
+        Args:
+            delta_time: The time elapsed since the last update frame.
+        """
+        move, new_state = self.state.update(
+            delta_ticks=delta_ticks,
+            pacman_position=self.pacman.get_position(),
+            ghost_position=self.position
+        )
+        if new_state:
+            self.state = new_state
+        if move:
+            self._process_move(move)
+        if self.name == GhostName.BLINKY:
+            print(f"I'm {self.name.name}. My position is {self.position}. My move was{move}. My state is {self.state.__class__.__name__}")
 
     def get_position(self) -> tuple[float, float]:
-        return (0, 0)  # TODO
+        """Returns the current coordinates of the ghost.
 
-    def become_frightened(self) -> None:
-        pass
+        Returns:
+            A tuple of (x, y) coordinates.
+        """
+        return self.position
+
+    def big_pellet_activated(self) -> None:
+        self.state = self.state.big_pellet_activated()
 
     def collide_with_pacman(self) -> None:
-        match self.state:
-            case GhostState.CHASING:
-                return
-            case GhostState.FRIGHTENED:
-                self.state = GhostState.EATEN
-                return
-            case GhostState.EATEN:
-                return
-            case _:
-                raise GhostStateError("Somehow self.state inside a Ghost"
-                                      "-object was an invalid state.")
+        """Handles the logic when the ghost collides with Pac-Man.
 
-    def _get_ghost_ai(self) -> AIStrategy:
+        Changes state to EATEN if the ghost is currently FRIGHTENED.
+
+        Raises:
+            GhostStateError: If the ghost is in an undefined state.
+        """
+        self.state.collide_with_pacman()
+
+    def _get_ghost_ai(self, maze: Maze) -> AIStrategy:
+        """Determines the AI strategy based on the ghost's name.
+
+        Returns:
+            An AIStrategy implementation specific to the ghost's identity.
+
+        Raises:
+            GhostError: If the ghost's name does not map to a known AI
+            strategy.
+        """
         match self.name:
             case GhostName.BLINKY:
-                return BlinkyAI(self.spawn_point)
+                return BlinkyAI(self.spawn_point, maze)
             case GhostName.CLYDE:
-                return ClydeAI(self.spawn_point)
+                return ClydeAI(self.spawn_point, maze)
             case GhostName.INKY:
-                return InkyAI(self.spawn_point)
+                return InkyAI(self.spawn_point, maze)
             case GhostName.PINKY:
-                return PinkyAI(self.spawn_point)
+                return PinkyAI(self.spawn_point, maze)
             case _:
                 raise GhostError("Stored invalid name in Ghost-object, "
                                  "so can't determine valid AIStrategy.")
 
-    def _get_spawn_point(self) -> tuple[float, float]:  # TODO
+    def _get_spawn_point(self) -> tuple[int, int]:
+        """Returns the default starting coordinates for the specific ghost.
+
+        Returns:
+            A tuple of (x, y) coordinates.
+
+        Raises:
+            GhostError: If the ghost's name is invalid.
+        """  # TODO
         match self.name:
             case GhostName.BLINKY:
-                return (0, 0)
+                return (1, 1)
             case GhostName.CLYDE:
-                return (0, 0)
+                return (2, 2)
             case GhostName.INKY:
-                return (0, 0)
+                return (3, 3)
             case GhostName.PINKY:
-                return (0, 0)
+                return (4, 4)
             case _:
                 raise GhostError("Stored invalid name in Ghost-object, "
                                  "so can't determine valid AIStrategy.")
+
+    def _process_move(self, move: tuple[int, int]) -> None:
+        dx, dy = move
+        old_x, old_y = self.position
+        new_position = (old_x + dx, old_y + dy)
+        self.position = new_position
+
+
+class GhostManager:
+    def __init__(self, maze: Maze, pacman: Pacman) -> None:
+        self.ghosts = {
+            GhostName.BLINKY: Ghost(GhostName.BLINKY, maze, pacman),
+            GhostName.CLYDE: Ghost(GhostName.CLYDE, maze, pacman),
+            GhostName.INKY: Ghost(GhostName.INKY, maze, pacman),
+            GhostName.PINKY: Ghost(GhostName.PINKY, maze, pacman)
+        }
+
+    def update(self, delta_ticks: int, pacman_position: tuple[int, int]) -> None:
+        for ghost in self.ghosts.values():
+            ghost.update(delta_ticks=delta_ticks)
