@@ -25,7 +25,7 @@ class GameLogicManager:
         return self.state
 
     @staticmethod
-    def _init_maze(nb_cells: int):
+    def _init_maze(nb_cells: int) -> Maze:
         return MazeFactory(nb_cells).make_maze()
 
 
