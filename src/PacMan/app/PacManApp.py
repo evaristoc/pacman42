@@ -6,7 +6,7 @@ from src.PacMan.validation_contracts.parser import DataProcessor
 from src.PacMan.renderer.renderer_engine import (
                                 PyGMiniLibXEmulator,
                                 PyGMLXImageEmulator,
-                                PyMLXPNGEmulator, 
+                                PyMLXPNGEmulator,
                                 PyGMLXTextEmulator)
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
@@ -101,5 +101,3 @@ class PacManApp:
             self.drawer.corrected_size[0] + 7,
         )
         self.pygmlx.pygmlx_loop()
-
-

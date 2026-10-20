@@ -5,7 +5,6 @@ from src.PacMan.validation_contracts.valid_game_config import (
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
 from src.PacMan.game_logic.maze.tile import Tile
 from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
-from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
 logger = logging.getLogger(__name__)
