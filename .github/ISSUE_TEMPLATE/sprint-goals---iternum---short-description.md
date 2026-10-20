@@ -17,3 +17,6 @@ _It should be in Sprint Increment status_)
 
 ## Acceptance Criteria (for the sprint increment, always looking to comply with assignment requirements):
 (_NOTE: use checkout - [ ]_)
+
+## Carried out from previous sprints:
+(_NOTE: links to comments where those unaccomplished tasks have been listed_)
