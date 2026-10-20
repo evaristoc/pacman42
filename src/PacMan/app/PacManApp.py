@@ -11,8 +11,6 @@ from src.PacMan.renderer.renderer_engine import (
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.game_logic.maze.maze import Maze
-from src.PacMan.game_logic.characters.ghosts import GhostName
-from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 
 logger = logging.getLogger(__name__)
 
@@ -102,19 +100,6 @@ class PacManApp:
             14,
             self.drawer.corrected_size[0] + 7,
         )
-
-        gamelogicmanager = GameLogicManager(20)
-        import time
-        steps = 50
-        ticks = 0
-        while steps > 0:
-            ticks += 10
-            gamelogicmanager.update_logic(events=None, ticks=ticks)
-            if steps == 48:
-                gamelogicmanager.character_manager.ghost_mng.ghosts[GhostName.BLINKY].big_pellet_activated()
-            time.sleep(0.5)
-            steps -= 1
-
-        # self.pygmlx.pygmlx_loop()
+        self.pygmlx.pygmlx_loop()
 
 
