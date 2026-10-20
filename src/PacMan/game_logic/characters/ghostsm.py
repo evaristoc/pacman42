@@ -1,20 +1,24 @@
 from abc import ABC, abstractmethod
-from src.PacMan.game_logic.characters.ghosts import Ghost
+from src.PacMan.game_logic.characters.ghostsai import AIStrategy
 import time
-
-FRIGHTENED_GHOST_TICK_SPEED: int = 40
+from typing import Union
+FRIGHTENED_GHOST_TICK_SPEED: int = 10
 
 
 class IGhostState(ABC):
-    def __init__(self, context: Ghost):
-        self.context = context
+    def __init__(self, strategy: AIStrategy):
+        self.strategy: AIStrategy = strategy
 
     @abstractmethod
-    def update(self, delta_ticks: int) -> None:
+    def update(self, *,
+               delta_ticks: int,
+               pacman_position: tuple[int, int],
+               ghost_position: tuple[int, int]
+               ) -> tuple[tuple[int, int] | None, Union["IGhostState", None]]:
         pass
 
     @abstractmethod
-    def big_pellet_activated(self) -> None:
+    def big_pellet_activated(self) -> "IGhostState":
         pass
 
     @abstractmethod
@@ -23,34 +27,40 @@ class IGhostState(ABC):
 
 
 class ChasingGhostState(IGhostState):
-    def __init__(self, context: Ghost) -> None:
-        super().__init__(context)
+    def update(self, *,
+               delta_ticks: int,
+               pacman_position: tuple[int, int],
+               ghost_position: tuple[int, int]
+               ) -> tuple[tuple[int, int] | None, Union[IGhostState, None]]:
+        return ((0, 0), self)
 
-    def update(self, delta_ticks: int) -> None:
-        pass
-
-    def big_pellet_activated(self) -> None:
-        self.context.set_state(FrightenedGhostState(self.context))
+    def big_pellet_activated(self) -> IGhostState:
+        return FrightenedGhostState(self.strategy)
 
     def collide_with_pacman(self) -> None:
         pass
 
 
 class FrightenedGhostState(IGhostState):
-    def __init__(self, context: Ghost) -> None:
-        super().__init__(context)
-        self.frightened_timer: float = time.time() + 90
+    def __init__(self, strategy: AIStrategy) -> None:
+        super().__init__(strategy)
+        self.frightened_timer: float = time.time() + 500
         self.tick_speed: int = FRIGHTENED_GHOST_TICK_SPEED
 
-    def update(self, delta_ticks: int) -> None:
+    def update(self, *,
+               delta_ticks: int,
+               pacman_position: tuple[int, int],
+               ghost_position: tuple[int, int]
+               ) -> tuple[tuple[int, int] | None, Union[IGhostState, None]]:
+        move = None
         if time.time() > self.frightened_timer:
-            self.context.set_state(ChasingGhostState(self.context))
-            return
+            return None, ChasingGhostState(self.strategy)
         if delta_ticks % self.tick_speed == 0:
-            self.context.position = self.context.strategy.random_move()
+            move = self.strategy.random_move(ghost_position)
+        return (move, None)
 
-    def big_pellet_activated(self) -> None:
-        self.context.set_state(FrightenedGhostState(self.context))
+    def big_pellet_activated(self) -> IGhostState:
+        return FrightenedGhostState(self.strategy)
 
     def collide_with_pacman(self) -> None:
         pass

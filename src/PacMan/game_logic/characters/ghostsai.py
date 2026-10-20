@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.PacMan.game_logic.characters.ghosts import Ghost
+from src.PacMan.game_logic.maze.maze import Maze
 from src.PacMan.game_logic.maze.tile import Tile
 import random
 
@@ -13,9 +13,9 @@ class AIStrategy(ABC):
     fleeing, and returning to spawn.
     """
 
-    def __init__(self, context: Ghost, spawn_pos: tuple[float, float] = (3, 3)):
-        self.context = context
-        self.spawn_pos = spawn_pos
+    def __init__(self, spawn_pos: tuple[float, float], maze: Maze) -> None:
+        self.maze: Maze = maze
+        self.spawn_pos: tuple[float, float] = spawn_pos
 
     @abstractmethod
     def decide_move(
@@ -58,7 +58,7 @@ class AIStrategy(ABC):
         """
         return self._pathfind_to(ghost_pos, self.spawn_pos)
 
-    def random_move(self) -> tuple[float, float]:
+    def random_move(self, ghost_pos: tuple[int, int]) -> tuple[int, int]:
         """Select a random direction for the ghost to move.
 
         Used when the ghost is in frightened mode, causing erratic,
@@ -69,12 +69,11 @@ class AIStrategy(ABC):
             A random direction vector: one of (1, 0), (-1, 0), (0, 1), or 
             (0, -1).
         """
-        temp_tile = self.context.maze.grid[self.context.position[1]][self.context.position[0]]
+        temp_tile = self.maze.grid[ghost_pos[1]][ghost_pos[0]]
         if isinstance(temp_tile, Tile):
             possible_directions = temp_tile.get_open_walls()
         else:
             raise ValueError("Getting a tile from the maze failed.")
-
         return random.choice(possible_directions)
 
     def _pathfind_to(

@@ -1,8 +1,11 @@
-from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 
 
 class IGameState:
-    def __init__(self, context: GameLogicManager):
+    def __init__(self, context):
         self.context = context
 
 

@@ -103,14 +103,18 @@ class PacManApp:
             self.drawer.corrected_size[0] + 7,
         )
 
-        # gamelogicmanager = GameLogicManager(20)
-        # steps = 20
-        # while steps > 0:
-        #     gamelogicmanager.update_logic()
-        #     if steps == 18:
-        #         gamelogicmanager.character_manager.ghost_mng.ghosts[GhostName.BLINKY].big_pellet_activated()
-        #     steps -= 1
+        gamelogicmanager = GameLogicManager(20)
+        import time
+        steps = 50
+        ticks = 0
+        while steps > 0:
+            ticks += 10
+            gamelogicmanager.update_logic(events=None, ticks=ticks)
+            if steps == 48:
+                gamelogicmanager.character_manager.ghost_mng.ghosts[GhostName.BLINKY].big_pellet_activated()
+            time.sleep(0.5)
+            steps -= 1
 
-        self.pygmlx.pygmlx_loop()
+        # self.pygmlx.pygmlx_loop()
 
 

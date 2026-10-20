@@ -88,6 +88,7 @@ class Tile:
             open_walls.append((0, 1))
         if self.wall_west == WallState.OPEN:
             open_walls.append((-1, 0))
+        print(f"this tile: x={self.cell_position_x}, y={self.cell_position_y}")
         return open_walls
 
 
@@ -127,13 +128,10 @@ class Tile:
             return PelletState.NOPELLET
         temporary_tilebyte = self.tilebyte >> 4 & 0x0F
         if temporary_tilebyte.bit_count() > 1:
-            print(self)
             return PelletState.POWERPELLET
         return PelletState.NORMALPELLET
 
     def __repr__(self) -> str:
         """Returns a string representation of the wall states for each face."""
-        return (f"N: {self.wall_north.value}, E: {self.wall_east.value}, "
-                f"S: {self.wall_south.value}, W: {self.wall_west.value}"
-                f", location: (X={self.cell_position_x},"
-                f" Y={self.cell_position_y})")
+        return (f"N;{self.wall_north.value},E:{self.wall_east.value},"
+                f"S:{self.wall_south.value},W:{self.wall_west.value}")

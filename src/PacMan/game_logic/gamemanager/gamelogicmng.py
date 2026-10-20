@@ -13,13 +13,14 @@ class GameLogicManager:
         self.state: IGameState = PlayingGameState(self)
         self.collision_mng = CollisionManager()
         self.maze: Maze = self._init_maze(nr_maze_cells)
+        print(self.maze)
         self.character_manager: CharacterManager = CharacterManager(self.maze)
 
         # self.menu_manager:
         # self.time_manager:
         # self.player:
 
-    def update_logic(self, events: list, ticks: int) -> IGameState:
+    def update_logic(self, events: list | None, ticks: int) -> IGameState:
         self.state.update_logic(ticks)
         return self.state
 

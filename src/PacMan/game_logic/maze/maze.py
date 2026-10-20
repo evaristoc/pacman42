@@ -102,7 +102,7 @@ class Maze:
                 result += "\n"
             for j, _ in enumerate(range(self.width)):
                 if j < self.width - 1:
-                    result += str(self.grid[i][j]) + "   |    "
+                    result += str(self.grid[i][j]) + "|"
                 else:
                     result += str(self.grid[i][j])
         return result
