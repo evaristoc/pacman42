@@ -8,6 +8,13 @@ class WallState(Enum):
     OUTERWALL = 3
 
 
+class PelletState(Enum):
+    """Defines the possible states of a pellet on a tile."""
+    NOPELLET = 0
+    NORMALPELLET = 1
+    POWERPELLET = 2
+
+
 class TileBits(Enum):
     """Bitmasks used to determine wall states from a tilebyte.
 
@@ -23,6 +30,10 @@ class TileBits(Enum):
     WEST_OUTER = 128
 
 
+class TileError(Exception):
+    pass
+
+
 class Tile:
     """Represents a single cell in the maze.
 
@@ -36,10 +47,12 @@ class Tile:
         self.wall_south: WallState = WallState.OPEN
         self.wall_west: WallState = WallState.OPEN
         self.wall_east: WallState = WallState.OPEN
+        self.pellet_state: PelletState = PelletState.NORMALPELLET
         self.cell_position_x: int = x
         self.cell_position_y: int = y
 
         self._set_open_walls_from_tilebyte()
+        self.pellet_state = self._set_pellet_state_from_tilebyte()
 
     @property
     def tilebyte(self) -> int:
@@ -64,6 +77,20 @@ class Tile:
             raise ValueError("Passed tilebyte to Tile-class "
                              "that is not in range 0-255.")
         self._tilebyte = tilebyte
+
+    def get_open_walls(self) -> list[tuple[int, int]]:
+        open_walls = []
+        if self.wall_north == WallState.OPEN:
+            open_walls.append((0, -1))
+        if self.wall_east == WallState.OPEN:
+            open_walls.append((1, 0))
+        if self.wall_south == WallState.OPEN:
+            open_walls.append((0, 1))
+        if self.wall_west == WallState.OPEN:
+            open_walls.append((-1, 0))
+        print(f"this tile: x={self.cell_position_x}, y={self.cell_position_y}")
+        return open_walls
+
 
     def _set_open_walls_from_tilebyte(self) -> None:
         """Updates WallState properties based on the bits set in tilebyte.
@@ -95,9 +122,16 @@ class Tile:
         if self.tilebyte & TileBits.WEST_OUTER.value:
             self.wall_west = WallState.OUTERWALL
 
+    def _set_pellet_state_from_tilebyte(self) -> PelletState:
+        if self.tilebyte.bit_count() == 4:
+            print(self)
+            return PelletState.NOPELLET
+        temporary_tilebyte = self.tilebyte >> 4 & 0x0F
+        if temporary_tilebyte.bit_count() > 1:
+            return PelletState.POWERPELLET
+        return PelletState.NORMALPELLET
+
     def __repr__(self) -> str:
         """Returns a string representation of the wall states for each face."""
-        return (f"N: {self.wall_north.value}, E: {self.wall_east.value}, "
-                f"S: {self.wall_south.value}, W: {self.wall_west.value}"
-                f", location: (X={self.cell_position_x},"
-                f" Y={self.cell_position_y})")
+        return (f"N;{self.wall_north.value},E:{self.wall_east.value},"
+                f"S:{self.wall_south.value},W:{self.wall_west.value}")

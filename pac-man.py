@@ -33,7 +33,8 @@ if __name__ == "__main__":
     # python pac-man.py load_game --config configs/configs.json
     try:
         c = Controller()
-        fire.Fire(c.load_game)
+        # fire.Fire(c.load_game)
+        c.load_game("configs/configs.json")
     except Exception as err:
         logger.exception(err)
         console.print("FATAL: the following error ocurred:"

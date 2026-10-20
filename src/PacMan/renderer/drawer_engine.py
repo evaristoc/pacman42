@@ -3,7 +3,9 @@ from typing import cast
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidBoardConfig)
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
-from src.PacMan.game_logic.map.tile import Tile
+from src.PacMan.game_logic.maze.tile import Tile
+from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
+from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +64,21 @@ class DrawerEngine:
         #     self.__interior_cell_size - 2 * self.__padding
         # )
 
+    def init_maze(self) -> Maze:
+        try:
+            return MazeFactory(self._config.nb_cells).make_map()
+        except Exception:
+            logger.error("FATAL: maze couldnot be made with following params: "
+                         f"perfect True, seed 42, config: {self._config}")
+
+    def init_engine(self) -> PyGMiniLibXEmulator:
+        if self._config.size is not None:
+            return PyGMiniLibXEmulator(self._config.size,
+                                       self._config.size)
+        else:
+            logger.error("FATAL: height or width found to be None.")
+            raise SystemExit()
+    
     @property
     def tot_cell_size(self) -> tuple[int, str]:
         return (

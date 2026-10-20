@@ -1,4 +1,5 @@
-from characterABC import GameCharacter
+from src.PacMan.game_logic.characters.characterABC import GameCharacter
+from src.PacMan.game_logic.maze.maze import Maze
 
 
 class Pacman(GameCharacter):
@@ -11,14 +12,15 @@ class Pacman(GameCharacter):
     detection determines interactions with pellets, power-ups, and ghosts.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, maze: Maze) -> None:
         """Initialize Pac-Man at its spawn point.
 
         Sets up Pac-Man's initial position and prepares it for gameplay.
         """
         self.spawn_point = self._get_spawn_point()
+        self.maze: Maze = maze
 
-    def update(self, delta_time: float) -> None:
+    def update(self, delta_ticks: int) -> None:
         """Update Pac-Man's state each frame.
 
         Handles movement based on player input, updates animation frames,
@@ -29,7 +31,7 @@ class Pacman(GameCharacter):
         """
         pass
 
-    def get_position(self) -> tuple[float, float]:
+    def get_position(self) -> tuple[int, int]:
         """Get Pac-Man's current position in world space.
 
         Returns:

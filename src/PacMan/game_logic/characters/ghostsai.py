@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from .ghosts import GhostState
+from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.maze.tile import Tile
 import random
 
 
@@ -12,21 +13,15 @@ class AIStrategy(ABC):
     fleeing, and returning to spawn.
     """
 
-    def __init__(self, spawn_pos: tuple[float, float]):
-        """Initialize a ghost strategy with its spawn position.
-
-        Args:
-            spawn_pos: The (x, y) coordinates where the ghost respawns when
-            caught or when exiting frightened mode.
-        """
-        self.spawn_pos = spawn_pos
+    def __init__(self, spawn_pos: tuple[float, float], maze: Maze) -> None:
+        self.maze: Maze = maze
+        self.spawn_pos: tuple[float, float] = spawn_pos
 
     @abstractmethod
     def decide_move(
         self,
         ghost_pos: tuple[float, float],
         pacman_pos: tuple[float, float],
-        mode: GhostState
     ) -> tuple[float, float]:
         """Determine the next move for the ghost based on current game state.
 
@@ -45,7 +40,7 @@ class AIStrategy(ABC):
         """
         pass
 
-    def _return_to_spawn(
+    def return_to_spawn(
         self,
         ghost_pos: tuple[float, float]
     ) -> tuple[float, float]:
@@ -63,7 +58,7 @@ class AIStrategy(ABC):
         """
         return self._pathfind_to(ghost_pos, self.spawn_pos)
 
-    def _random_move(self) -> tuple[float, float]:
+    def random_move(self, ghost_pos: tuple[int, int]) -> tuple[int, int]:
         """Select a random direction for the ghost to move.
 
         Used when the ghost is in frightened mode, causing erratic,
@@ -74,8 +69,12 @@ class AIStrategy(ABC):
             A random direction vector: one of (1, 0), (-1, 0), (0, 1), or 
             (0, -1).
         """
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-        return random.choice(directions)
+        temp_tile = self.maze.grid[ghost_pos[1]][ghost_pos[0]]
+        if isinstance(temp_tile, Tile):
+            possible_directions = temp_tile.get_open_walls()
+        else:
+            raise ValueError("Getting a tile from the maze failed.")
+        return random.choice(possible_directions)
 
     def _pathfind_to(
         self,

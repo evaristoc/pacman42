@@ -18,6 +18,9 @@ _It should have a Backlog status_)
 ## Acceptance Criteria (should be in tune with Sprint Goals, but specific to DOMAIN):
 (_NOTE: use checkout - [ ]_)
 
+## Tasks:
+(_NOTE: use checkout - [ ], can be organized by numbered groups (eg. task group 1, task group 2, etc_)
+
 ## Technical _haves_
 
 #### Technical _must have_ (technical implementations that are required by the subject):
