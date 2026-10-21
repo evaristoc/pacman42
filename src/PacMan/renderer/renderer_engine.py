@@ -109,12 +109,12 @@ class PyGMiniLibXEmulator:
 
     def pygmlx_loop(self) -> None:
         clock: pygame.time.Clock = pygame.time.Clock()
-        self.running = True
-        while self.running:
+        running = True
+        while running:
             event: pygame.event.Event
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    running = False
             if self._loop_hook is not None:
                 result: int = self.mlx_loop_hook(self._loop_param)
                 if result == 0:

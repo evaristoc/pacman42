@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
@@ -24,6 +25,7 @@ class PacManApp:
         self.board: dict[PyGMLXImageEmulator] | None = None
         self.ghosts_imgs: dict[PyMLXPNGEmulator] | None = None
         self.pacman_imgs: dict[PyMLXPNGEmulator] | None = None
+        self.assets: dict[str, Any] | None = None
 
     def __str__(self) -> str:
         return "I am PacMan!"
@@ -55,7 +57,7 @@ class PacManApp:
                                                        "ghosts")
             self.pacman_imgs = assembler.register_imgs(rsized,
                                                        "pacman")
-
+            self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
         except Exception as err:
             logger.exception(err)
             raise SystemExit(1)
@@ -100,6 +102,4 @@ class PacManApp:
             14,
             self.drawer.corrected_size[0] + 7,
         )
-        self.pygmlx.pygmlx_loop()
-
-
+        # self.pygmlx.pygmlx_loop()
