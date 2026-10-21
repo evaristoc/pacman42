@@ -1,4 +1,3 @@
-from src.PacMan.game_logic.characters.characterABC import GameCharacter
 from src.PacMan.game_logic.characters.ghostsai import (AIStrategy,
                                                        BlinkyAI,
                                                        ClydeAI,
@@ -7,7 +6,6 @@ from src.PacMan.game_logic.characters.ghostsai import (AIStrategy,
 from src.PacMan.game_logic.characters.ghostsm import (IGhostState,
                                                       ChasingGhostState)
 from src.PacMan.game_logic.maze.maze import Maze
-from src.PacMan.game_logic.characters.pacman import Pacman
 
 from enum import Enum
 
@@ -25,10 +23,10 @@ class GhostError(Exception):
     pass
 
 
-class Ghost(GameCharacter):
+class Ghost:
     """A ghost entity that pursues Pac-Man using a specific AI strategy."""
 
-    def __init__(self, name: GhostName, maze: Maze, pacman: Pacman) -> None:
+    def __init__(self, name: GhostName, maze: Maze) -> None:
         """Initializes a Ghost with a name, default state, and AI strategy.
 
         Args:
@@ -41,25 +39,27 @@ class Ghost(GameCharacter):
         self.strategy: AIStrategy = self._get_ghost_ai(maze)
         self.position: tuple[int, int] = self.spawn_point
         self.state: IGhostState = ChasingGhostState(self.strategy)
-        self.pacman: Pacman = pacman
 
-    def update(self, *, delta_ticks: int) -> None:
+    def update(self, *, delta_ticks: int, pacman_position: tuple[int, int]) -> None:
         """Updates the ghost's position and state based on game time.
 
         Args:
             delta_time: The time elapsed since the last update frame.
         """
+        if pacman_position == self.position:
+            return
         move, new_state = self.state.update(
             delta_ticks=delta_ticks,
-            pacman_position=self.pacman.get_position(),
+            pacman_position=pacman_position,
             ghost_position=self.position
         )
         if new_state:
             self.state = new_state
         if move:
             self._process_move(move)
-        if self.name == GhostName.BLINKY:
             print(f"I'm {self.name.name}. My position is {self.position}. My move was{move}. My state is {self.state.__class__.__name__}")
+        if self.position == pacman_position:
+            print(f"GOTCHAA from {self.name.name}")
 
     def get_position(self) -> tuple[float, float]:
         """Returns the current coordinates of the ghost.
@@ -135,14 +135,15 @@ class Ghost(GameCharacter):
 
 
 class GhostManager:
-    def __init__(self, maze: Maze, pacman: Pacman) -> None:
+    def __init__(self, maze: Maze) -> None:
         self.ghosts = {
-            GhostName.BLINKY: Ghost(GhostName.BLINKY, maze, pacman),
-            GhostName.CLYDE: Ghost(GhostName.CLYDE, maze, pacman),
-            GhostName.INKY: Ghost(GhostName.INKY, maze, pacman),
-            GhostName.PINKY: Ghost(GhostName.PINKY, maze, pacman)
+            GhostName.BLINKY: Ghost(GhostName.BLINKY, maze),
+            GhostName.CLYDE: Ghost(GhostName.CLYDE, maze),
+            GhostName.INKY: Ghost(GhostName.INKY, maze),
+            GhostName.PINKY: Ghost(GhostName.PINKY, maze)
         }
 
     def update(self, delta_ticks: int, pacman_position: tuple[int, int]) -> None:
         for ghost in self.ghosts.values():
-            ghost.update(delta_ticks=delta_ticks)
+            ghost.update(delta_ticks=delta_ticks,
+                         pacman_position=pacman_position)

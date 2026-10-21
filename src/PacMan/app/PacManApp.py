@@ -101,3 +101,5 @@ class PacManApp:
             self.drawer.corrected_size[0] + 7,
         )
         self.pygmlx.pygmlx_loop()
+
+

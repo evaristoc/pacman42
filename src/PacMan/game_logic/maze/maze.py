@@ -111,11 +111,11 @@ class Maze:
 class MazeFactory:
     """Creates Map instances using a MazeGenerator."""
 
-    def __init__(self, nb_cells: int):
+    def __init__(self, *, nb_cells: int, seed: int = 42):
         """Initializes the maze generator used by this factory."""
         self.mazegen = MazeGenerator(size=(nb_cells, nb_cells),
                                      perfect=True,
-                                     seed=42)
+                                     seed=seed)
 
     def make_maze(self) -> Maze:
         """Generates a maze and wraps it in a Maze.

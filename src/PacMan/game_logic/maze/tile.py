@@ -88,9 +88,7 @@ class Tile:
             open_walls.append((0, 1))
         if self.wall_west == WallState.OPEN:
             open_walls.append((-1, 0))
-        print(f"this tile: x={self.cell_position_x}, y={self.cell_position_y}")
         return open_walls
-
 
     def _set_open_walls_from_tilebyte(self) -> None:
         """Updates WallState properties based on the bits set in tilebyte.

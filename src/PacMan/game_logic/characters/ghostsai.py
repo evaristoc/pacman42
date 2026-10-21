@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from src.PacMan.game_logic.maze.maze import Maze
 from src.PacMan.game_logic.maze.tile import Tile
+from src.PacMan.game_logic.characters.a_star import AStar_next_move
 import random
 
 
@@ -13,37 +14,22 @@ class AIStrategy(ABC):
     fleeing, and returning to spawn.
     """
 
-    def __init__(self, spawn_pos: tuple[float, float], maze: Maze) -> None:
+    def __init__(self, spawn_pos: tuple[int, int], maze: Maze) -> None:
         self.maze: Maze = maze
-        self.spawn_pos: tuple[float, float] = spawn_pos
+        self.spawn_pos: tuple[int, int] = spawn_pos
 
     @abstractmethod
     def decide_move(
-        self,
-        ghost_pos: tuple[float, float],
-        pacman_pos: tuple[float, float],
-    ) -> tuple[float, float]:
-        """Determine the next move for the ghost based on current game state.
-
-        Subclasses implement their unique behavior here. Movement decisions
-        should consider the ghost's current mode (chase, scatter, frightened)
-        and may use pathfinding, evasion, or random movement strategies.
-
-        Args:
-            ghost_pos: The ghost's current (x, y) position.
-            pacman_pos: Pac-Man's current (x, y) position.
-            mode: The ghost's current behavioral state (chase, scatter,
-            frightened, etc.).
-
-        Returns:
-            A direction vector (dx, dy) representing the next move.
-        """
+        self, *,
+        ghost_pos: tuple[int, int],
+        pacman_pos: tuple[int, int],
+    ) -> tuple[int, int]:
         pass
 
     def return_to_spawn(
         self,
-        ghost_pos: tuple[float, float]
-    ) -> tuple[float, float]:
+        ghost_pos: tuple[int, int]
+    ) -> tuple[int, int]:
         """Calculate the next move for the ghost to return to its spawn
         position.
 
@@ -78,9 +64,9 @@ class AIStrategy(ABC):
 
     def _pathfind_to(
         self,
-        start: tuple[float, float],
-        target: tuple[float, float]
-    ) -> tuple[float, float]:
+        start: tuple[int, int],
+        target: tuple[int, int]
+    ) -> tuple[int, int]:
         """Calculate the next move toward a target position using pathfinding.
 
         Uses A* or BFS to find the shortest path, accounting for maze walls and
@@ -95,22 +81,31 @@ class AIStrategy(ABC):
             A direction vector (dx, dy) representing the first step of the 
             path.
         """
-        # Generic pathfinding logic
+
+
         return (0, 0)  # TODO
 
 
 class BlinkyAI(AIStrategy):
     """Chase directly at Pacman."""
 
-    def decide_move(self, ghost_pos, pacman_pos, mode):
-        pass
+    def decide_move(
+        self, *,
+        ghost_pos: tuple[int, int],
+        pacman_pos: tuple[int, int],
+    ) -> tuple[int, int]:
+        return AStar_next_move(position=ghost_pos, target=pacman_pos, maze=self.maze)
 
 
 class PinkyAI(AIStrategy):
     """Aim 4 tiles ahead of Pacman."""
 
-    def decide_move(self, ghost_pos, pacman_pos, mode):
-        pass
+    def decide_move(
+        self, *,
+        ghost_pos: tuple[int, int],
+        pacman_pos: tuple[int, int],
+    ) -> tuple[int, int]:
+        return AStar_next_move(position=ghost_pos, target=pacman_pos, maze=self.maze)
 
     def _aim_ahead(self, pacman_pos, tiles: int):
         """Predict where Pacman will be."""
@@ -120,7 +115,12 @@ class PinkyAI(AIStrategy):
 class InkyAI(AIStrategy):
     """Complex: use Blinky's position to triangulate."""
 
-    def decide_move(self, ghost_pos, pacman_pos, mode):
+    def decide_move(
+        self, *,
+        ghost_pos: tuple[int, int],
+        pacman_pos: tuple[int, int],
+    ) -> tuple[int, int]:
+        return AStar_next_move(position=ghost_pos, target=pacman_pos, maze=self.maze)
         pass
 
     def _triangulate(self, pacman_pos, blinky_pos):
@@ -131,8 +131,12 @@ class InkyAI(AIStrategy):
 class ClydeAI(AIStrategy):
     """Chase if far, else scatter."""
 
-    def decide_move(self, ghost_pos, pacman_pos, mode):
-        pass
+    def decide_move(
+        self, *,
+        ghost_pos: tuple[int, int],
+        pacman_pos: tuple[int, int],
+    ) -> tuple[int, int]:
+        return AStar_next_move(position=ghost_pos, target=pacman_pos, maze=self.maze)
 
     def _distance(self, pos1, pos2):
         pass
