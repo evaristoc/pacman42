@@ -57,7 +57,7 @@ class Ghost:
             self.state = new_state
         if move:
             self._process_move(move)
-        print(f"I'm {self.name.name}. My position is {self.position}. My move was{move}. My state is {self.state.__class__.__name__}")
+            print(f"I'm {self.name.name}. My position is {self.position}. My move was{move}. My state is {self.state.__class__.__name__}")
         if self.position == pacman_position:
             print(f"GOTCHAA from {self.name.name}")
 

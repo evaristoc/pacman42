@@ -1,19 +1,23 @@
 from enum import Enum, auto
 
 
-class MainMenuEvents(Enum):
+class IEventEnums(Enum):
+    pass
+
+
+class MainMenuEvents(IEventEnums):
     START = auto()
     SETTINGS = auto()
     HIGHSCORES = auto()
     QUIT = auto()
 
 
-class PauseMenuEvents(Enum):
+class PauseMenuEvents(IEventEnums):
     CONTINUE = auto()
     QUIT = auto()
 
 
-class InGameEvents(Enum):
+class InGameEvents(IEventEnums):
     PACMAN_NORTH = auto()
     PACMAN_EAST = auto()
     PACMAN_SOUTH = auto()
@@ -21,6 +25,6 @@ class InGameEvents(Enum):
     PAUSE = auto()
 
 
-class HighScoreMenuEvents(Enum):
+class HighScoreMenuEvents(IEventEnums):
     REGISTER = auto()
     CANCEL = auto()
