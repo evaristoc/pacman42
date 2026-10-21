@@ -7,9 +7,17 @@ class IEventEnums(Enum):
 
 class MainMenuEvents(IEventEnums):
     START = auto()
-    SETTINGS = auto()
+    CHEATING = auto()
     HIGHSCORES = auto()
     QUIT = auto()
+
+
+class CheatingMenuEvents(IEventEnums):
+    IMPOTENTGHOSTS = auto()
+
+
+class HighScoreMenuEvents(IEventEnums):
+    RETURN = auto()
 
 
 class PauseMenuEvents(IEventEnums):
@@ -25,6 +33,6 @@ class InGameEvents(IEventEnums):
     PAUSE = auto()
 
 
-class HighScoreMenuEvents(IEventEnums):
+class HighScoreRegisterEvents(IEventEnums):
     REGISTER = auto()
     CANCEL = auto()
