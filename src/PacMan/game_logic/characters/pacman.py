@@ -1,8 +1,7 @@
-from src.PacMan.game_logic.characters.characterABC import GameCharacter
 from src.PacMan.game_logic.maze.maze import Maze
 
 
-class Pacman(GameCharacter):
+class Pacman:
     """Represents Pac-Man, the player-controlled character in the game.
 
     Pacman is responsible for tracking its own position and handling movement
@@ -38,7 +37,7 @@ class Pacman(GameCharacter):
             A tuple of (x, y) coordinates representing Pac-Man's current
             location.
         """
-        return (0, 0)  # TODO
+        return (1, 1)  # TODO
 
     def _get_spawn_point(self) -> tuple[float, float]:
         """Get Pac-Man's spawn point in world space.

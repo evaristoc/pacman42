@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from src.PacMan.game_logic.characters.ghostsai import AIStrategy
 import time
 from typing import Union
+
+CHASING_GHOST_TICK_SPEED: int = 10
 FRIGHTENED_GHOST_TICK_SPEED: int = 10
 
 
@@ -27,12 +29,20 @@ class IGhostState(ABC):
 
 
 class ChasingGhostState(IGhostState):
+    def __init__(self, strategy: AIStrategy) -> None:
+        super().__init__(strategy)
+        self.tick_speed: int = CHASING_GHOST_TICK_SPEED
+
     def update(self, *,
                delta_ticks: int,
                pacman_position: tuple[int, int],
                ghost_position: tuple[int, int]
                ) -> tuple[tuple[int, int] | None, Union[IGhostState, None]]:
-        return ((0, 0), self)
+        move = None
+        if delta_ticks % self.tick_speed == 0:
+            move = self.strategy.decide_move(ghost_pos=ghost_position, 
+                                             pacman_pos=pacman_position)
+        return move, None
 
     def big_pellet_activated(self) -> IGhostState:
         return FrightenedGhostState(self.strategy)

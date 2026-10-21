@@ -6,7 +6,7 @@ from src.PacMan.game_logic.maze.maze import Maze
 class CharacterManager:
     def __init__(self, maze: Maze) -> None:
         self.pacman: Pacman = Pacman(maze)
-        self.ghost_mng: GhostManager = GhostManager(maze, self.pacman)
+        self.ghost_mng: GhostManager = GhostManager(maze)
         
 
     def update(self, delta_ticks: int) -> None:
