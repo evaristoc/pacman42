@@ -5,6 +5,7 @@ from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
 from src.PacMan.game_logic.characters.charactermng import CharacterManager
 from src.PacMan.game_logic.characters.ghosts import GhostName
 from src.PacMan.validation_contracts.event_enums import IEventEnums
+from typing import Any
 import time
 
 
@@ -21,10 +22,12 @@ class GameLogicManager:
         # self.player:
 
     def update_logic(self,
-                     events: list[dict[IEventEnums, list | None]] | None
+                     events: dict[IEventEnums, dict[str, Any] | None] | None
                      ) -> IGameState:
         self.ticks += 1
-        self.state.update_logic(events, self.ticks)
+        new_state = self.state.update_logic(events, self.ticks)
+        if new_state:
+            self.state = new_state
         return self.state
 
     @staticmethod
@@ -34,10 +37,24 @@ class GameLogicManager:
 
 if __name__ == '__main__':
     from src.PacMan.validation_contracts.event_enums import InGameEvents
-    gamelogicmanager = GameLogicManager(6)
-    steps = 100
+    gamelogicmanager = GameLogicManager(15)
+    steps = 300
+    event: dict[IEventEnums, dict[str, Any] | None] | None = None
     while steps > 0:
-        gamelogicmanager.update_logic(None)
-        if steps == 60:
-            gamelogicmanager.update_logic([{InGameEvents.PAUSE: None}])
+        gamelogicmanager.update_logic(event)
+        if steps % 50 == 0:
+            new_move = input()
+            if new_move == 'n':
+                event = {InGameEvents.PACMAN_NORTH: None}
+            elif new_move == 'e':
+                event = {InGameEvents.PACMAN_EAST: None}
+            elif new_move == 's':
+                event = {InGameEvents.PACMAN_SOUTH: None}
+            elif new_move == 'w':
+                event = {InGameEvents.PACMAN_WEST: None}
+            else:
+                event = None
+
+        if steps == 10:
+            gamelogicmanager.update_logic({InGameEvents.PAUSE: None})
         steps -= 1

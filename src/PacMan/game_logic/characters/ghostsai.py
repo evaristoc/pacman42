@@ -82,7 +82,6 @@ class AIStrategy(ABC):
             path.
         """
 
-
         return (0, 0)  # TODO
 
 

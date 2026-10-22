@@ -38,6 +38,7 @@ class Ghost:
         self.spawn_point: tuple[int, int] = self._get_spawn_point()
         self.strategy: AIStrategy = self._get_ghost_ai(maze)
         self.position: tuple[int, int] = self.spawn_point
+        self.old_position: tuple[int, int] = self.position
         self.state: IGhostState = ChasingGhostState(self.strategy)
 
     def update(self, *, delta_ticks: int, pacman_position: tuple[int, int]) -> None:
@@ -57,7 +58,7 @@ class Ghost:
             self.state = new_state
         if move:
             self._process_move(move)
-            print(f"I'm {self.name.name}. My position is {self.position}. My move was{move}. My state is {self.state.__class__.__name__}")
+            print(f"{delta_ticks}: I'm {self.name.name}. My position is {self.position}. My previous position was {self.old_position}. My move was{move}. My state is {self.state.__class__.__name__}")
         if self.position == pacman_position:
             print(f"GOTCHAA from {self.name.name}")
 
@@ -116,13 +117,13 @@ class Ghost:
         """  # TODO
         match self.name:
             case GhostName.BLINKY:
-                return (1, 1)
+                return (0, 0)
             case GhostName.CLYDE:
-                return (2, 2)
+                return (self.maze.width - 1, 0)
             case GhostName.INKY:
-                return (3, 3)
+                return (self.maze.width - 1,  self.maze.height - 1)
             case GhostName.PINKY:
-                return (4, 4)
+                return (0, self.maze.height - 1)
             case _:
                 raise GhostError("Stored invalid name in Ghost-object, "
                                  "so can't determine valid AIStrategy.")
@@ -131,6 +132,7 @@ class Ghost:
         dx, dy = move
         old_x, old_y = self.position
         new_position = (old_x + dx, old_y + dy)
+        self.old_position = self.position
         self.position = new_position
 
 
@@ -143,7 +145,9 @@ class GhostManager:
             GhostName.PINKY: Ghost(GhostName.PINKY, maze)
         }
 
-    def update(self, delta_ticks: int, pacman_position: tuple[int, int]) -> None:
+    def update(self, delta_ticks: int, 
+               pacman_position: tuple[int, int]
+               ) -> None:
         for ghost in self.ghosts.values():
             ghost.update(delta_ticks=delta_ticks,
                          pacman_position=pacman_position)
