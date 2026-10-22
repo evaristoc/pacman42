@@ -1,5 +1,7 @@
 from src.PacMan.game_logic.maze.maze import Maze
 
+PACMAN_TICK_SPEED = 10
+
 
 class Pacman:
     """Represents Pac-Man, the player-controlled character in the game.
@@ -16,37 +18,61 @@ class Pacman:
 
         Sets up Pac-Man's initial position and prepares it for gameplay.
         """
-        self.spawn_point = self._get_spawn_point()
+        self.direction = (-1, 0)
+        self.speed = PACMAN_TICK_SPEED
         self.maze: Maze = maze
+        self.spawn_point = self._get_spawn_point()
+        self.position = self.spawn_point
+        self.old_position = self.position
 
-    def update(self, delta_ticks: int) -> None:
-        """Update Pac-Man's state each frame.
+    @property
+    def direction(self) -> tuple[int, int]:
+        return self._direction
 
-        Handles movement based on player input, updates animation frames,
-        manages power-up timers, and checks for collisions with game objects.
+    @direction.setter
+    def direction(self,
+                  new_direction: tuple[int, int]
+                  ) -> None:
+        if not isinstance(new_direction, tuple):
+            raise ValueError("Direction must be a tuple")
+        if len(new_direction) != 2:
+            raise ValueError("Direction tuple must have exactly 2 elements")
+        if not all(isinstance(x, int) for x in new_direction):
+            raise ValueError("Direction tuple elements must be integers")
+        if not all((x == 1 or x == -1 or x == 0) for x in new_direction):
+            raise ValueError("Direction elements can only be 1 or -1.")
+        if new_direction[0] != 0 and new_direction[1] != 0:
+            raise ValueError("One of either direction elements"
+                             " needs to be 0 always")
+        if new_direction == (0, 0):
+            raise ValueError("Direction cannot be (0, 0)")
+        self._direction = new_direction
 
-        Args:
-            delta_time: The time elapsed since the last frame in seconds.
-        """
-        pass
+    def update(self, *,
+               new_direction: tuple[int, int] | None,
+               delta_ticks: int) -> None:
+        if new_direction:
+            self.direction = new_direction
+        if delta_ticks % self.speed == 0:
+            self.old_position = self.position
+            self._process_move(self._direction)
+            print(f"{delta_ticks}: I'm {self.__class__.__name__}. My position is {self.position}. My previous position was {self.old_position}. My attempted move was{self.direction}.")
 
     def get_position(self) -> tuple[int, int]:
-        """Get Pac-Man's current position in world space.
+        return self.position
 
-        Returns:
-            A tuple of (x, y) coordinates representing Pac-Man's current
-            location.
-        """
-        return (1, 1)  # TODO
+    def _get_spawn_point(self) -> tuple[int, int]:
+        x_coordinate = (self.maze.width - 1) // 2
+        y_coordinate = (self.maze.height - 1) - (self.maze.height // 5)
+        return (x_coordinate, y_coordinate)
 
-    def _get_spawn_point(self) -> tuple[float, float]:
-        """Get Pac-Man's spawn point in world space.
-
-        Returns the position where Pac-Man starts each game and where it
-        respawns after losing a life.
-
-        Returns:
-            A tuple of (x, y) coordinates representing the spawn point
-            location.
-        """
-        return (0, 0)  # TODO
+    def _process_move(self, move: tuple[int, int]) -> None:
+        temp_tile = self.maze.return_tile_from_position(position=self.position)
+        valid_moves = temp_tile.get_open_walls()
+        if move in valid_moves:
+            dx, dy = move
+            old_x, old_y = self.position
+            new_position = (old_x + dx, old_y + dy)
+            self.position = new_position
+        else:
+            return

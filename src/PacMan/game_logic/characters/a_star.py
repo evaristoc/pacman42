@@ -152,19 +152,3 @@ def _next_move(optimal_path_node: AStarNode) -> tuple[int, int]:
     else:
         raise ValueError(
             "Node with steps == 1 doesn't have a move.")
-
-
-def test() -> None:
-    from random import randint
-    from src.PacMan.game_logic.maze.maze import MazeFactory
-    maze = MazeFactory(nb_cells=10, seed=randint(1, 100)).make_maze()
-    print(maze)
-    position = (0, 0)
-    target = (5, 5)
-    temp_move = None
-    counter = 0
-    while position != target and counter < 20:
-        temp_move = AStar_next_move(position, target, maze)
-        position = AStarNode._process_move(temp_move, position)
-        print(position)
-        counter
