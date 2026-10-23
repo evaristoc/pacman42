@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from enum import IntEnum
 from typing import Any, Callable, TypeAlias
-
+from src.PacMan.app.observer import Observer
 
 TLoopHookCB: TypeAlias = Callable[[Any], int]
 PixelBuffer: TypeAlias = np.ndarray
@@ -107,7 +107,7 @@ class PyGMiniLibXEmulator:
         self._loop_hook = funct_ptr
         self._loop_param = param
 
-    def pygmlx_loop(self) -> None:
+    def pygmlx_loop(self, observer: Observer) -> None:
         clock: pygame.time.Clock = pygame.time.Clock()
         running = True
         while running:
@@ -115,6 +115,7 @@ class PyGMiniLibXEmulator:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                observer.actions(event=event)
             if self._loop_hook is not None:
                 result: int = self.mlx_loop_hook(self._loop_param)
                 if result == 0:
