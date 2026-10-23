@@ -11,6 +11,7 @@ class Player:
     name: str
     score: int = 0
     lives: int = 3
+    level: int = 0
 
     def to_dict(self) -> dict:
         """Serialize player data to a dictionary for storage.

@@ -91,8 +91,8 @@ class Maze:
         return grid
 
     def return_tile_from_position(self, *,
-                                   position: tuple[int, int]
-                                   ) -> Tile:
+                                  position: tuple[int, int]
+                                  ) -> Tile:
         temp_tile = self.grid[position[1]][position[0]]
         if temp_tile:
             return temp_tile
