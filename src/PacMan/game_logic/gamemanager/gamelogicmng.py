@@ -1,6 +1,6 @@
 from src.PacMan.game_logic.collision import CollisionManager
 from src.PacMan.game_logic.gamemanager.game_sm import (IGameState,
-                                                       PlayingGameState)
+                                                       InGameState)
 from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
 from src.PacMan.game_logic.characters.charactermng import CharacterManager
 from src.PacMan.game_logic.characters.ghosts import GhostName
@@ -11,7 +11,7 @@ import time
 
 class GameLogicManager:
     def __init__(self, nr_maze_cells: int) -> None:
-        self.state: IGameState = PlayingGameState(self)
+        self.state: IGameState = InGameState(self)
         self.collision_mng = CollisionManager()
         self.maze: Maze = self._init_maze(nr_maze_cells)
         self.character_manager: CharacterManager = CharacterManager(self.maze)
