@@ -3,7 +3,7 @@ from src.PacMan.game_logic.characters.ghostsai import AIStrategy
 import time
 from typing import Union
 
-CHASING_GHOST_TICK_SPEED: int = 10
+CHASING_GHOST_TICK_SPEED: int = 1
 FRIGHTENED_GHOST_TICK_SPEED: int = 10
 
 

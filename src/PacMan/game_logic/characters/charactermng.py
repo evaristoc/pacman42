@@ -8,6 +8,10 @@ class CharacterManager:
         self.pacman: Pacman = Pacman(maze)
         self.ghost_mng: GhostManager = GhostManager(maze)
 
-    def update(self, delta_ticks: int) -> None:
-        # self.pacman.update()
+    def update(self, *,
+               delta_ticks: int,
+               pacman_move: tuple[int, int] | None = None
+               ) -> None:
+        self.pacman.update(delta_ticks=delta_ticks,
+                           new_direction=pacman_move)
         self.ghost_mng.update(delta_ticks, self.pacman.get_position())

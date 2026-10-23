@@ -90,6 +90,15 @@ class Maze:
                 grid[i][j] = Tile(self.outerbound_maze[i][j], j, i)
         return grid
 
+    def return_tile_from_position(self, *,
+                                  position: tuple[int, int]
+                                  ) -> Tile:
+        temp_tile = self.grid[position[1]][position[0]]
+        if temp_tile:
+            return temp_tile
+        else:
+            raise ValueError(f"No tile at position: {position}")
+
     def __repr__(self) -> str:
         """Returns a printable, row-by-row representation of the tile grid.
 
