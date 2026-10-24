@@ -1,5 +1,5 @@
-import os
 import logging
+from collections import deque
 from pathlib import Path
 from PIL import Image
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
@@ -68,24 +68,36 @@ class RendererAssembler:
         _assets = self.cwd.parent / 'assets' / character
         _dict: dict[str, PyMLXPNGEmulator] = {}
         try:
-            for r, d, files in os.walk(_assets):
-                for file in files:
-                    img = Image.open(_assets / file)
+            # this will sort the paths (they are Path types now)
+            sorted_files = sorted(_assets.rglob('*'))
+            for file in sorted_files:
+                if not file.is_file():
+                    continue
+                with Image.open(_assets / file) as img:
                     org_w, org_h = img.size
-                    fname = Path(file).stem
-                    print(fname, org_w)
-                    if fname not in _dict:
-                        _dict[fname] = PyMLXPNGEmulator(
+                fname = Path(file).stem
+                print(fname, org_w)
+                emu = PyMLXPNGEmulator(
                             org_w,
                             org_h
                         )
-                        _dict[fname].pygput_from_png(
+                emu.pygput_from_png(
                             str(_assets / file)
                         )
-                        _dict[fname].pygll_resize(
+                emu.pygll_resize(
                             rsize,
                             rsize
                         )
+                if "pacman" in file.parts:
+                    if "pacman" not in _dict:
+                        _dict["pacman"]["moves"] = deque([])
+                        _dict["pacman"]["still"] = None
+                    if fname == "1":
+                        _dict["pacman"]["still"] = emu
+                    _dict["pacman"]["moves"].append(emu)
+                else:
+                    if fname not in _dict:
+                        _dict[fname] = emu
             return _dict
         except Exception as err:
             logger.exception(f"FATAL: we could not load images : {err}")
