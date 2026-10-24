@@ -55,11 +55,11 @@ class PacManApp:
             self.maze = self.glm.maze
             self.board_img = assembler.init_board(size)
             rsized = self.drawer.resized
-            self.ghosts_imgs = assembler.register_imgs(rsized,
-                                                       "ghosts")
-            self.pacman_imgs = assembler.register_imgs(rsized,
-                                                       "pacman")
-            self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
+            self.ghosts_imgs = assembler.upload_imgs("ghosts",
+                                                     rsized)
+            self.pacman_imgs = assembler.upload_imgs("pacman",
+                                                     rsized)
+            # self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
         except Exception as err:
             logger.exception(err)
             raise SystemExit(1)
@@ -71,7 +71,7 @@ class PacManApp:
         # if self.drawer is None or self.pygmlx is None or self.maze is None or self.board_img is None or self.ghosts_imgs is None or self.pacman_imgs is None:
         #     logger.exception("FATAL: no assembler was defined.")
         #     raise SystemExit(1)
-        self.drawer.draw(self.board_img["board"],
+        self.drawer.draw(self.board_img,
                          self.maze.grid,
                          None)
         # print(
@@ -80,7 +80,7 @@ class PacManApp:
         #     self.drawer.margin)
         # board_margin = int(self.drawer.corrected_size[1] / 2)
         self.pygmlx.pygmlx_put_image_to_window(
-            self.board_img["board"],
+            self.board_img,
             self.drawer.margin / 2,
             self.drawer.margin / 2
             )

@@ -33,23 +33,38 @@ class PlayingAction:
         print(f"this is {self.__class__.__name__}")
         print(obs._glm.character_manager.pacman.position)
         print(obs._glm.character_manager.ghost_mng.ghosts)
+        # INTERIOR CELLS ###
+        # -- pacman --
+        obs.drawer.draw_cell_interior(
+            obs._registry["board"],
+            obs._glm.character_manager.pacman.old_position,
+            0x000
+        )
+        # -- ghosts --
+        for g in obs._glm.character_manager.ghost_mng.ghosts:
+            obs.drawer.draw_cell_interior(
+                obs._registry["board"],
+                obs._glm.character_manager.ghost_mng.ghosts[g].old_position,
+                0x000
+            )
         obs._mlx.pygmlx_put_image_to_window(
-            obs._registry["pacman"]["1"],
+            obs._registry["board"],
+            obs.drawer.margin / 2,
+            obs.drawer.margin / 2
+        )            
+        # PACMAN ###
+        pm = obs._registry["pacman"]["moves"].pop()
+        obs._mlx.pygmlx_put_image_to_window(
+            pm,
             obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
             obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[1])
         )
+        obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
+
+        # GHOSTS ###
         for g in obs._glm.character_manager.ghost_mng.ghosts:
-            n = ""
-            if g.name == "BLINKY":
-                n = "orange"
-            if g.name == "CLYDE":
-                n = "blue"
-            if g.name == "INKY":
-                n = "red"
-            if g.name == "PINKY":
-                n = "pink"
             obs._mlx.pygmlx_put_image_to_window(
-                obs._registry["ghosts"][n],
+                obs._registry["ghosts"][g.name],
                 obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
                 obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1])
             )

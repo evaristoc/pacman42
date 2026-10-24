@@ -48,19 +48,17 @@ class RendererAssembler:
         # return PyGMiniLibXEmulator(w,
         #                            w + w / BOTTOMPARTSCREEN)
 
-    def init_board(self, w: int) -> dict[str, PyGMLXImageEmulator]:
+    def init_board(self, w: int) -> PyGMLXImageEmulator:
         # maze
-        return {
-            "board":
-                PyMLXPNGEmulator(
+        return PyMLXPNGEmulator(
                     w,
                     w
-                )}
+                )
 
-    def register_imgs(
+    def upload_imgs(
             self,
-            rsize: int,
-            character: str) -> dict[str, PyMLXPNGEmulator]:
+            character: str,
+            rsize: int | None = None) -> dict[str, PyMLXPNGEmulator]:
         # assume ref size cannot be negative, but it could...
         # if self.ref_w == REFWITHNOTSETVALUE:
         #     logger.exception("FATAL: we could not set ref size.")
@@ -84,17 +82,20 @@ class RendererAssembler:
                 emu.pygput_from_png(
                             str(_assets / file)
                         )
-                emu.pygll_resize(
-                            rsize,
-                            rsize
-                        )
+                if rsize:
+                    emu.pygll_resize(
+                                rsize,
+                                rsize
+                            )
                 if "pacman" in file.parts:
-                    if "pacman" not in _dict:
-                        _dict["pacman"]["moves"] = deque([])
-                        _dict["pacman"]["still"] = None
+                    if "moves" not in _dict:
+                        _dict = {
+                            "moves": deque([]),
+                            "still": None
+                        }
                     if fname == "1":
-                        _dict["pacman"]["still"] = emu
-                    _dict["pacman"]["moves"].append(emu)
+                        _dict["still"] = emu
+                    _dict["moves"].append(emu)
                 else:
                     if fname not in _dict:
                         _dict[fname] = emu
