@@ -79,11 +79,11 @@ class PacManApp:
         #     self.drawer.corrected_size[1],
         #     self.drawer.margin)
         # board_margin = int(self.drawer.corrected_size[1] / 2)
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     self.board_img["board"],
-        #     self.drawer.margin / 2,
-        #     self.drawer.margin / 2
-        #     )
+        self.pygmlx.pygmlx_put_image_to_window(
+            self.board_img["board"],
+            self.drawer.margin / 2,
+            self.drawer.margin / 2
+            )
         # print(self.ghosts_imgs)
         # for i, g in enumerate(self.ghosts_imgs):
         #     self.pygmlx.pygmlx_put_image_to_window(
@@ -107,7 +107,7 @@ class PacManApp:
         #     14,
         #     self.drawer.corrected_size[0] + 7,
         # )
-        observer = Observer(self.glm, self.drawer)
+        observer = Observer(self.pygmlx, self.glm, self.drawer)
         observer.register_assets("ghosts", self.ghosts_imgs)
         observer.register_assets("pacman", self.pacman_imgs)
         observer.register_assets("board", self.board_img)

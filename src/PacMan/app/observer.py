@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pygame import Event
 from typing import TypeVar, Type, Any, Protocol, TypeAlias, TYPE_CHECKING
 from src.PacMan.validation_contracts.event_enums import (
@@ -9,19 +10,49 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState)
 if TYPE_CHECKING:  # only required for parameter type assignment 
     from src.PacMan.renderer.drawer_engine import DrawerEngine
+    from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
 T = TypeVar("T", bound="IAction")
 EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 
 
 class IAction(Protocol):
-    def actions(self) -> None:
+    def actions(self,
+                assets,
+                mlx: PyGMiniLibXEmulator,
+                drawer: DrawerEngine,
+                char_mng) -> None:
         ...
 
 
 class PlayingAction:
-    def action(self) -> None:
+    def action(
+            self,
+            obs: "Observer"
+            ) -> None:
         print(f"this is {self.__class__.__name__}")
+        print(obs._glm.character_manager.pacman.position)
+        print(obs._glm.character_manager.ghost_mng.ghosts)
+        obs._mlx.pygmlx_put_image_to_window(
+            obs._registry["pacman"]["1"],
+            obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
+            obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[1])
+        )
+        for g in obs._glm.character_manager.ghost_mng.ghosts:
+            n = ""
+            if g.name == "BLINKY":
+                n = "orange"
+            if g.name == "CLYDE":
+                n = "blue"
+            if g.name == "INKY":
+                n = "red"
+            if g.name == "PINKY":
+                n = "pink"
+            obs._mlx.pygmlx_put_image_to_window(
+                obs._registry["ghosts"][n],
+                obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
+                obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1])
+            )
 
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
@@ -31,9 +62,11 @@ HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
 
 class Observer:
     def __init__(self,
+                 mlx: PyGMiniLibXEmulator,
                  glm: GameLogicManager,
                  drawer: "DrawerEngine") -> None:
         self._registry: dict[str, Any] | None = None
+        self._mlx = mlx
         self._glm = glm
         self.drawer = drawer
 
@@ -48,7 +81,7 @@ class Observer:
         eventmsg = self._translate_event(event)
         self._glm.update_logic(eventmsg)
         if isinstance(self._glm.state, IGameState):
-            self._get_action(state=self._glm.state)().action()
+            self.action = self._get_action(state=self._glm.state)().action(self)
 
     def _get_action(
             self,
