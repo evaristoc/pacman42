@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Union
 from src.PacMan.validation_contracts.event_enums import (IEventEnums,
                                                          InGameEvents)
-from src.PacMan.game_logic.time.time import TimeManager
+from src.PacMan.game_logic.ingame.time.time import TimeManager
 from typing import Any
 if TYPE_CHECKING:
     from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager

@@ -10,7 +10,7 @@ from src.PacMan.renderer.renderer_engine import (
                                 PyGMLXTextEmulator)
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
-from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 logger = logging.getLogger(__name__)
 

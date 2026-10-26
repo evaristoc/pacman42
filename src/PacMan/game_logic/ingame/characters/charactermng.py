@@ -1,6 +1,6 @@
-from src.PacMan.game_logic.characters.ghosts import GhostManager
-from src.PacMan.game_logic.characters.pacman import Pacman
-from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager
+from src.PacMan.game_logic.ingame.characters.pacman import Pacman
+from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 
 class CharacterManager:

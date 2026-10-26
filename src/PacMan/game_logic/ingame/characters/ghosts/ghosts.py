@@ -1,11 +1,11 @@
-from src.PacMan.game_logic.characters.ghostsai import (AIStrategy,
-                                                       BlinkyAI,
-                                                       ClydeAI,
-                                                       PinkyAI,
-                                                       InkyAI)
-from src.PacMan.game_logic.characters.ghostsm import (IGhostState,
-                                                      ChasingGhostState)
-from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import (AIStrategy,
+                                                                     BlinkyAI,
+                                                                     ClydeAI,
+                                                                     PinkyAI,
+                                                                     InkyAI)
+from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
+                                                                    ChasingGhostState)
+from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 from enum import Enum
 
@@ -145,7 +145,7 @@ class GhostManager:
             GhostName.PINKY: Ghost(GhostName.PINKY, maze)
         }
 
-    def update(self, delta_ticks: int, 
+    def update(self, delta_ticks: int,
                pacman_position: tuple[int, int]
                ) -> None:
         for ghost in self.ghosts.values():

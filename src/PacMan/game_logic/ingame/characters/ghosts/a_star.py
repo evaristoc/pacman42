@@ -1,5 +1,5 @@
-from src.PacMan.game_logic.maze.maze import Maze
-from src.PacMan.game_logic.maze.tile import Tile
+from src.PacMan.game_logic.ingame.maze.maze import Maze
+from src.PacMan.game_logic.ingame.maze.tile import Tile
 from typing import Union
 import heapq
 

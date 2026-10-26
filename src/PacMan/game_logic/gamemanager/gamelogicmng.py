@@ -1,11 +1,11 @@
-from src.PacMan.game_logic.collision import CollisionManager
+from src.PacMan.game_logic.ingame.collision import CollisionManager
 from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
-from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
-from src.PacMan.game_logic.characters.charactermng import CharacterManager
+from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory
+from src.PacMan.game_logic.ingame.characters.charactermng import CharacterManager
 from src.PacMan.validation_contracts.event_enums import (IEventEnums,
                                                          InGameEvents)
 from src.PacMan.game_logic.player import Player
-from src.PacMan.game_logic.time.time import TimeManager
+from src.PacMan.game_logic.ingame.time.time import TimeManager
 from typing import Any
 # for testing
 from src.PacMan.game_logic.mock_observer import IObserver

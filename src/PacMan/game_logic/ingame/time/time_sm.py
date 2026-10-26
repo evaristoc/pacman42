@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
-    from src.PacMan.game_logic.time.time import TimeManager
+    from src.PacMan.game_logic.ingame.time.time import TimeManager
 
 COUNTDOWN_TIME = 3
 LEVEL_TIME = 90

@@ -1,4 +1,4 @@
-from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 PACMAN_TICK_SPEED = 10
 

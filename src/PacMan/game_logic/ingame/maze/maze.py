@@ -1,5 +1,5 @@
 from mazegenerator import MazeGenerator
-from src.PacMan.game_logic.maze.tile import Tile, TileBits
+from src.PacMan.game_logic.ingame.maze.tile import Tile, TileBits
 from typing import Union
 
 

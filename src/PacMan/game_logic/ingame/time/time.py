@@ -1,4 +1,4 @@
-from src.PacMan.game_logic.time.time_sm import ITimeState, CountDownState
+from src.PacMan.game_logic.ingame.time.time_sm import ITimeState, CountDownState
 from src.PacMan.game_logic.mock_observer import IObserver
 from typing import Any
 import time

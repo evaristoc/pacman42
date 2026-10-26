@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.PacMan.game_logic.characters.ghostsai import AIStrategy
+from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import AIStrategy
 import time
 from typing import Union
 
