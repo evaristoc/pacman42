@@ -89,7 +89,7 @@ def AStar_next_move(
 def _find_path(position: tuple[int, int],
                target: tuple[int, int],
                maze: Maze) -> AStarNode | None:
-    visited = set()
+    visited: set[tuple[int, int]] = set()
     steps = 0
     start_node = AStarNode(position=position,
                            steps=steps,

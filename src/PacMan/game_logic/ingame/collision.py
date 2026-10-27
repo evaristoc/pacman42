@@ -59,7 +59,7 @@ class CollisionManager:
     def check_pacman_ghost_collisions(self) -> tuple[bool, bool | None]:
         game_over = False
         level_won = None
-        pacman_position = self.pacman.position.get_position_from_tile()
+        pacman_position = self.pacman.position
         for ghost in self.ghostmng.ghosts.values():
             if ghost.position == pacman_position and ghost.state:
                 ghost_dies = ghost.collide_with_pacman_and_does_ghost_die()

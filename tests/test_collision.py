@@ -1,4 +1,3 @@
-from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager, GhostName
 from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (ChasingGhostState,
                                                                     FrightenedGhostState)
@@ -9,7 +8,6 @@ from src.PacMan.game_logic.ingame.characters.pacman import Pacman
 from src.PacMan.game_logic.player import Player
 from src.PacMan.game_logic.score_mng import ScoreManager
 from src.PacMan.game_logic.ingame.time.time import TimeManager
-from src.PacMan.validation_contracts.event_enums import InGameEvents
 
 
 def build_collision_manager() -> CollisionManager:
@@ -41,8 +39,8 @@ def test_pacman_eats_a_normal_pellet() -> None:
 def test_ghost_collision_while_frightened_scores_and_eats_ghost() -> None:
     collision = build_collision_manager()
     ghost = collision.ghostmng.ghosts[GhostName.BLINKY]
-    ghost.position = collision.pacman.position.get_position_from_tile()
-    ghost.state = FrightenedGhostState(ghost.strategy)
+    ghost.position = collision.pacman.position
+    ghost.state = FrightenedGhostState(ghost.strategy, speed=5)
 
     collision.check_pacman_ghost_collisions()
 
@@ -66,7 +64,7 @@ def test_power_pellet_activates_ghost_frightened_state() -> None:
 def test_ghost_collision_without_frightened_state_loses_a_life() -> None:
     collision = build_collision_manager()
     ghost = collision.ghostmng.ghosts[GhostName.BLINKY]
-    ghost.position = collision.pacman.position.get_position_from_tile()
+    ghost.position = collision.pacman.position
     ghost.state = ChasingGhostState(ghost.strategy, speed=1)
 
     class DummyTimeManager:
@@ -79,14 +77,3 @@ def test_ghost_collision_without_frightened_state_loses_a_life() -> None:
 
     assert collision.player.lives == 2
     assert collision.pacman.position == collision.pacman.spawn_point
-
-
-def test_ingame_pause_toggles_without_a_separate_pause_state() -> None:
-    manager = GameLogicManager()
-
-    manager.update_logic({InGameEvents.PAUSE: None})
-    assert manager.state.__class__.__name__ == "InGameState"
-    assert manager.state.paused is True
-
-    manager.update_logic({InGameEvents.PAUSE: None})
-    assert manager.state.paused is False

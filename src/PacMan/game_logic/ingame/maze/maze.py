@@ -1,6 +1,5 @@
 from mazegenerator import MazeGenerator
 from src.PacMan.game_logic.ingame.maze.tile import Tile, TileBits
-from typing import Union
 
 
 class Maze:
@@ -18,7 +17,7 @@ class Maze:
     is set and its normal wall bit is cleared.
     """
 
-    def __init__(self, maze: list[list]) -> None:
+    def __init__(self, maze: list[list[int]]) -> None:
         """Initializes the map from a two-dimensional maze grid.
 
         Args:
@@ -31,10 +30,10 @@ class Maze:
         self.pellets_nr: int = 0
         self.height = len(maze)
         self.width = len(maze[0])
-        self.outerbound_maze = self._find_outerbounds(maze)
+        self.outerbound_maze: list[list[int]] = self._find_outerbounds(maze)
         self.grid: list[list[Tile | None]] = self._build_grid()
 
-    def _find_outerbounds(self, maze: list[list]) -> list[list]:
+    def _find_outerbounds(self, maze: list[list[int]]) -> list[list[int]]:
         """Adds outer-boundary wall bits to the maze cells.
 
         Args:
@@ -51,7 +50,7 @@ class Maze:
         ]
         for i, _ in enumerate(range(self.height)):
             for j, _ in enumerate(range(self.width)):
-                temp_var = maze[i][j]
+                temp_var: int = maze[i][j]
                 if temp_var < 0 or temp_var > 15:
                     raise ValueError(
                         "Invalid value in maze passed to "
@@ -82,7 +81,7 @@ class Maze:
         Returns:
             A two-dimensional grid containing a Tile for each maze cell.
         """
-        grid: list[list[Union[None | Tile]]] = [
+        grid: list[list[None | Tile]] = [
             [None for _ in range(self.width)] for _ in range(self.height)
         ]
 
@@ -105,7 +104,7 @@ class Maze:
 
     def decrement_pellets(self) -> int | None:
         """Returns the decremented value, or None if can't decrement"""
-        if self.pellets_nr == 0:
+        if self.pellets_nr <= 1:
             return None
         self.pellets_nr -= 1
         return 1

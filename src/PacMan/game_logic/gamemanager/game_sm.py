@@ -7,6 +7,7 @@ from typing import Any
 if TYPE_CHECKING:
     from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 
+MAX_LEVEL = 3
 
 class GameStateError(Exception):
     pass
@@ -74,36 +75,35 @@ class PauseMenuState(IGameState):
 
 
 class InGameState(IGameState):
-    def __init__(self, context: "GameLogicManager"):
-        super().__init__(context=context)
-        if not self.context.session:
-            self.context.session = self.context.create_game_session()
-        self.pacman_steps: dict[InGameEvents, tuple[int, int]] = {
+    PACMAN_STEPS: dict[IEventEnums, tuple[int, int]] = {
             InGameEvents.PACMAN_NORTH: (0, -1),
             InGameEvents.PACMAN_SOUTH: (0, 1),
             InGameEvents.PACMAN_EAST: (1, 0),
             InGameEvents.PACMAN_WEST: (-1, 0),
         }
+    
+    def __init__(self, context: "GameLogicManager"):
+        super().__init__(context=context)
+        if not self.context.session:
+            self.context.session = self.context.create_game_session()
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
                      delta_ticks: int
                      ) -> Union["IGameState", None]:
         if self.context.session:
-            self.context.session.timemng.update()
-            if self.context.session.timemng.level_running:
-                if events:
-                    for event in events.keys():
-                        if not isinstance(event, InGameEvents):
-                            raise ValueError(
-                                f'{event} is not of type "InGameEvents"')
-                    event = self._get_priority_event(events)
-                    return self._process_event_enums(event, delta_ticks)
-                else:
-                    self.context.session.update(delta_ticks=delta_ticks)
+            if events:
+                for event in events.keys():
+                    if not isinstance(event, InGameEvents):
+                        raise ValueError(
+                            f'{event} is not of type "InGameEvents"')
+                event = self._get_priority_event(events)
+                return self._process_event_enums(event, delta_ticks)
+            else:
+                return self._normal_ingame_update(delta_ticks=delta_ticks)
         return None
 
-    def _get_priority_event(self, events: dict) -> InGameEvents:
+    def _get_priority_event(self, events: dict[IEventEnums, dict[str, Any] | None]) -> IEventEnums:
         # Define priority order
         priority_order = [InGameEvents.PAUSE,
                           InGameEvents.PACMAN_NORTH,
@@ -117,17 +117,14 @@ class InGameState(IGameState):
         return list(events.keys())[0]
 
     def _process_event_enums(self,
-                             event: InGameEvents,
+                             event: IEventEnums,
                              delta_ticks: int
                              ) -> IGameState | None:
-
-        if event in self.pacman_steps.keys():
+        if event in self.PACMAN_STEPS.keys():
             return self._normal_ingame_update(delta_ticks=delta_ticks,
-                                              pacman_move=self.pacman_steps.get(event))
-
+                                              pacman_move=self.PACMAN_STEPS.get(event))
         elif event == InGameEvents.PAUSE:
             return PauseMenuState(self.context)
-
         else:
             raise ValueError(f"Passed invalid event: {event} to"
                              " InGameState._process_event_enums.")
@@ -139,20 +136,25 @@ class InGameState(IGameState):
         if self.context.session:
             game_over, level_won = self.context.session.update(pacman_move=pacman_move,
                                                                delta_ticks=delta_ticks)
-            if game_over:
-                if level_won:
-                    if not self.context.final_level():
-                        self.context.increment_level()
-                        return None
-                    else:
-                        self.context.session = None
-                        return HighScoreRegisterState(self.context)
-                else:
-                    self.context.session = None
-                    return HighScoreRegisterState(self.context)
-            else:
+            if not game_over:
                 return None
+            
+            if level_won and not self.context.final_level():
+                self._increment_level()
+                return None
+
+            self.context.session = None
+            return HighScoreRegisterState(self.context)
+        
         return None
+
+    def _increment_level(self) -> None:
+        if self.context.level == MAX_LEVEL:
+            raise RuntimeError(
+                "Can't increment level. Level is already final level.")
+        self.context.level += 1
+        self.context.session = self.context.create_game_session()
+        self.context.state = InGameState(self.context)
 
     def subscribe(self) -> None:
         for subscriber in self.context.subscribers:

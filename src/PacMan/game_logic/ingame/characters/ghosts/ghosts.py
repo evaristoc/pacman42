@@ -38,7 +38,8 @@ class Ghost:
         self.maze: Maze = maze
         self.spawn_point: tuple[int, int] = self._get_spawn_point()
         self.strategy: AIStrategy = self._get_ghost_ai(maze)
-        self.position: Tile = self.maze.return_tile_from_position(self.position)
+        self.position: Tile = self.maze.return_tile_from_position(
+            position=self.spawn_point)
         self.old_position: Tile | None = None
         self.state: IGhostState = ChasingGhostState(self.strategy, speed=speed)
 
@@ -48,19 +49,19 @@ class Ghost:
         Args:
             delta_time: The time elapsed since the last update frame.
         """
-        if pacman_position == self.position:
+        if pacman_position == self.position.get_position_from_tile():
             return
         move, new_state = self.state.update(
             delta_ticks=delta_ticks,
             pacman_position=pacman_position,
-            ghost_position=self.position
+            ghost_position=self.position.get_position_from_tile()
         )
         if new_state:
             self.state = new_state
         if move:
             self._process_move(move)
-            print(f"{delta_ticks}: I'm {self.name.name}. My position is {self.position}. My previous position was {self.old_position}. My move was{move}. My state is {self.state.__class__.__name__}")
-        if self.position == pacman_position:
+            print(f"{delta_ticks}: I'm {self.name.name}. My position is {self.position.get_position_from_tile()}. My previous position was {self.old_position.get_position_from_tile()}. My move was{move}. My state is {self.state.__class__.__name__}")
+        if self.position.get_position_from_tile() == pacman_position:
             print(f"GOTCHAA from {self.name.name}")
 
     def get_position(self) -> Tile:
@@ -124,7 +125,7 @@ class Ghost:
         dx, dy = move
         old_x, old_y = self.position.get_position_from_tile()
         new_position = (old_x + dx, old_y + dy)
-        new_tile = self.maze.return_tile_from_position(new_position)
+        new_tile = self.maze.return_tile_from_position(position=new_position)
         self.old_position = self.position
         self.position = new_tile
 
