@@ -4,7 +4,7 @@ from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
 from src.PacMan.validation_contracts.parser import DataProcessor
-from src.PacMan.app.observer import Observer
+from src.PacMan.renderer.observer import Observer
 from src.PacMan.renderer.renderer_engine import (
                                 PyGMiniLibXEmulator,
                                 PyGMLXImageEmulator,
@@ -23,9 +23,10 @@ class PacManApp:
         self.drawer: DrawerEngine | None = None
         self.pygmlx: PyGMiniLibXEmulator | None = None
         self.glm: GameLogicManager | None = None
-        self.board: dict[PyGMLXImageEmulator] | None = None
-        self.ghosts_imgs: dict[PyMLXPNGEmulator] | None = None
-        self.pacman_imgs: dict[PyMLXPNGEmulator] | None = None
+        self.board: dict[str, PyGMLXImageEmulator] | None = None
+        self.ghosts_imgs: dict[str, PyMLXPNGEmulator] | None = None
+        self.pacman_imgs: dict[str, PyMLXPNGEmulator] | None = None
+        self.menus_imgs: dict[str, PyGMLXTextEmulator] | None = None
         self.assets: dict[str, Any] | None = None
 
     def __str__(self) -> str:
@@ -59,6 +60,16 @@ class PacManApp:
                                                      rsized)
             self.pacman_imgs = assembler.upload_imgs("pacman",
                                                      rsized)
+            self.menus_imgs = {}
+            self.menus_imgs["hub"] = assembler.init_menus(
+                size,
+                bottom,
+                "I am PacMan!",
+                0,
+                0,
+                "CONSOLA.TTF",
+                32
+            )
             # self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
         except Exception as err:
             logger.exception(err)
@@ -81,9 +92,14 @@ class PacManApp:
         # board_margin = int(self.drawer.corrected_size[1] / 2)
         self.pygmlx.pygmlx_put_image_to_window(
             self.board_img,
-            self.drawer.margin / 2,
-            self.drawer.margin / 2
+            int(self.drawer.margin / 2),
+            int(self.drawer.margin / 2)
             )
+        self.pygmlx.pygmlx_put_image_to_window(
+            self.menus_imgs["hub"],
+            int(self.drawer.margin / 2),
+            int(self.drawer.margin / 2) + self.drawer.corrected_size[0]     
+        )
         # print(self.ghosts_imgs)
         # for i, g in enumerate(self.ghosts_imgs):
         #     self.pygmlx.pygmlx_put_image_to_window(
@@ -111,4 +127,5 @@ class PacManApp:
         observer.register_assets("ghosts", self.ghosts_imgs)
         observer.register_assets("pacman", self.pacman_imgs)
         observer.register_assets("board", self.board_img)
+        observer.register_assets("menus", self.menus_imgs)
         self.pygmlx.pygmlx_loop(observer)

@@ -17,11 +17,10 @@ EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 
 
 class IAction(Protocol):
-    def actions(self,
-                assets,
-                mlx: PyGMiniLibXEmulator,
-                drawer: DrawerEngine,
-                char_mng) -> None:
+    def action(
+            self,
+            obs: "Observer"
+            ) -> None:
         ...
 
 
@@ -31,6 +30,7 @@ class PlayingAction:
             obs: "Observer"
             ) -> None:
         print(f"this is {self.__class__.__name__}")
+        print(obs._registry)
         print(obs._glm.character_manager.pacman.position)
         print(obs._glm.character_manager.ghost_mng.ghosts)
         # INTERIOR CELLS ###
@@ -51,8 +51,15 @@ class PlayingAction:
             obs._registry["board"],
             obs.drawer.margin / 2,
             obs.drawer.margin / 2
-        )            
-        # PACMAN ###
+        )
+        # MENUS ###
+        # # -- hub --
+        # obs._mlx.pygmlx_put_image_to_window(
+        #     obs._registry["menus"]["hub"],
+        #     obs.drawer.margin / 2,
+        #     obs.drawer.margin / 2 + obs._mlx.height
+        # )
+        # # PACMAN ###
         pm = obs._registry["pacman"]["moves"].pop()
         obs._mlx.pygmlx_put_image_to_window(
             pm,
@@ -68,7 +75,6 @@ class PlayingAction:
                 obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
                 obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1])
             )
-
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     InGameState: PlayingAction
@@ -88,7 +94,7 @@ class Observer:
     def register_assets(self, key: str, asset: dict[str, Any]) -> None:
         if not self._registry:
             self._registry = {}
-        print(asset)
+        # print(asset)
         self._registry[key] = asset
 
     def actions(self,

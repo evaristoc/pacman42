@@ -3,7 +3,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from enum import IntEnum
 from typing import Any, Callable, TypeAlias
-from src.PacMan.app.observer import Observer
+from src.PacMan.app_config.console import console
+from src.PacMan.renderer.observer import Observer
 
 TLoopHookCB: TypeAlias = Callable[[Any], int]
 PixelBuffer: TypeAlias = np.ndarray
@@ -232,20 +233,25 @@ class PyGMLXTextEmulator(PyGMLXImageEmulator):
         self,
         width: int,
         height: int,
-        font_path: str = "CONSOLAS.TTF",
+        font_path: str = "CONSOLA.TTF",
         font_size: int = 16,
         color: int = 0xFFFFFF
     ) -> None:
         super().__init__(width, height)
-        self.font_path = "../assets/fonts/" + font_path
+        self.font_path = "src/PacMan/assets/fonts/" + font_path  # as it runs from root...
         self.font_size = font_size
         self.color = color
         self._load_font()
 
     def _load_font(self) -> None:
         try:
-            self.font = ImageFont.truetype(self.font_path, self.font_size)
-        except IOError:
+            self.font = ImageFont.truetype(
+                self.font_path,
+                self.font_size)
+        except (IOError, OSError) as err:
+            console.print("[bold yellow] font was not found at: "
+                          f"{self.font_path} --- "
+                          f"setting to default ({err})")
             self.font = ImageFont.load_default()
 
     def pygput_from_text(

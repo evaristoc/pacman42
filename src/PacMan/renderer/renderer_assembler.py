@@ -8,7 +8,8 @@ from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.renderer.renderer_engine import (PyGMiniLibXEmulator,
                                                  PyGMLXImageEmulator,
-                                                 PyMLXPNGEmulator)
+                                                 PyMLXPNGEmulator,
+                                                 PyGMLXTextEmulator)
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,11 @@ class RendererAssembler:
     def init_drawer(self) -> DrawerEngine:
         return DrawerEngine(self._config)
 
-    def init_engine(self, w: int, bottom_h: int) -> PyGMiniLibXEmulator:
+    def init_engine(
+            self,
+            w: int,
+            bottom_h: int
+            ) -> PyGMiniLibXEmulator:
         return PyGMiniLibXEmulator(w,
                                    w + bottom_h)        
         # if self.ref_w == REFWITHNOTSETVALUE:
@@ -68,13 +73,14 @@ class RendererAssembler:
         try:
             # this will sort the paths (they are Path types now)
             sorted_files = sorted(_assets.rglob('*'))
+            print(sorted_files)
             for file in sorted_files:
                 if not file.is_file():
                     continue
                 with Image.open(_assets / file) as img:
                     org_w, org_h = img.size
                 fname = Path(file).stem
-                print(fname, org_w)
+                # print(fname, org_w)
                 emu = PyMLXPNGEmulator(
                             org_w,
                             org_h
@@ -87,7 +93,8 @@ class RendererAssembler:
                                 rsize,
                                 rsize
                             )
-                if "pacman" in file.parts:
+                print(file.parts)
+                if "pacman" == file.parts[-2]:
                     if "moves" not in _dict:
                         _dict = {
                             "moves": deque([]),
@@ -99,7 +106,31 @@ class RendererAssembler:
                 else:
                     if fname not in _dict:
                         _dict[fname] = emu
+            print(_dict)
             return _dict
         except Exception as err:
             logger.exception(f"FATAL: we could not load images : {err}")
             raise SystemExit(1)
+
+    def init_menus(
+            self,
+            w: int,
+            h: int,
+            msg: str,
+            x: int,
+            y: int,
+            font_path: str = "CONSOLA.TTF",
+            font_size: int = 14,
+            color: int = 0xffffff
+            ) -> PyGMLXTextEmulator:
+        imgmlxtext = PyGMLXTextEmulator(
+            w,
+            h,
+            font_path,
+            font_size,
+            color)
+        imgmlxtext.pygput_from_text(
+            x,
+            y,
+            msg)
+        return imgmlxtext
