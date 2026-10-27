@@ -90,6 +90,9 @@ class Tile:
             open_walls.append((-1, 0))
         return open_walls
 
+    def get_position_from_tile(self) -> tuple[int, int]:
+        return (self.cell_position_x, self.cell_position_y)
+
     def _set_open_walls_from_tilebyte(self) -> None:
         """Updates WallState properties based on the bits set in tilebyte.
 
@@ -128,6 +131,9 @@ class Tile:
         if temporary_tilebyte.bit_count() > 1:
             return PelletState.POWERPELLET
         return PelletState.NORMALPELLET
+
+    def collide_with_pacman(self) -> None:
+        self.pellet_state = PelletState.NOPELLET
 
     def __repr__(self) -> str:
         """Returns a string representation of the wall states for each face."""

@@ -29,9 +29,9 @@ class IGhostState(ABC):
 
 
 class ChasingGhostState(IGhostState):
-    def __init__(self, strategy: AIStrategy) -> None:
+    def __init__(self, strategy: AIStrategy, speed: int) -> None:
         super().__init__(strategy)
-        self.tick_speed: int = CHASING_GHOST_TICK_SPEED
+        self.tick_speed: int = speed
 
     def update(self, *,
                delta_ticks: int,

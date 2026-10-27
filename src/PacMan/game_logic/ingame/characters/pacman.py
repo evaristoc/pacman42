@@ -1,4 +1,5 @@
 from src.PacMan.game_logic.ingame.maze.maze import Maze
+from src.PacMan.game_logic.ingame.maze.tile import Tile
 
 PACMAN_TICK_SPEED = 10
 
@@ -13,17 +14,17 @@ class Pacman:
     detection determines interactions with pellets, power-ups, and ghosts.
     """
 
-    def __init__(self, maze: Maze) -> None:
+    def __init__(self, maze: Maze, speed: int) -> None:
         """Initialize Pac-Man at its spawn point.
 
         Sets up Pac-Man's initial position and prepares it for gameplay.
         """
         self.direction = (-1, 0)
-        self.speed = PACMAN_TICK_SPEED
+        self.speed = speed
         self.maze: Maze = maze
         self.spawn_point = self._get_spawn_point()
-        self.position = self.spawn_point
-        self.old_position = self.position
+        self.position: Tile = self.spawn_point
+        self.old_position: Tile | None = None
 
     @property
     def direction(self) -> tuple[int, int]:
@@ -56,23 +57,22 @@ class Pacman:
         if delta_ticks % self.speed == 0:
             self.old_position = self.position
             self._process_move(self._direction)
-            print(f"{delta_ticks}: I'm {self.__class__.__name__}. My position is {self.position}. My previous position was {self.old_position}. My attempted move was{self.direction}.")
+            print(f"{delta_ticks}: I'm {self.__class__.__name__}. My position is {self.position.get_position_from_tile()}. My previous position was {self.old_position.get_position_from_tile()}. My attempted move was{self.direction}.")
 
-    def get_position(self) -> tuple[int, int]:
-        return self.position
-
-    def _get_spawn_point(self) -> tuple[int, int]:
+    def _get_spawn_point(self) -> Tile:
         x_coordinate = (self.maze.width - 1) // 2
         y_coordinate = (self.maze.height - 1) - (self.maze.height // 5)
-        return (x_coordinate, y_coordinate)
+        return self.maze.return_tile_from_position(position=(x_coordinate,
+                                                             y_coordinate))
 
     def _process_move(self, move: tuple[int, int]) -> None:
-        temp_tile = self.maze.return_tile_from_position(position=self.position)
-        valid_moves = temp_tile.get_open_walls()
+        valid_moves = self.position.get_open_walls()
         if move in valid_moves:
             dx, dy = move
-            old_x, old_y = self.position
+            old_x = self.position.cell_position_x
+            old_y = self.position.cell_position_y
             new_position = (old_x + dx, old_y + dy)
-            self.position = new_position
+            self.position = self.maze.return_tile_from_position(
+                position=new_position)
         else:
             return

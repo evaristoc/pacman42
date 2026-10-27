@@ -26,7 +26,7 @@ class GhostError(Exception):
 class Ghost:
     """A ghost entity that pursues Pac-Man using a specific AI strategy."""
 
-    def __init__(self, name: GhostName, maze: Maze) -> None:
+    def __init__(self, name: GhostName, maze: Maze, speed: int) -> None:
         """Initializes a Ghost with a name, default state, and AI strategy.
 
         Args:
@@ -39,7 +39,7 @@ class Ghost:
         self.strategy: AIStrategy = self._get_ghost_ai(maze)
         self.position: tuple[int, int] = self.spawn_point
         self.old_position: tuple[int, int] = self.position
-        self.state: IGhostState = ChasingGhostState(self.strategy)
+        self.state: IGhostState = ChasingGhostState(self.strategy, speed)
 
     def update(self, *, delta_ticks: int, pacman_position: tuple[int, int]) -> None:
         """Updates the ghost's position and state based on game time.
@@ -137,12 +137,12 @@ class Ghost:
 
 
 class GhostManager:
-    def __init__(self, maze: Maze) -> None:
+    def __init__(self, maze: Maze, speed: int) -> None:
         self.ghosts = {
-            GhostName.BLINKY: Ghost(GhostName.BLINKY, maze),
-            GhostName.CLYDE: Ghost(GhostName.CLYDE, maze),
-            GhostName.INKY: Ghost(GhostName.INKY, maze),
-            GhostName.PINKY: Ghost(GhostName.PINKY, maze)
+            GhostName.BLINKY: Ghost(GhostName.BLINKY, maze, speed),
+            GhostName.CLYDE: Ghost(GhostName.CLYDE, maze, speed),
+            GhostName.INKY: Ghost(GhostName.INKY, maze, speed),
+            GhostName.PINKY: Ghost(GhostName.PINKY, maze, speed)
         }
 
     def update(self, delta_ticks: int,
@@ -151,3 +151,7 @@ class GhostManager:
         for ghost in self.ghosts.values():
             ghost.update(delta_ticks=delta_ticks,
                          pacman_position=pacman_position)
+
+    def big_pellet_activated(self) -> None:
+        for ghost in self.ghosts.values():
+            ghost.big_pellet_activated()

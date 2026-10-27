@@ -10,7 +10,6 @@ class TimeError(Exception):
 
 class TimeManager:
     def __init__(self) -> None:
-        self.state: ITimeState = CountDownState(self)
         self._countdown_end_time: float | None = None
         self._countdown_time_remaining: float | None = None
         self._discrete_cd_time: int | None = None
@@ -20,6 +19,7 @@ class TimeManager:
         self._counting_down: bool = False
         self.level_running: bool = False
         self._subscribers: list[IObserver] = []
+        self.state: ITimeState = CountDownState(self)
 
     def update(self) -> None:
         self.state.update()
