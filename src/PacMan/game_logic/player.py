@@ -32,3 +32,11 @@ class Player:
             Player: A new Player instance with the data from the dictionary.
         """
         return cls(**data)
+
+    def decrement_lives(self) -> int | None:
+        if self.lives == 0:
+            return None
+        else:
+            self.lives -= 1
+        print(f"Remaining lives: {self.lives}")
+        return 1

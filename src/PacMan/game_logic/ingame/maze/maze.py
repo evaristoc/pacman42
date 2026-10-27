@@ -28,6 +28,7 @@ class Maze:
         Raises:
             ValueError: If a cell value is outside the valid range.
         """
+        self.pellets_nr: int = 0
         self.height = len(maze)
         self.width = len(maze[0])
         self.outerbound_maze = self._find_outerbounds(maze)
@@ -87,7 +88,10 @@ class Maze:
 
         for i, _ in enumerate(range(self.height)):  # rows?
             for j, _ in enumerate(range(self.width)):  # cols?
-                grid[i][j] = Tile(self.outerbound_maze[i][j], j, i)
+                new_tile = Tile(self.outerbound_maze[i][j], j, i)
+                grid[i][j] = new_tile
+                if new_tile.has_pellet():
+                    self.pellets_nr += 1
         return grid
 
     def return_tile_from_position(self, *,
@@ -98,6 +102,13 @@ class Maze:
             return temp_tile
         else:
             raise ValueError(f"No tile at position: {position}")
+
+    def decrement_pellets(self) -> int | None:
+        """Returns the decremented value, or None if can't decrement"""
+        if self.pellets_nr == 0:
+            return None
+        self.pellets_nr -= 1
+        return 1
 
     def __repr__(self) -> str:
         """Returns a printable, row-by-row representation of the tile grid.

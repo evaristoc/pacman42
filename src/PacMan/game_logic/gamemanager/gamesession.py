@@ -4,6 +4,7 @@ from src.PacMan.game_logic.ingame.characters.pacman import Pacman
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager
 from src.PacMan.game_logic.ingame.collision import CollisionManager
 from src.PacMan.game_logic.score_mng import ScoreManager
+from src.PacMan.game_logic.player import Player
 
 
 class GameSession:
@@ -26,21 +27,27 @@ class GameSession:
     def update(self, *,
                delta_ticks: int,
                pacman_move: tuple[int, int] | None = None
-               ) -> None:
-        self.pacman.update(delta_ticks=delta_ticks,
-                           new_direction=pacman_move)
-        self.ghost_mng.update(delta_ticks,
-                              self.pacman.position.get_position_from_tile())
-        self.timemng.update()
+               ) -> tuple[bool, bool | None]:
+        game_over_and_level_won = self.timemng.update()
+        if game_over_and_level_won[0]:
+            return game_over_and_level_won
+        if self.timemng.level_running:
+            self.pacman.update(delta_ticks=delta_ticks,
+                            new_direction=pacman_move)
+            self.ghost_mng.update(delta_ticks,
+                                self.pacman.position.get_position_from_tile())
+            game_over_and_level_won = self.collision_mng.update()
+        return game_over_and_level_won
+
 
 
 class GameSessionFactory:
-    GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 30, 2: 20, 3: 10}
-    PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 20, 2: 10, 3: 5}
+    GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 10, 2: 10, 3: 6}
+    PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 10, 2: 10, 3: 10}
     MAZE_SIZENSEED_PER_LEVEL: dict[int, tuple[int, int]] = {
-        1: (16, 42), 2: (17, 45), 3: (18, 50)}
+        1: (10, 42), 2: (9, 45), 3: (8, 50)}
 
-    def create_game_new_game(self, level: int, scoremng: ScoreManager) -> GameSession:
+    def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player) -> GameSession:
         if not isinstance(level, int):
             raise ValueError("level-variable is not an int.")
         if not level > 0 or not level < 10:
@@ -54,6 +61,8 @@ class GameSessionFactory:
         new_collisionmng = CollisionManager(maze=new_maze,
                                             pacman=new_pacman,
                                             ghostmng=new_ghostmng,
+                                            timemng=new_timemng,
+                                            player=player,
                                             scoremng=scoremng)
         return GameSession(maze=new_maze,
                            timemng=new_timemng,

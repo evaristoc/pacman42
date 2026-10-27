@@ -76,3 +76,6 @@ class Pacman:
                 position=new_position)
         else:
             return
+
+    def pacman_dies(self) -> None:
+        self.position = self.spawn_point

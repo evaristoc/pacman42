@@ -6,6 +6,7 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import (AIStrategy,
 from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
                                                                     ChasingGhostState)
 from src.PacMan.game_logic.ingame.maze.maze import Maze
+from src.PacMan.game_logic.ingame.maze.tile import Tile
 
 from enum import Enum
 
@@ -37,9 +38,9 @@ class Ghost:
         self.maze: Maze = maze
         self.spawn_point: tuple[int, int] = self._get_spawn_point()
         self.strategy: AIStrategy = self._get_ghost_ai(maze)
-        self.position: tuple[int, int] = self.spawn_point
-        self.old_position: tuple[int, int] = self.position
-        self.state: IGhostState = ChasingGhostState(self.strategy, speed)
+        self.position: Tile = self.maze.return_tile_from_position(self.position)
+        self.old_position: Tile | None = None
+        self.state: IGhostState = ChasingGhostState(self.strategy, speed=speed)
 
     def update(self, *, delta_ticks: int, pacman_position: tuple[int, int]) -> None:
         """Updates the ghost's position and state based on game time.
@@ -62,26 +63,17 @@ class Ghost:
         if self.position == pacman_position:
             print(f"GOTCHAA from {self.name.name}")
 
-    def get_position(self) -> tuple[float, float]:
-        """Returns the current coordinates of the ghost.
-
-        Returns:
-            A tuple of (x, y) coordinates.
-        """
+    def get_position(self) -> Tile:
         return self.position
 
     def big_pellet_activated(self) -> None:
         self.state = self.state.big_pellet_activated()
 
-    def collide_with_pacman(self) -> None:
-        """Handles the logic when the ghost collides with Pac-Man.
-
-        Changes state to EATEN if the ghost is currently FRIGHTENED.
-
-        Raises:
-            GhostStateError: If the ghost is in an undefined state.
-        """
-        self.state.collide_with_pacman()
+    def collide_with_pacman_and_does_ghost_die(self) -> bool:
+        new_state, ghost_dies = self.state.collide_with_pacman_does_ghost_die()
+        if new_state:
+            self.state = new_state
+        return ghost_dies
 
     def _get_ghost_ai(self, maze: Maze) -> AIStrategy:
         """Determines the AI strategy based on the ghost's name.
@@ -130,10 +122,11 @@ class Ghost:
 
     def _process_move(self, move: tuple[int, int]) -> None:
         dx, dy = move
-        old_x, old_y = self.position
+        old_x, old_y = self.position.get_position_from_tile()
         new_position = (old_x + dx, old_y + dy)
+        new_tile = self.maze.return_tile_from_position(new_position)
         self.old_position = self.position
-        self.position = new_position
+        self.position = new_tile
 
 
 class GhostManager:

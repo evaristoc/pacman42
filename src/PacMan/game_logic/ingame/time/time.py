@@ -21,14 +21,17 @@ class TimeManager:
         self._subscribers: list[IObserver] = []
         self.state: ITimeState = CountDownState(self)
 
-    def update(self) -> None:
-        self.state.update()
+    def update(self) -> tuple[bool, bool | None]:
+        return self.state.update()
 
     def pause(self) -> None:
         self.state.pause()
 
     def start(self) -> None:
         self.state.start()
+
+    def restart_countdown(self) -> None:
+        self.state.restart_countdown()
 
     def subscribe(self, subscriber: IObserver) -> None:
         if subscriber not in self._subscribers:

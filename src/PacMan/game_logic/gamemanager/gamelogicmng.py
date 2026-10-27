@@ -8,6 +8,8 @@ from typing import Any
 # for testing
 from src.PacMan.game_logic.mock_observer import IObserver
 
+MAX_LEVEL = 3
+
 
 class GameLogicManager:
     def __init__(self) -> None:
@@ -33,7 +35,22 @@ class GameLogicManager:
         self.subscribers.append(subscriber)
 
     def create_game_session(self) -> GameSession:
-        return GameSessionFactory().create_game_new_game(self.level, self.scoremng)
+        return GameSessionFactory().create_game_new_game(self.level,
+                                                         self.scoremng,
+                                                         self.player)
+
+    def final_level(self) -> bool:
+        if self.level == MAX_LEVEL:
+            True
+        return False
+
+    def increment_level(self) -> None:
+        if self.level == MAX_LEVEL:
+            raise RuntimeError(
+                "Can't increment level. Level is already final level.")
+        self.level += 1
+        self.session = self.create_game_session()
+        self.state = InGameState(self)
 
 
 def test() -> None:
@@ -46,7 +63,7 @@ def test() -> None:
     steps = 300
     event: dict[IEventEnums, dict[str, Any] | None] | None = None
     while steps > 0:
-        if steps % 5 == 0:
+        if steps % 2 == 0:
             if gamelogicmanager.session:
                 position = gamelogicmanager.session.pacman.position.get_position_from_tile()
                 prev_pos = gamelogicmanager.session.pacman.old_position

@@ -132,8 +132,13 @@ class Tile:
             return PelletState.POWERPELLET
         return PelletState.NORMALPELLET
 
-    def collide_with_pacman(self) -> None:
+    def pellet_eaten_by_pacman(self) -> None:
         self.pellet_state = PelletState.NOPELLET
+
+    def has_pellet(self) -> bool:
+        if self.pellet_state == PelletState.NOPELLET:
+            return False
+        return True
 
     def __repr__(self) -> str:
         """Returns a string representation of the wall states for each face."""

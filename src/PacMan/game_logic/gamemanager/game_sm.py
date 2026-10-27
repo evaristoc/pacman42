@@ -122,9 +122,8 @@ class InGameState(IGameState):
                              ) -> IGameState | None:
 
         if event in self.pacman_steps.keys():
-            self._normal_ingame_update(delta_ticks=delta_ticks,
-                                       pacman_move=self.pacman_steps.get(event))
-            return None
+            return self._normal_ingame_update(delta_ticks=delta_ticks,
+                                              pacman_move=self.pacman_steps.get(event))
 
         elif event == InGameEvents.PAUSE:
             return PauseMenuState(self.context)
@@ -136,10 +135,24 @@ class InGameState(IGameState):
     def _normal_ingame_update(self, *,
                               delta_ticks: int,
                               pacman_move: tuple[int, int] | None = None
-                              ) -> None:
+                              ) -> IGameState | None:
         if self.context.session:
-            self.context.session.update(pacman_move=pacman_move,
-                                        delta_ticks=delta_ticks)
+            game_over, level_won = self.context.session.update(pacman_move=pacman_move,
+                                                               delta_ticks=delta_ticks)
+            if game_over:
+                if level_won:
+                    if not self.context.final_level():
+                        self.context.increment_level()
+                        return None
+                    else:
+                        self.context.session = None
+                        return HighScoreRegisterState(self.context)
+                else:
+                    self.context.session = None
+                    return HighScoreRegisterState(self.context)
+            else:
+                return None
+        return None
 
     def subscribe(self) -> None:
         for subscriber in self.context.subscribers:
@@ -152,4 +165,15 @@ class InGameState(IGameState):
 
 
 class HighScoreRegisterState(InGameState):
-    pass
+    def __init__(self, context: "GameLogicManager"):
+        self.context: "GameLogicManager" = context
+        print(f"GAME TRANSITION to {self.__class__.__name__}")
+
+    def update_logic(self,
+                     events: dict[IEventEnums, dict[str, Any] | None] | None,
+                     delta_ticks: int
+                     ) -> Union["IGameState", None]:
+        return None
+
+    def subscribe(self) -> None:
+        return None
