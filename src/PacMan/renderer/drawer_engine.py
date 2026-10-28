@@ -18,7 +18,8 @@ class DrawerEngine:
         "exit": 0xFFFF00FF,
         # "walls": 0xFF00AAAA,
         # "path": 0xFF00FF00,
-        "walls": 0xFF00FF00,
+        # "walls": 0xFF00FF00,
+        "walls": 0x0101F2,
     }
 
     BOTTOMPARTSCREEN = 5

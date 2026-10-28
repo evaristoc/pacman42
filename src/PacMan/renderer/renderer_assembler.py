@@ -62,13 +62,14 @@ class RendererAssembler:
 
     def upload_imgs(
             self,
-            character: str,
-            rsize: int | None = None) -> dict[str, PyMLXPNGEmulator]:
+            folder: str,
+            rsize_w: int | None = None,
+            rsize_h: int | None = None) -> dict[str, PyMLXPNGEmulator]:
         # assume ref size cannot be negative, but it could...
         # if self.ref_w == REFWITHNOTSETVALUE:
         #     logger.exception("FATAL: we could not set ref size.")
         #     raise SystemExit(1)
-        _assets = self.cwd.parent / 'assets' / character
+        _assets = self.cwd.parent / 'assets' / folder
         _dict: dict[str, PyMLXPNGEmulator] = {}
         try:
             # this will sort the paths (they are Path types now)
@@ -88,10 +89,10 @@ class RendererAssembler:
                 emu.pygput_from_png(
                             str(_assets / file)
                         )
-                if rsize:
+                if rsize_w and rsize_h:
                     emu.pygll_resize(
-                                rsize,
-                                rsize
+                                rsize_w,
+                                rsize_h
                             )
                 print(file.parts)
                 if "pacman" == file.parts[-2]:
@@ -112,7 +113,7 @@ class RendererAssembler:
             logger.exception(f"FATAL: we could not load images : {err}")
             raise SystemExit(1)
 
-    def init_menus(
+    def init_hubs(
             self,
             w: int,
             h: int,
@@ -121,7 +122,8 @@ class RendererAssembler:
             y: int,
             font_path: str = "CONSOLA.TTF",
             font_size: int = 14,
-            color: int = 0xffffff
+            color: int = 0xF6303F,
+            # color: int = 0xffffff
             ) -> PyGMLXTextEmulator:
         imgmlxtext = PyGMLXTextEmulator(
             w,

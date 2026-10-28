@@ -51,17 +51,23 @@ class PacManApp:
             size = self.drawer.corrected_size[0]
             bottom = self.drawer.bottom_h
             self.pygmlx = assembler.init_engine(config.size,
-                                                bottom)
+                                                2 * bottom)
             self.glm = assembler.init_glm()
             self.maze = self.glm.maze
             self.board_img = assembler.init_board(size)
             rsized = self.drawer.resized
             self.ghosts_imgs = assembler.upload_imgs("ghosts",
+                                                     rsized,
                                                      rsized)
             self.pacman_imgs = assembler.upload_imgs("pacman",
+                                                     rsized,
                                                      rsized)
             self.menus_imgs = {}
-            self.menus_imgs["hub"] = assembler.init_menus(
+            self.menus_imgs["start"] = assembler.upload_imgs(
+                                                    "menu/start",
+                                                    100,
+                                                    60)
+            self.menus_imgs["hub"] = assembler.init_hubs(
                 size,
                 bottom,
                 "I am PacMan!",
@@ -93,12 +99,18 @@ class PacManApp:
         self.pygmlx.pygmlx_put_image_to_window(
             self.board_img,
             int(self.drawer.margin / 2),
-            int(self.drawer.margin / 2)
+            int(self.drawer.margin / 2) + self.drawer.bottom_h
             )
+        # for i, img in enumerate(self.menus_imgs["start"].keys()):
+        #     self.pygmlx.pygmlx_put_image_to_window(
+        #         self.menus_imgs["start"][img],
+        #         int(self.drawer.margin / 2) + 150,
+        #         int(self.drawer.margin / 2) + self.drawer.bottom_h + i * 100
+        #         )   
         self.pygmlx.pygmlx_put_image_to_window(
             self.menus_imgs["hub"],
             int(self.drawer.margin / 2),
-            int(self.drawer.margin / 2) + self.drawer.corrected_size[0]     
+            int(self.drawer.margin / 2) + + self.drawer.bottom_h + self.drawer.corrected_size[0]
         )
         # print(self.ghosts_imgs)
         # for i, g in enumerate(self.ghosts_imgs):

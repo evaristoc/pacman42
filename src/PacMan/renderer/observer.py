@@ -50,7 +50,7 @@ class PlayingAction:
         obs._mlx.pygmlx_put_image_to_window(
             obs._registry["board"],
             obs.drawer.margin / 2,
-            obs.drawer.margin / 2
+            obs.drawer.margin / 2 + obs.drawer.bottom_h
         )
         # MENUS ###
         # # -- hub --
@@ -64,7 +64,7 @@ class PlayingAction:
         obs._mlx.pygmlx_put_image_to_window(
             pm,
             obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
-            obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[1])
+            obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[1]) + obs.drawer.bottom_h
         )
         obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
 
@@ -73,8 +73,16 @@ class PlayingAction:
             obs._mlx.pygmlx_put_image_to_window(
                 obs._registry["ghosts"][g.name],
                 obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
-                obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1])
+                obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs.drawer.bottom_h
             )
+
+        for i, img in enumerate(obs._registry["menus"]["start"].keys()):
+            obs._mlx.pygmlx_put_image_to_window(
+                obs._registry["menus"]["start"][img],
+                int(obs.drawer.margin / 2) + 150,
+                int(obs.drawer.margin / 2) + obs.drawer.bottom_h + i * 100
+                ) 
+
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     InGameState: PlayingAction
