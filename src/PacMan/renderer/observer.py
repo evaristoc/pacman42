@@ -79,7 +79,7 @@ class PlayingAction:
         for i, img in enumerate(obs._registry["menus"]["start"].keys()):
             obs._mlx.pygmlx_put_image_to_window(
                 obs._registry["menus"]["start"][img],
-                int(obs.drawer.margin / 2) + 150,
+                int(obs.drawer.margin / 2) + 200,
                 int(obs.drawer.margin / 2) + obs.drawer.bottom_h + i * 100
                 ) 
 
@@ -106,9 +106,8 @@ class Observer:
         self._registry[key] = asset
 
     def actions(self,
-                event: Event) -> None:
-        eventmsg = self._translate_event(event)
-        self._glm.update_logic(eventmsg)
+                event: Event | None) -> None:
+        self._glm.update_logic(self._translate_event(event))
         if isinstance(self._glm.state, IGameState):
             self.action = self._get_action(state=self._glm.state)().action(self)
 
@@ -120,7 +119,7 @@ class Observer:
 
     def _translate_event(self,
                          event: Event
-                         ) -> EventMsg:
+                         ) -> EventMsg | None:
         events: EventMsg = {}
         if not events:
             return

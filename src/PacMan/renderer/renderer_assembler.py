@@ -113,7 +113,7 @@ class RendererAssembler:
             logger.exception(f"FATAL: we could not load images : {err}")
             raise SystemExit(1)
 
-    def init_hubs(
+    def init_hub_text(
             self,
             w: int,
             h: int,

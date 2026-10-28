@@ -67,14 +67,14 @@ class PacManApp:
                                                     "menu/start",
                                                     100,
                                                     60)
-            self.menus_imgs["hub"] = assembler.init_hubs(
+            self.menus_imgs["hub_u"] = assembler.init_hub_text(
                 size,
                 bottom,
-                "I am PacMan!",
+                "Score 100  Highest 20000  Remaining 50secs",
                 0,
                 0,
                 "CONSOLA.TTF",
-                32
+                24
             )
             # self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
         except Exception as err:
@@ -107,10 +107,44 @@ class PacManApp:
         #         int(self.drawer.margin / 2) + 150,
         #         int(self.drawer.margin / 2) + self.drawer.bottom_h + i * 100
         #         )   
+        # upper hub
         self.pygmlx.pygmlx_put_image_to_window(
-            self.menus_imgs["hub"],
+            self.menus_imgs["hub_u"],
             int(self.drawer.margin / 2),
-            int(self.drawer.margin / 2) + + self.drawer.bottom_h + self.drawer.corrected_size[0]
+            int(self.drawer.margin / 2)
+        )
+        # lower hub
+        level = self.pygmlx.pygmlx_new_text_image(
+                                        98,
+                                        48,
+                                        24,
+                                        0xF6303F
+                                    )
+        level.pygput_from_text(
+            0,
+            0,
+            "Level 1"
+        )
+        self.pygmlx.pygmlx_put_image_to_window(
+            level,
+            0,
+            int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
+        )
+
+        self.pygmlx.pygmlx_put_image_to_window(
+            self.pacman_imgs["still"],
+            int(self.drawer.margin / 2) + 350,
+            int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
+        )
+        self.pygmlx.pygmlx_put_image_to_window(
+            self.pacman_imgs["still"],
+            int(self.drawer.margin / 2) + 350 + 30,
+            int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
+        )
+        self.pygmlx.pygmlx_put_image_to_window(
+            self.pacman_imgs["still"],
+            int(self.drawer.margin / 2) + 350 + 60,
+            int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
         )
         # print(self.ghosts_imgs)
         # for i, g in enumerate(self.ghosts_imgs):

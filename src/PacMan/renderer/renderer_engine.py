@@ -53,7 +53,8 @@ class PyGMiniLibXEmulator:
         return PyGMLXTextEmulator(
             width=width,
             height=height,
-            font_size=font)
+            font_size=font,
+            color=color)
 
     def pygmlx_put_image_to_window(self,
                                    img: 'PyGMLXImageEmulator',
@@ -113,10 +114,11 @@ class PyGMiniLibXEmulator:
         running = True
         while running:
             event: pygame.event.Event
+            observer.actions(None)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                observer.actions(event=event)
+                # observer.actions(event=event)
             if self._loop_hook is not None:
                 result: int = self.mlx_loop_hook(self._loop_param)
                 if result == 0:
