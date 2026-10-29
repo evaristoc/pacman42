@@ -69,11 +69,8 @@ class Ghost:
             self.interpolated_position = self.old_position.get_position_from_tile()
         else:
             self._move_interpolate(delta_ticks=delta_ticks)
-        
-        print(f"{delta_ticks}: I'm {self.name.name}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}.")
 
-    def get_position(self) -> Tile:
-        return self.interpolated_position
+        print(f"{delta_ticks}: I'm {self.name.name}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}.")
 
     def big_pellet_activated(self) -> None:
         self.state = self.state.big_pellet_activated()
@@ -141,14 +138,18 @@ class Ghost:
 
     def _move_interpolate(self, delta_ticks: int) -> None:
         if not self.old_position == self.new_position:
-            interpolation_amount = (delta_ticks % self.speed) * (1 / self.speed)
-            direction_x = self.new_position.get_position_from_tile()[0] - self.old_position.get_position_from_tile()[0]
-            direction_y = self.new_position.get_position_from_tile()[1] - self.old_position.get_position_from_tile()[1]
+            interpolation_amount = (delta_ticks %
+                                    self.speed) * (1 / self.speed)
+            direction_x = self.new_position.get_position_from_tile(
+            )[0] - self.old_position.get_position_from_tile()[0]
+            direction_y = self.new_position.get_position_from_tile(
+            )[1] - self.old_position.get_position_from_tile()[1]
             interpolated_x = direction_x * interpolation_amount
             interpolated_y = direction_y * interpolation_amount
             old_position_x, old_position_y = self.old_position.get_position_from_tile()
 
-            self.interpolated_position = (old_position_x + interpolated_x, old_position_y + interpolated_y)
+            self.interpolated_position = (
+                old_position_x + interpolated_x, old_position_y + interpolated_y)
         else:
             self.interpolated_position = self.old_position.get_position_from_tile()
 

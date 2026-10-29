@@ -61,7 +61,8 @@ class CollisionManager:
         level_won = None
         pacman_position = self.pacman.interpolated_position
         for ghost in self.ghostmng.ghosts.values():
-            if ghost.interpolated_position == pacman_position and ghost.state:
+            if (self.__calculate_collision(ghost.interpolated_position,
+                                           pacman_position) and ghost.state):
                 ghost_dies = ghost.collide_with_pacman_and_does_ghost_die()
                 if ghost_dies:
                     self.scoremng.ghost_eaten()
@@ -80,3 +81,14 @@ class CollisionManager:
                         level_won = False
                         return (game_over, level_won)
         return (game_over, level_won)
+
+    @staticmethod
+    def __calculate_collision(ghost_interpolated: tuple[float, float],
+                              pacman_interpolated: tuple[float, float]) -> bool:
+        if ((abs(ghost_interpolated[0] - pacman_interpolated[0]) < 0.5) and
+                (ghost_interpolated[1] == pacman_interpolated[1])):
+            return True
+        if ((abs(ghost_interpolated[1] - pacman_interpolated[1]) < 0.5) and
+                (ghost_interpolated[0] == pacman_interpolated[0])):
+            return True
+        return False

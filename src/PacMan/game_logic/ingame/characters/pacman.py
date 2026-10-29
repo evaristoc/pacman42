@@ -80,6 +80,8 @@ class Pacman:
             interpolation_amount = (delta_ticks % self.speed) * (1 / self.speed)
             direction_x = self.new_position.get_position_from_tile()[0] - self.old_position.get_position_from_tile()[0]
             direction_y = self.new_position.get_position_from_tile()[1] - self.old_position.get_position_from_tile()[1]
+            if direction_x > 1 or direction_y > 1:
+                raise ValueError("Direction can never be more than 1.")
             interpolated_x = direction_x * interpolation_amount
             interpolated_y = direction_y * interpolation_amount
             old_position_x, old_position_y = self.old_position.get_position_from_tile()
@@ -101,6 +103,7 @@ class Pacman:
             self.new_position = self.old_position
 
     def pacman_dies(self) -> None:
-        self.position = self.spawn_point
+        self.new_position = self.spawn_point
+        self.old_position = self.spawn_point
         print(
-            f"I'm Pacman. I died and am now at {self.position.get_position_from_tile()}.")
+            f"I'm Pacman. I died and am now at {self.new_position.get_position_from_tile()}.")
