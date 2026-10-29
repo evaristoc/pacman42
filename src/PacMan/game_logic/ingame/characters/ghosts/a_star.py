@@ -77,6 +77,8 @@ def AStar_next_move(
     target: tuple[int, int],
     maze: Maze
 ) -> tuple[int, int]:
+    if position == target:
+        return (0, 0)
     optimal_path_node = _find_path(position=position,
                                    target=target,
                                    maze=maze)

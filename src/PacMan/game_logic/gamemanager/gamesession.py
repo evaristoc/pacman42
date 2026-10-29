@@ -35,7 +35,7 @@ class GameSession:
             self.pacman.update(delta_ticks=delta_ticks,
                             new_direction=pacman_move)
             self.ghost_mng.update(delta_ticks,
-                                self.pacman.position.get_position_from_tile())
+                                self.pacman.new_position.get_position_from_tile())
             game_over_and_level_won = self.collision_mng.update()
         return game_over_and_level_won
 
@@ -43,9 +43,9 @@ class GameSession:
 
 class GameSessionFactory:
     GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 10, 2: 10, 3: 6}
-    PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 10, 2: 10, 3: 10}
+    PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 7, 2: 10, 3: 10}
     MAZE_SIZENSEED_PER_LEVEL: dict[int, tuple[int, int]] = {
-        1: (10, 42), 2: (9, 45), 3: (8, 50)}
+        1: (7, 80), 2: (9, 45), 3: (8, 50)}
 
     def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player) -> GameSession:
         if not isinstance(level, int):

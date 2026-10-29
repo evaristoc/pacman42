@@ -10,7 +10,7 @@ class Player:
     """
     name: str
     score: int = 0
-    lives: int = 3
+    lives: int = 5
     level: int = 0
 
     def to_dict(self) -> dict:
@@ -40,3 +40,7 @@ class Player:
             self.lives -= 1
         print(f"Remaining lives: {self.lives}")
         return 1
+
+    def set_name(self, new_name: str) -> None:
+        self.name = new_name
+        print(f"New name registered for player: {self.name}")

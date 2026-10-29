@@ -30,11 +30,11 @@ class CollisionManager:
     def check_pacman_pellet_collisions(self) -> tuple[bool, bool | None]:
         game_over = False
         level_won = None
-        if self.pacman.position.pellet_state == PelletState.NORMALPELLET:
+        if self.pacman.new_position.pellet_state == PelletState.NORMALPELLET:
             self.scoremng.normal_pellet_eaten()
-            self.pacman.position.pellet_eaten_by_pacman()
+            self.pacman.new_position.pellet_eaten_by_pacman()
             print(
-                f"Pacman ate normal pellet at position {self.pacman.position.get_position_from_tile()}")
+                f"Pacman ate normal pellet at position {self.pacman.new_position.get_position_from_tile()}")
             if self.maze.decrement_pellets():
                 return (game_over, level_won)
             else:
@@ -42,12 +42,12 @@ class CollisionManager:
                 level_won = True
                 return (game_over, level_won)
 
-        elif self.pacman.position.pellet_state == PelletState.POWERPELLET:
+        elif self.pacman.new_position.pellet_state == PelletState.POWERPELLET:
             self.scoremng.super_pellet_eaten()
             self.ghostmng.big_pellet_activated()
-            self.pacman.position.pellet_eaten_by_pacman()
+            self.pacman.new_position.pellet_eaten_by_pacman()
             print(
-                f"Pacman ate super pellet at position {self.pacman.position.get_position_from_tile()}")
+                f"Pacman ate super pellet at position {self.pacman.new_position.get_position_from_tile()}")
             if self.maze.decrement_pellets():
                 return (game_over, level_won)
             else:
@@ -59,9 +59,9 @@ class CollisionManager:
     def check_pacman_ghost_collisions(self) -> tuple[bool, bool | None]:
         game_over = False
         level_won = None
-        pacman_position = self.pacman.position
+        pacman_position = self.pacman.interpolated_position
         for ghost in self.ghostmng.ghosts.values():
-            if ghost.position == pacman_position and ghost.state:
+            if ghost.interpolated_position == pacman_position and ghost.state:
                 ghost_dies = ghost.collide_with_pacman_and_does_ghost_die()
                 if ghost_dies:
                     self.scoremng.ghost_eaten()
