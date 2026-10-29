@@ -42,7 +42,7 @@ class Ghost:
             position=self.spawn_point)
         self.old_position: Tile = self.maze.return_tile_from_position(
             position=self.spawn_point)
-        self.interpolated_position: tuple[int, int]
+        self.interpolated_position: tuple[float, float]
         self.speed: int = speed
         self.state: IGhostState = ChasingGhostState(self.strategy, speed=speed)
         self.first_run = True
@@ -149,7 +149,8 @@ class Ghost:
             old_position_x, old_position_y = self.old_position.get_position_from_tile()
 
             self.interpolated_position = (
-                old_position_x + interpolated_x, old_position_y + interpolated_y)
+                old_position_x + interpolated_x,
+                old_position_y + interpolated_y)
         else:
             self.interpolated_position = self.old_position.get_position_from_tile()
 
