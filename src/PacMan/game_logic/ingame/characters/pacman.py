@@ -4,10 +4,15 @@ from dataclasses import dataclass
 
 PACMAN_TICK_SPEED = 10
 
+
 @dataclass(frozen=True)
 class PacmanSnapshot:
-    direction: tuple[float, float]
-    position: tuple[float, float]
+    direction: tuple[int, int]
+    interpolation: tuple[float, float]
+    position_coordinate: tuple[float, float]
+    previous_tile: Tile
+    next_tile: Tile
+
 
 class Pacman:
     """Represents Pac-Man, the player-controlled character in the game.
@@ -29,7 +34,9 @@ class Pacman:
         self.speed = speed
         self.maze: Maze = maze
         self.spawn_point = self._get_spawn_point()
-        self.interpolated_position: tuple[float, float] = self.spawn_point.get_position_from_tile()
+        self.interpolation: tuple[float, float] = (0, 0)
+        self.interpolated_position: tuple[float,
+                                          float] = self.spawn_point.get_position_from_tile()
         self.new_position: Tile = None
         self.old_position: Tile = self.spawn_point
         self.first_run: bool = True
@@ -75,8 +82,12 @@ class Pacman:
         print(f"{delta_ticks}: I'm {self.__class__.__name__}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}. My direction is {self.direction}")
 
     def view(self) -> PacmanSnapshot:
-        return PacmanSnapshot(direction=self.direction, position=self.interpolated_position)
-    
+        return PacmanSnapshot(direction=self.direction,
+                              interpolation=self.interpolation,
+                              position_coordinate=self.interpolated_position,
+                              previous_tile=self.old_position,
+                              next_tile=self.new_position)
+
     def _get_spawn_point(self) -> Tile:
         x_coordinate = (self.maze.width - 1) // 2
         y_coordinate = (self.maze.height - 1) - (self.maze.height // 5)
@@ -85,16 +96,21 @@ class Pacman:
 
     def _move_interpolate(self, delta_ticks: int) -> None:
         if not self.old_position == self.new_position:
-            interpolation_amount = (delta_ticks % self.speed) * (1 / self.speed)
-            direction_x = self.new_position.get_position_from_tile()[0] - self.old_position.get_position_from_tile()[0]
-            direction_y = self.new_position.get_position_from_tile()[1] - self.old_position.get_position_from_tile()[1]
+            interpolation_amount = (delta_ticks %
+                                    self.speed) * (1 / self.speed)
+            direction_x = self.new_position.get_position_from_tile(
+            )[0] - self.old_position.get_position_from_tile()[0]
+            direction_y = self.new_position.get_position_from_tile(
+            )[1] - self.old_position.get_position_from_tile()[1]
             if direction_x > 1 or direction_y > 1:
                 raise ValueError("Direction can never be more than 1.")
             interpolated_x = direction_x * interpolation_amount
             interpolated_y = direction_y * interpolation_amount
+            self.interpolation = (interpolated_x, interpolated_y)
             old_position_x, old_position_y = self.old_position.get_position_from_tile()
 
-            self.interpolated_position = (old_position_x + interpolated_x, old_position_y + interpolated_y)
+            self.interpolated_position = (
+                old_position_x + interpolated_x, old_position_y + interpolated_y)
         else:
             self.interpolated_position = self.old_position.get_position_from_tile()
 

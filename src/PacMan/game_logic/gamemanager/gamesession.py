@@ -10,10 +10,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class GameSessionSnapshot:
-    maze: MazeSnapshot
     timemng: TimeMngSnapshot
     ghostmng: GhostMngSnapshot
     pacman: PacmanSnapshot
+    maze: MazeSnapshot
 
 
 class GameSession:
@@ -27,11 +27,11 @@ class GameSession:
                  pacman: Pacman,
                  ghostmng: GhostManager,
                  collisionmng: CollisionManager) -> None:
-        self.maze: Maze = maze
         self.timemng: TimeManager = timemng
         self.pacman: Pacman = pacman
         self.ghost_mng: GhostManager = ghostmng
         self.collision_mng: CollisionManager = collisionmng
+        self.maze: Maze = maze
 
     def update(self, *,
                delta_ticks: int,
@@ -54,10 +54,10 @@ class GameSession:
         timemng_ss = self.timemng.view()
         ghost_mng_ss = self.ghost_mng.view()
         pacman_ss = self.pacman.view()
-        return GameSessionSnapshot(maze=maze_ss,
+        return GameSessionSnapshot(pacman=pacman_ss,
                                    timemng=timemng_ss,
                                    ghostmng=ghost_mng_ss,
-                                   pacman=pacman_ss)
+                                   maze=maze_ss)
 
 
 class GameSessionFactory:
