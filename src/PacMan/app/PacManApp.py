@@ -54,7 +54,7 @@ class PacManApp:
             self.pygmlx = assembler.init_engine(config.size,
                                                 2 * bottom)
             self.glm = assembler.init_glm()
-            self.maze = self.glm.maze
+            self.maze = self.glm.session.maze
             self.board_img = assembler.init_board(size)
             rsized = self.drawer.resized
             self.ghosts_imgs = assembler.upload_imgs("ghosts",

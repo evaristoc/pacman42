@@ -19,13 +19,13 @@ class GLMSnapshot:
 
 
 class GameLogicManager:
-    def __init__(self) -> None:
+    def __init__(self, start_state: IGameState) -> None:
         self.ticks: int = 0
         self.player = Player("anonymous")
         self.scoremng = ScoreManager(self.player)
         self.session: GameSession | None = None
         self.menu: IMenu | None = None
-        self.state: IGameState = MainMenuState(self)
+        self.state: IGameState = start_state(self)
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[Any, Any] | None] | None

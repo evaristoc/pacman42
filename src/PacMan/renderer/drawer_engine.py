@@ -210,15 +210,15 @@ class DrawerEngine:
     def draw_cell_interior(
         self,
         target_img: PyGMLXImageEmulator,
-        # cell: Tile,
-        cell: tuple[int, int],
+        cell: Tile,
+        # cell: tuple[int, int],
         color: int
     ) -> None:
         """Draw interior area of a cell using computed geometry."""
-        # x_cell = cell.cell_position_x
-        # y_cell = cell.cell_position_y
-        x_cell = cell[0]
-        y_cell = cell[1]
+        x_cell = cell.cell_position_x
+        y_cell = cell.cell_position_y
+        # x_cell = cell[0]
+        # y_cell = cell[1]
         inter = self.__interior_cell_size
         wall = self.__wall_thickness
         pad = self.__padding

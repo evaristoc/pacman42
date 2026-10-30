@@ -64,7 +64,7 @@ class GameSessionFactory:
     GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 10, 2: 10, 3: 6}
     PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 7, 2: 10, 3: 10}
     MAZE_SIZENSEED_PER_LEVEL: dict[int, tuple[int, int]] = {
-        1: (7, 80), 2: (9, 45), 3: (8, 50)}
+        1: (10, 80), 2: (10, 45), 3: (10, 50)}
 
     def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player) -> GameSession:
         if not isinstance(level, int):

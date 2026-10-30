@@ -12,6 +12,7 @@ from src.PacMan.renderer.renderer_engine import (PyGMiniLibXEmulator,
                                                  PyGMLXImageEmulator,
                                                  PyMLXPNGEmulator,
                                                  PyGMLXTextEmulator)
+from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class RendererAssembler:
 
     def init_glm(self) -> GameLogicManager:
         try:
-            return GameLogicManager(self._config.nb_cells)
+            return GameLogicManager(InGameState)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")

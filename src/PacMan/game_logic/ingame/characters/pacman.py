@@ -37,7 +37,7 @@ class Pacman:
         self.interpolation: tuple[float, float] = (0, 0)
         self.interpolated_position: tuple[float,
                                           float] = self.spawn_point.get_position_from_tile()
-        self.new_position: Tile = None
+        self.new_position: Tile = self.spawn_point
         self.old_position: Tile = self.spawn_point
         self.first_run: bool = True
 

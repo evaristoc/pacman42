@@ -115,14 +115,14 @@ class PlayingAction(IAction):
         # -- pacman --
         obs._drawer.draw_cell_interior(
             obs._registry["board"],
-            obs._glm.character_manager.pacman.old_position,
+            obs._glm.session.pacman.new_position,
             0x000
         )
         # -- ghosts --
-        for g in obs._glm.character_manager.ghost_mng.ghosts:
+        for g in obs._glm.session.ghost_mng.ghosts:
             obs._drawer.draw_cell_interior(
                 obs._registry["board"],
-                obs._glm.character_manager.ghost_mng.ghosts[g].old_position,
+                obs._glm.session.ghost_mng.ghosts[g].new_position,
                 0x000
             )
         obs._mlx.pygmlx_put_image_to_window(
@@ -143,18 +143,18 @@ class PlayingAction(IAction):
         print(pm)
         obs._mlx.pygmlx_put_image_to_window(
             pm,
-            obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
-            obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[1]) + obs._drawer.bottom_h
+            obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_x),
+            obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_y) + obs._drawer.bottom_h
         )
         obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
 
-        # GHOSTS ###
-        # for g in obs._glm.character_manager.ghost_mng.ghosts:
-        #     obs._mlx.pygmlx_put_image_to_window(
-        #         obs._registry["ghosts"][g.name],
-        #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
-        #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
-        #     )
+        # # GHOSTS ###
+        for g in obs._glm.session.ghost_mng.ghosts:
+            obs._mlx.pygmlx_put_image_to_window(
+                obs._registry["ghosts"][g.name],
+                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x),
+                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + obs._drawer.bottom_h
+            )
 
         # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
         #     obs._mlx.pygmlx_put_image_to_window(
