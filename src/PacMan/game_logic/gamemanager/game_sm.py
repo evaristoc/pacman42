@@ -32,10 +32,6 @@ class IGameState(ABC):
                      ) -> Union["IGameState", None]:
         pass
 
-    @abstractmethod
-    def subscribe(self) -> None:
-        pass
-
 
 class MainMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
@@ -76,9 +72,6 @@ class MainMenuState(IGameState):
                 return event
         return list(events.keys())[0]
 
-    def subscribe(self) -> None:
-        return None
-
 
 class CheatingMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
@@ -114,9 +107,6 @@ class CheatingMenuState(IGameState):
                 return event
         return list(events.keys())[0]
 
-    def subscribe(self) -> None:
-        return None
-
 
 class HighScoreMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
@@ -147,9 +137,6 @@ class HighScoreMenuState(IGameState):
             if event in events:
                 return event
         return list(events.keys())[0]
-
-    def subscribe(self) -> None:
-        return None
 
 
 class PauseMenuState(IGameState):
@@ -188,15 +175,6 @@ class PauseMenuState(IGameState):
             if event in events:
                 return event
         return list(events.keys())[0]
-
-    def subscribe(self) -> None:
-        for subscriber in self.context.subscribers:
-            if self.context.session:
-                if self.context.session.timemng:
-                    self.context.session.timemng.subscribe(subscriber)
-                else:
-                    raise GameStateError("Tried to subscribe"
-                                         " to a nonexistent time manager.")
 
 
 class InGameState(IGameState):
@@ -276,21 +254,12 @@ class InGameState(IGameState):
         return None
 
     def _increment_level(self) -> None:
-        if self.context.level == MAX_LEVEL:
+        if self.context.player.level == MAX_LEVEL:
             raise RuntimeError(
                 "Can't increment level. Level is already final level.")
-        self.context.level += 1
+        self.context.player.level += 1
         self.context.session = self.context.create_game_session()
         self.context.state = InGameState(self.context)
-
-    def subscribe(self) -> None:
-        for subscriber in self.context.subscribers:
-            if self.context.session:
-                if self.context.session.timemng:
-                    self.context.session.timemng.subscribe(subscriber)
-                else:
-                    raise GameStateError("Tried to subscribe"
-                                         " to a nonexistent time manager.")
 
 
 class HighScoreRegisterState(InGameState):
@@ -330,6 +299,3 @@ class HighScoreRegisterState(InGameState):
             if event in events:
                 return event
         return list(events.keys())[0]
-
-    def subscribe(self) -> None:
-        return None

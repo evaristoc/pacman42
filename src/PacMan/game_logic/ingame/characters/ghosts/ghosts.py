@@ -7,6 +7,7 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
                                                                     ChasingGhostState)
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
+from dataclasses import dataclass
 
 from enum import Enum
 
@@ -22,6 +23,12 @@ class GhostName(Enum):
 class GhostError(Exception):
     """Base exception for ghost-related errors."""
     pass
+
+
+@dataclass(frozen=True)
+class GhostSnapShot:
+    state: str
+    position: tuple[float, float]
 
 
 class Ghost:
@@ -47,7 +54,8 @@ class Ghost:
             position=self.spawn_point)
         self.old_position: Tile = self.maze.return_tile_from_position(
             position=self.spawn_point)
-        self.interpolated_position: tuple[float, float]
+        self.interpolated_position: tuple[float,
+                                          float] = self.old_position.get_position_from_tile()
         self.speed: int = speed
         self.state: IGhostState = ChasingGhostState(self)
         self.first_run = True
@@ -77,6 +85,10 @@ class Ghost:
             self._move_interpolate(delta_ticks=delta_ticks)
 
         print(f"{delta_ticks}: I'm {self.name.name}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}. My state is {self.state.__class__.__name__}")
+
+    def view(self) -> GhostSnapShot:
+        return GhostSnapShot(state=self.state.__class__.__name__,
+                             position=self.interpolated_position)
 
     def big_pellet_activated(self) -> None:
         self.state = self.state.big_pellet_activated()
@@ -157,6 +169,11 @@ class GhostFactory:
         return ghosts
 
 
+@dataclass(frozen=True)
+class GhostMngSnapshot:
+    ghost_snapshots: dict[str, GhostSnapShot]
+
+
 class GhostManager:
     def __init__(self, maze: Maze, speed: int) -> None:
         self.ghost_factory: GhostFactory = GhostFactory(maze, speed)
@@ -172,6 +189,16 @@ class GhostManager:
                          pacman_position=pacman_position,
                          pacman_direction=pacman_direction)
 
+    def view(self) -> GhostMngSnapshot:
+        return GhostMngSnapshot(ghost_snapshots={ghost_name.name: ghost.view() for ghost_name, ghost in self.ghosts.items()})
+
     def big_pellet_activated(self) -> None:
         for ghost in self.ghosts.values():
             ghost.big_pellet_activated()
+
+
+if __name__ == '__main__':
+    from src.PacMan.game_logic.ingame.maze.maze import MazeFactory
+    mf = MazeFactory(nb_cells=12)
+    gm = GhostManager(maze=mf.make_maze(), speed=10)
+    print(gm.view())

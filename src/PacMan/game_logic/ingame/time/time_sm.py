@@ -46,7 +46,6 @@ class CountDownState(ITimeState):
             self.context._countdown_time_remaining = COUNTDOWN_TIME
             self.context._discrete_cd_time = COUNTDOWN_TIME
             self.context._counting_down = True
-            self.context.notify({"Countdown:": self.context._discrete_cd_time})
         else:
             if self.context._countdown_end_time:
                 new_time = self.context._countdown_end_time - time.time()
@@ -63,8 +62,6 @@ class CountDownState(ITimeState):
                 new_time_int = int(new_time)
                 if new_time_int != self.context._discrete_cd_time:
                     self.context._discrete_cd_time = new_time_int
-                    self.context.notify(
-                        {"Countdown:": self.context._discrete_cd_time})
         return (game_over, None)
 
     def pause(self) -> None:
@@ -87,8 +84,6 @@ class LevelActiveState(ITimeState):
         if not self.context._level_end_time:
             self.context._level_end_time = time.time() + LEVEL_TIME
             self.context._discrete_level_time = LEVEL_TIME
-            self.context.notify(
-                {"Time_remaing:": self.context._discrete_level_time})
         new_time = self.context._level_end_time - time.time()
         if new_time < 0:
             self.context.level_running = False
@@ -100,8 +95,6 @@ class LevelActiveState(ITimeState):
             new_time_int = int(new_time)
             if new_time_int != self.context._discrete_level_time:
                 self.context._discrete_level_time = new_time_int
-                self.context.notify(
-                    {"Time_remaing:": self.context._discrete_level_time})
             return (game_over, None)
 
     def pause(self) -> None:

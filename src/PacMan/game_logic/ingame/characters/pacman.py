@@ -1,8 +1,13 @@
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
+from dataclasses import dataclass
 
 PACMAN_TICK_SPEED = 10
 
+@dataclass(frozen=True)
+class PacmanSnapshot:
+    direction: tuple[float, float]
+    position: tuple[float, float]
 
 class Pacman:
     """Represents Pac-Man, the player-controlled character in the game.
@@ -69,6 +74,9 @@ class Pacman:
             self._move_interpolate(delta_ticks=delta_ticks)
         print(f"{delta_ticks}: I'm {self.__class__.__name__}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}. My direction is {self.direction}")
 
+    def view(self) -> PacmanSnapshot:
+        return PacmanSnapshot(direction=self.direction, position=self.interpolated_position)
+    
     def _get_spawn_point(self) -> Tile:
         x_coordinate = (self.maze.width - 1) // 2
         y_coordinate = (self.maze.height - 1) - (self.maze.height // 5)

@@ -1,6 +1,14 @@
 from dataclasses import dataclass
 
 
+@dataclass(frozen=True)
+class PlayerSnapshot:
+    name: str
+    score: int
+    lives: int
+    level: int
+
+
 @dataclass
 class Player:
     """Represents a player profile with name, score, and lives.
@@ -11,7 +19,7 @@ class Player:
     name: str
     score: int = 0
     lives: int = 5
-    level: int = 0
+    level: int = 1
 
     def to_dict(self) -> dict:
         """Serialize player data to a dictionary for storage.
@@ -32,6 +40,12 @@ class Player:
             Player: A new Player instance with the data from the dictionary.
         """
         return cls(**data)
+
+    def view(self) -> PlayerSnapshot:
+        return PlayerSnapshot(name=self.name,
+                              score=self.score,
+                              lives=self.lives,
+                              level=self.level)
 
     def decrement_lives(self) -> int | None:
         if self.lives == 0:

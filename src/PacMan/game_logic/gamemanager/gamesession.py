@@ -1,10 +1,19 @@
-from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory
-from src.PacMan.game_logic.ingame.time.time import TimeManager
-from src.PacMan.game_logic.ingame.characters.pacman import Pacman
-from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager
+from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory, MazeSnapshot
+from src.PacMan.game_logic.ingame.time.time import TimeManager, TimeMngSnapshot
+from src.PacMan.game_logic.ingame.characters.pacman import Pacman, PacmanSnapshot
+from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager, GhostMngSnapshot
 from src.PacMan.game_logic.ingame.collision import CollisionManager
 from src.PacMan.game_logic.score_mng import ScoreManager
 from src.PacMan.game_logic.player import Player
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class GameSessionSnapshot:
+    maze: MazeSnapshot
+    timemng: TimeMngSnapshot
+    ghostmng: GhostMngSnapshot
+    pacman: PacmanSnapshot
 
 
 class GameSession:
@@ -39,6 +48,16 @@ class GameSession:
                                   self.pacman.direction)
             game_over_and_level_won = self.collision_mng.update()
         return game_over_and_level_won
+
+    def view(self) -> GameSessionSnapshot:
+        maze_ss = self.maze.view()
+        timemng_ss = self.timemng.view()
+        ghost_mng_ss = self.ghost_mng.view()
+        pacman_ss = self.pacman.view()
+        return GameSessionSnapshot(maze=maze_ss,
+                                   timemng=timemng_ss,
+                                   ghostmng=ghost_mng_ss,
+                                   pacman=pacman_ss)
 
 
 class GameSessionFactory:
