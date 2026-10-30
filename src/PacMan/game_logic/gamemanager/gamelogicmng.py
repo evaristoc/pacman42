@@ -103,11 +103,7 @@ def test() -> None:
                 event = None
         gamelogicmanager.update_logic(event)
         snapshot = gamelogicmanager.view()
-        with open('output.txt', 'a') as f:
-            print(snapshot, file=f)
-        if type(state) is HighScoreRegisterState:
-            gamelogicmanager.update_logic(
-                events={HighScoreRegisterEvents.REGISTER: {'name': "Dirky"}})
+        print(snapshot.session.pacman)
         time.sleep(0.3)
         steps -= 1
 

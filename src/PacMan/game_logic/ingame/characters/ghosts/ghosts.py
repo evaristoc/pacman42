@@ -85,6 +85,7 @@ class Ghost:
             self.first_run = False
             self._process_move(move)
             self.interpolated_position = self.old_position.get_position_from_tile()
+            self.interpolation = (0, 0)
         else:
             self._move_interpolate(delta_ticks=delta_ticks)
 
