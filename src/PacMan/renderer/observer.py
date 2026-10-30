@@ -1,4 +1,5 @@
 from __future__ import annotations
+import pygame
 from pygame import Event
 from typing import TypeVar, Type, Any, Protocol, TypeAlias, TYPE_CHECKING
 from src.PacMan.validation_contracts.event_enums import (
@@ -24,64 +25,133 @@ class IAction(Protocol):
         ...
 
 
-class PlayingAction:
+# class PlayingActionPacman:
+#     def action(
+#             self,
+#             obs: "Observer"
+#             ) -> None:
+#         print(f"this is {self.__class__.__name__}")
+#         print(obs._registry)
+#         print(obs._glm.character_manager.pacman.position)
+#         print(obs._glm.character_manager.ghost_mng.ghosts)
+#         # # PACMAN ###
+#         pm = obs._registry["pacman"]["moves"].pop()
+#         obs._mlx.pygmlx_put_image_to_window(
+#             pm,
+#             obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
+#             obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[1]) + obs._drawer.bottom_h
+#         )
+#         obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
+
+#         # # GHOSTS ###
+#         # for g in obs._glm.character_manager.ghost_mng.ghosts:
+#         #     obs._mlx.pygmlx_put_image_to_window(
+#         #         obs._registry["ghosts"][g.name],
+#         #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
+#         #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
+#         #     )
+
+
+# class PlayingActionGhosts:
+#     def action(
+#             self,
+#             obs: "Observer"
+#             ) -> None:
+#         # GHOSTS ###
+#         for g in obs._glm.character_manager.ghost_mng.ghosts:
+#             obs._mlx.pygmlx_put_image_to_window(
+#                 obs._registry["ghosts"][g.name],
+#                 obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
+#                 obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
+#             )
+
+
+# class PlayingActionBoard:
+#     def action(
+#             self,
+#             obs: "Observer"
+#             ) -> None:
+#         # INTERIOR CELLS ###
+#         # -- pacman --
+#         obs._drawer.draw_cell_interior(
+#             obs._registry["board"],
+#             obs._glm.character_manager.pacman.old_position,
+#             0x000
+#         )
+#         # -- ghosts --
+#         for g in obs._glm.character_manager.ghost_mng.ghosts:
+#             obs._drawer.draw_cell_interior(
+#                 obs._registry["board"],
+#                 obs._glm.character_manager.ghost_mng.ghosts[g].old_position,
+#                 0x000
+#             )
+#         obs._mlx.pygmlx_put_image_to_window(
+#             obs._registry["board"],
+#             obs._drawer.margin / 2,
+#             obs._drawer.margin / 2 + obs._drawer.bottom_h
+#         )
+#         # MENUS ###
+#         # # -- hub --
+#         # obs._mlx.pygmlx_put_image_to_window(
+#         #     obs._registry["menus"]["hub"],
+#         #     obs._drawer.margin / 2,
+#         #     obs._drawer.margin / 2 + obs._mlx.height
+#         # )
+
+#         # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
+#         #     obs._mlx.pygmlx_put_image_to_window(
+#         #         obs._registry["menus"]["start"][img],
+#         #         int(obs._drawer.margin / 2) + 200,
+#         #         int(obs._drawer.margin / 2) + obs._drawer.bottom_h + i * 100
+#         #         ) 
+
+
+class PlayingAction(IAction):
     def action(
             self,
-            obs: "Observer"
-            ) -> None:
-        print(f"this is {self.__class__.__name__}")
-        print(obs._registry)
-        print(obs._glm.character_manager.pacman.position)
-        print(obs._glm.character_manager.ghost_mng.ghosts)
+            obs: Observer
+    ) -> None:
         # INTERIOR CELLS ###
         # -- pacman --
-        obs.drawer.draw_cell_interior(
+        obs._drawer.draw_cell_interior(
             obs._registry["board"],
             obs._glm.character_manager.pacman.old_position,
             0x000
         )
         # -- ghosts --
         for g in obs._glm.character_manager.ghost_mng.ghosts:
-            obs.drawer.draw_cell_interior(
+            obs._drawer.draw_cell_interior(
                 obs._registry["board"],
                 obs._glm.character_manager.ghost_mng.ghosts[g].old_position,
                 0x000
             )
         obs._mlx.pygmlx_put_image_to_window(
             obs._registry["board"],
-            obs.drawer.margin / 2,
-            obs.drawer.margin / 2 + obs.drawer.bottom_h
+            obs._drawer.margin / 2,
+            obs._drawer.margin / 2 + obs._drawer.bottom_h
         )
         # MENUS ###
         # # -- hub --
         # obs._mlx.pygmlx_put_image_to_window(
         #     obs._registry["menus"]["hub"],
-        #     obs.drawer.margin / 2,
-        #     obs.drawer.margin / 2 + obs._mlx.height
+        #     obs._drawer.margin / 2,
+        #     obs._drawer.margin / 2 + obs._mlx.height
         # )
-        # # PACMAN ###
-        pm = obs._registry["pacman"]["moves"].pop()
-        obs._mlx.pygmlx_put_image_to_window(
-            pm,
-            obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
-            obs.drawer.next_char_coord(obs._glm.character_manager.pacman.position[1]) + obs.drawer.bottom_h
-        )
-        obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
 
         # GHOSTS ###
         for g in obs._glm.character_manager.ghost_mng.ghosts:
             obs._mlx.pygmlx_put_image_to_window(
                 obs._registry["ghosts"][g.name],
-                obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
-                obs.drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs.drawer.bottom_h
+                obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
+                obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
             )
 
-        for i, img in enumerate(obs._registry["menus"]["start"].keys()):
-            obs._mlx.pygmlx_put_image_to_window(
-                obs._registry["menus"]["start"][img],
-                int(obs.drawer.margin / 2) + 200,
-                int(obs.drawer.margin / 2) + obs.drawer.bottom_h + i * 100
-                ) 
+        # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
+        #     obs._mlx.pygmlx_put_image_to_window(
+        #         obs._registry["menus"]["start"][img],
+        #         int(obs._drawer.margin / 2) + 200,
+        #         int(obs._drawer.margin / 2) + obs._drawer.bottom_h + i * 100
+        #         )         
 
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
@@ -97,7 +167,9 @@ class Observer:
         self._registry: dict[str, Any] | None = None
         self._mlx = mlx
         self._glm = glm
-        self.drawer = drawer
+        self._drawer = drawer
+        self.event_queue: list[Event] = []
+        
 
     def register_assets(self, key: str, asset: dict[str, Any]) -> None:
         if not self._registry:
@@ -105,11 +177,19 @@ class Observer:
         # print(asset)
         self._registry[key] = asset
 
-    def actions(self,
-                event: Event | None) -> None:
-        self._glm.update_logic(self._translate_event(event))
+    def _actions(self,
+                 msgs: EventMsg | None) -> None:
+        self._glm.update_logic(msgs)
         if isinstance(self._glm.state, IGameState):
             self.action = self._get_action(state=self._glm.state)().action(self)
+
+    def event_queue_loop(
+            self
+    ) -> EventMsg:
+        msgs: EventMsg = {}
+        for event in self.event_queue.get():
+            msgs = self._translate_events(event, msgs)
+        self._actions(msgs)
 
     def _get_action(
             self,
@@ -117,17 +197,20 @@ class Observer:
             ) -> Type[T]:
         return HANDLER_REGISTRY[type(state)]
 
-    def _translate_event(self,
-                         event: Event
-                         ) -> EventMsg | None:
-        events: EventMsg = {}
-        if not events:
+    def _translate_events(self,
+                          event: Event,
+                          msgs: EventMsg
+                          ) -> EventMsg:
+        if not event:
             return
         if event.K_DOWN:
-            events[InGameEvents.PACMAN_SOUTH] = None
+            msgs[InGameEvents.PACMAN_SOUTH] = None
         if event.K_UP:
-            events[InGameEvents.PACMAN_NORTH] = None
+            msgs[InGameEvents.PACMAN_NORTH] = None
         if event.K_LEFT:
-            events[InGameEvents.PACMAN_WEST] = None
+            msgs[InGameEvents.PACMAN_WEST] = None
         if event.K_RIGHT:
-            events[InGameEvents.PACMAN_EAST] = None
+            msgs[InGameEvents.PACMAN_EAST] = None
+        if event.K_SPACE:
+            msgs[InGameEvents.PAUSE] = None
+        return msgs
