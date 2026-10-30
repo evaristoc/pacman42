@@ -8,7 +8,7 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
 from dataclasses import dataclass
-
+import random
 from enum import Enum
 
 
@@ -81,6 +81,8 @@ class Ghost:
         if new_state:
             self.state = new_state
         if move or self.first_run:
+            if move == (0, 0):
+                move = random.choice(self.new_position.get_open_walls())
             self.old_position = self.new_position
             self.first_run = False
             self._process_move(move)
@@ -88,8 +90,6 @@ class Ghost:
             self.interpolation = (0, 0)
         else:
             self._move_interpolate(delta_ticks=delta_ticks)
-
-        print(f"{delta_ticks}: I'm {self.name.name}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}. My state is {self.state.__class__.__name__}")
 
     def view(self) -> GhostSnapShot:
         return GhostSnapShot(state=self.state.__class__.__name__,

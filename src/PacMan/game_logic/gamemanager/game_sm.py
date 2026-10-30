@@ -23,7 +23,7 @@ class GameStateError(Exception):
 class IGameState(ABC):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
-        print(f"GAME TRANSITION to {self.__class__.__name__}")
+
 
     @abstractmethod
     def update_logic(self,
@@ -36,7 +36,6 @@ class IGameState(ABC):
 class MainMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
-        print(f"GAME TRANSITION to {self.__class__.__name__}")
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
@@ -76,7 +75,6 @@ class MainMenuState(IGameState):
 class CheatingMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
-        print(f"GAME TRANSITION to {self.__class__.__name__}")
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
@@ -111,7 +109,6 @@ class CheatingMenuState(IGameState):
 class HighScoreMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
-        print(f"GAME TRANSITION to {self.__class__.__name__}")
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
@@ -265,8 +262,6 @@ class InGameState(IGameState):
 class HighScoreRegisterState(InGameState):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
-        print("GAAAMEEE OVERRRRRR")
-        print(f"GAME TRANSITION to {self.__class__.__name__}")
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,

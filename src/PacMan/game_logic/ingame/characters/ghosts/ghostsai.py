@@ -172,7 +172,6 @@ class InkyAI(AIStrategy):
                 temp_tile = self.maze.return_tile_from_position(
                     position=new_target)
                 if temp_tile:
-                    print("whooooowww")
                     return temp_tile.get_position_from_tile()
         return pacman_pos
 
