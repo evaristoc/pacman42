@@ -80,7 +80,6 @@ class Pacman:
             self.interpolation = (0, 0)
         else:
             self._move_interpolate(delta_ticks=delta_ticks)
-        print(f"{delta_ticks}: I'm {self.__class__.__name__}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}. My direction is {self.direction}")
 
     def view(self) -> PacmanSnapshot:
         return PacmanSnapshot(direction=self.direction,
@@ -130,5 +129,5 @@ class Pacman:
     def pacman_dies(self) -> None:
         self.new_position = self.spawn_point
         self.old_position = self.spawn_point
-        print(
-            f"I'm Pacman. I died and am now at {self.new_position.get_position_from_tile()}.")
+        self.interpolated_position = self.old_position.get_position_from_tile()
+        self.interpolation = (0, 0)

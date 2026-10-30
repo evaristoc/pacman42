@@ -52,9 +52,7 @@ class Player:
             return None
         else:
             self.lives -= 1
-        print(f"Remaining lives: {self.lives}")
         return 1
 
     def set_name(self, new_name: str) -> None:
         self.name = new_name
-        print(f"New name registered for player: {self.name}")

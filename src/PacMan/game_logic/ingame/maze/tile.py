@@ -139,7 +139,6 @@ class Tile:
 
     def _set_pellet_state_from_tilebyte(self) -> PelletState:
         if self.tilebyte.bit_count() >= 4:
-            print(self)
             return PelletState.NOPELLET
         temporary_tilebyte = self.tilebyte >> 4 & 0x0F
         if temporary_tilebyte.bit_count() > 1:

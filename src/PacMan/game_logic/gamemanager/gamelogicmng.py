@@ -31,7 +31,6 @@ class GameLogicManager:
                      events: dict[IEventEnums, dict[Any, Any] | None] | None
                      ) -> None:
         self.ticks += 1
-        print(f"ticks: {self.ticks}")
         new_state = self.state.update_logic(events, self.ticks)
         if new_state:
             self.state = new_state
@@ -57,7 +56,6 @@ class GameLogicManager:
                                                          self.player)
 
     def toggle_impotent_ghosts(self) -> None:
-        print("Ghosts would now have been impotent...")
         return
 
     def final_level(self) -> bool:
@@ -85,7 +83,7 @@ def test() -> None:
     while steps > 0:
         snapshot = gamelogicmanager.view()
         event = None
-        if steps % 10 == 0 and steps < 170 and snapshot.game_state == "InGameState":
+        if steps % 10 == 0 and steps < 190 and snapshot.game_state == "InGameState":
             position = gamelogicmanager.session.pacman.new_position.get_position_from_tile()
             tile = gamelogicmanager.session.maze.return_tile_from_position(
                 position=position)
@@ -103,7 +101,6 @@ def test() -> None:
                 event = None
         gamelogicmanager.update_logic(event)
         snapshot = gamelogicmanager.view()
-        print(snapshot.session.pacman)
         time.sleep(0.3)
         steps -= 1
 
