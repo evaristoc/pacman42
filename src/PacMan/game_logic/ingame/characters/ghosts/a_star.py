@@ -1,5 +1,5 @@
-from src.PacMan.game_logic.maze.maze import Maze
-from src.PacMan.game_logic.maze.tile import Tile
+from src.PacMan.game_logic.ingame.maze.maze import Maze
+from src.PacMan.game_logic.ingame.maze.tile import Tile
 from typing import Union
 import heapq
 
@@ -77,6 +77,8 @@ def AStar_next_move(
     target: tuple[int, int],
     maze: Maze
 ) -> tuple[int, int]:
+    if position == target:
+        return (0, 0)
     optimal_path_node = _find_path(position=position,
                                    target=target,
                                    maze=maze)
@@ -89,7 +91,7 @@ def AStar_next_move(
 def _find_path(position: tuple[int, int],
                target: tuple[int, int],
                maze: Maze) -> AStarNode | None:
-    visited = set()
+    visited: set[tuple[int, int]] = set()
     steps = 0
     start_node = AStarNode(position=position,
                            steps=steps,

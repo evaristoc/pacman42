@@ -6,13 +6,14 @@ from src.PacMan.validation_contracts.valid_game_config import (
 from src.PacMan.validation_contracts.parser import DataProcessor
 from src.PacMan.renderer.observer import Observer
 from src.PacMan.renderer.renderer_engine import (
-                                PyGMiniLibXEmulator,
-                                PyGMLXImageEmulator,
-                                PyMLXPNGEmulator,
-                                PyGMLXTextEmulator)
+    PyGMiniLibXEmulator,
+    PyGMLXImageEmulator,
+    PyMLXPNGEmulator,
+    PyGMLXTextEmulator)
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
+from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 logger = logging.getLogger(__name__)
 

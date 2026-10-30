@@ -2,6 +2,8 @@ import logging
 from collections import deque
 from pathlib import Path
 from PIL import Image
+from src.PacMan.renderer.drawer_engine import DrawerEngine
+from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 # from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
