@@ -28,7 +28,10 @@ class GhostError(Exception):
 @dataclass(frozen=True)
 class GhostSnapShot:
     state: str
-    position: tuple[float, float]
+    interpolation: tuple[float, float]
+    position_coordinate: tuple[float, float]
+    previous_tile: Tile
+    next_tile: Tile
 
 
 class Ghost:
@@ -56,6 +59,7 @@ class Ghost:
             position=self.spawn_point)
         self.interpolated_position: tuple[float,
                                           float] = self.old_position.get_position_from_tile()
+        self.interpolation: tuple[float, float] = (0, 0)
         self.speed: int = speed
         self.state: IGhostState = ChasingGhostState(self)
         self.first_run = True
@@ -88,7 +92,10 @@ class Ghost:
 
     def view(self) -> GhostSnapShot:
         return GhostSnapShot(state=self.state.__class__.__name__,
-                             position=self.interpolated_position)
+                             interpolation=self.interpolation,
+                             position_coordinate=self.interpolated_position,
+                             previous_tile=self.old_position,
+                             next_tile=self.new_position)
 
     def big_pellet_activated(self) -> None:
         self.state = self.state.big_pellet_activated()
@@ -119,6 +126,7 @@ class Ghost:
                            self.old_position.get_position_from_tile()[1])
             interpolated_x = direction_x * interpolation_amount
             interpolated_y = direction_y * interpolation_amount
+            self.interpolation = (interpolated_x, interpolated_y)
             old_position_x, old_position_y = self.old_position.get_position_from_tile()
 
             self.interpolated_position = (
