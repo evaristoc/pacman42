@@ -3,7 +3,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from enum import IntEnum
 from typing import Any, Callable, TypeAlias
-
+from src.PacMan.app_config.console import console
+from src.PacMan.renderer.observer import Observer
 
 TLoopHookCB: TypeAlias = Callable[[Any], int]
 PixelBuffer: TypeAlias = np.ndarray
@@ -52,7 +53,8 @@ class PyGMiniLibXEmulator:
         return PyGMLXTextEmulator(
             width=width,
             height=height,
-            font_size=font)
+            font_size=font,
+            color=color)
 
     def pygmlx_put_image_to_window(self,
                                    img: 'PyGMLXImageEmulator',
@@ -107,14 +109,18 @@ class PyGMiniLibXEmulator:
         self._loop_hook = funct_ptr
         self._loop_param = param
 
-    def pygmlx_loop(self) -> None:
+    def pygmlx_loop(self, observer: Observer) -> None:
         clock: pygame.time.Clock = pygame.time.Clock()
-        self.running = True
-        while self.running:
-            event: pygame.event.Event
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
+        running = True
+        while running:
+            # event: pygame.event.Event
+            # observer.actions(None)
+            observer.event_queue = pygame.event.get()
+            running = observer.state_loop()
+            # for event in pygame.event.get():
+            #     if event.type == pygame.QUIT:
+            #         running = False
+            #     # observer.actions(event=event)
             if self._loop_hook is not None:
                 result: int = self.mlx_loop_hook(self._loop_param)
                 if result == 0:
@@ -231,20 +237,25 @@ class PyGMLXTextEmulator(PyGMLXImageEmulator):
         self,
         width: int,
         height: int,
-        font_path: str = "CONSOLAS.TTF",
+        font_path: str = "CONSOLA.TTF",
         font_size: int = 16,
         color: int = 0xFFFFFF
     ) -> None:
         super().__init__(width, height)
-        self.font_path = "../assets/fonts/" + font_path
+        self.font_path = "src/PacMan/assets/fonts/" + font_path  # as it runs from root...
         self.font_size = font_size
         self.color = color
         self._load_font()
 
     def _load_font(self) -> None:
         try:
-            self.font = ImageFont.truetype(self.font_path, self.font_size)
-        except IOError:
+            self.font = ImageFont.truetype(
+                self.font_path,
+                self.font_size)
+        except (IOError, OSError) as err:
+            console.print("[bold yellow] font was not found at: "
+                          f"{self.font_path} --- "
+                          f"setting to default ({err})")
             self.font = ImageFont.load_default()
 
     def pygput_from_text(

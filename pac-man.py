@@ -1,3 +1,4 @@
+
 import logging
 import fire
 from pathlib import Path
@@ -19,12 +20,12 @@ class Controller:
         if not PacMan:
             console.log("[bold red]FATAL: library was not found.[/bold red]")
             raise SystemExit()
-        console.print(PacMan)
+        # console.print(PacMan)
         valconfig = pacman.get_config(path_to_config=path_to_config)
         if not valconfig:
             console.log("[bold red]FATAL: library was not found.[/bold red]")
             raise SystemExit()
-        console.print(valconfig)
+        # console.print(valconfig)
         pacman.load_game(config=valconfig.board)
         pacman.run()
 

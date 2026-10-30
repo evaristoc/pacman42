@@ -1,6 +1,11 @@
 from mazegenerator import MazeGenerator
-from src.PacMan.game_logic.maze.tile import Tile, TileBits
-from typing import Union
+from src.PacMan.game_logic.ingame.maze.tile import Tile, TileBits, TileSnapshot
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class MazeSnapshot:
+    grid: list[list[TileSnapshot]]
 
 
 class Maze:
@@ -18,7 +23,7 @@ class Maze:
     is set and its normal wall bit is cleared.
     """
 
-    def __init__(self, maze: list[list]) -> None:
+    def __init__(self, maze: list[list[int]]) -> None:
         """Initializes the map from a two-dimensional maze grid.
 
         Args:
@@ -30,10 +35,11 @@ class Maze:
         """
         self.height = len(maze)
         self.width = len(maze[0])
-        self.outerbound_maze = self._find_outerbounds(maze)
+        self.outerbound_maze: list[list[int]] = self._find_outerbounds(maze)
         self.grid: list[list[Tile | None]] = self._build_grid()
+        self.pellets_nr: int = self._count_pellets()
 
-    def _find_outerbounds(self, maze: list[list]) -> list[list]:
+    def _find_outerbounds(self, maze: list[list[int]]) -> list[list[int]]:
         """Adds outer-boundary wall bits to the maze cells.
 
         Args:
@@ -50,7 +56,7 @@ class Maze:
         ]
         for i, _ in enumerate(range(self.height)):
             for j, _ in enumerate(range(self.width)):
-                temp_var = maze[i][j]
+                temp_var: int = maze[i][j]
                 if temp_var < 0 or temp_var > 15:
                     raise ValueError(
                         "Invalid value in maze passed to "
@@ -75,20 +81,47 @@ class Maze:
 
         return outerbound_maze
 
-    def _build_grid(self) -> list[list[Tile | None]]:
-        """Creates a grid of Tile objects from the bounded maze.
-
-        Returns:
-            A two-dimensional grid containing a Tile for each maze cell.
-        """
-        grid: list[list[Union[None | Tile]]] = [
-            [None for _ in range(self.width)] for _ in range(self.height)
+    def _build_grid(self) -> list[list[Tile]]:
+        """Creates a grid of Tile objects from the bounded maze."""
+        return [
+            [Tile(self.outerbound_maze[i][j], j, i) for j in range(self.width)]
+            for i in range(self.height)
         ]
 
-        for i, _ in enumerate(range(self.height)):  # rows?
-            for j, _ in enumerate(range(self.width)):  # cols?
-                grid[i][j] = Tile(self.outerbound_maze[i][j], j, i)
-        return grid
+    def _count_pellets(self) -> int:
+        """Count pellets in the grid after construction."""
+        pellets = 0
+        for row in self.grid:
+            for tile in row:
+                if tile:
+                    if tile.has_pellet():
+                        pellets += 1
+        return pellets
+
+    def view(self) -> MazeSnapshot:
+        return MazeSnapshot(grid=[[tile.view() for tile in row] for row in self.grid])
+
+    def return_tile_from_position(self, *,
+                                  position: tuple[int, int]
+                                  ) -> Tile | None:
+        x_position, y_position = position
+        if x_position < 0 or x_position > (self.width - 1):
+            return None
+        if y_position < 0 or y_position > (self.height - 1):
+            return None
+
+        temp_tile = self.grid[position[1]][position[0]]
+        if temp_tile:
+            return temp_tile
+        else:
+            raise ValueError(f"No tile at position: {position}")
+
+    def decrement_pellets(self) -> int | None:
+        """Returns the decremented value, or None if can't decrement"""
+        if self.pellets_nr <= 1:
+            return None
+        self.pellets_nr -= 1
+        return 1
 
     def __repr__(self) -> str:
         """Returns a printable, row-by-row representation of the tile grid.
@@ -111,11 +144,11 @@ class Maze:
 class MazeFactory:
     """Creates Map instances using a MazeGenerator."""
 
-    def __init__(self, nb_cells: int):
+    def __init__(self, *, nb_cells: int, seed: int = 42):
         """Initializes the maze generator used by this factory."""
         self.mazegen = MazeGenerator(size=(nb_cells, nb_cells),
-                                     perfect=True,
-                                     seed=42)
+                                     perfect=False,
+                                     seed=seed)
 
     def make_maze(self) -> Maze:
         """Generates a maze and wraps it in a Maze.
@@ -125,7 +158,8 @@ class MazeFactory:
         """
         return Maze(self.mazegen.maze)
 
-# if __name__ == '__main__':
-#     factory = MapFactory()
-#     map = factory.make_map()
-#     print(map)
+
+if __name__ == '__main__':
+    factory = MazeFactory(nb_cells=13)
+    map = factory.make_maze()
+    print(map.view())

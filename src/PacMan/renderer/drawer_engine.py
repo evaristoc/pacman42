@@ -3,8 +3,8 @@ from typing import cast
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidBoardConfig)
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
-from src.PacMan.game_logic.maze.tile import Tile
-from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
+from src.PacMan.game_logic.ingame.maze.tile import Tile
+from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,8 @@ class DrawerEngine:
         "exit": 0xFFFF00FF,
         # "walls": 0xFF00AAAA,
         # "path": 0xFF00FF00,
-        "walls": 0xFF00FF00,
+        # "walls": 0xFF00FF00,
+        "walls": 0x0101F2,
     }
 
     BOTTOMPARTSCREEN = 5
@@ -57,6 +58,7 @@ class DrawerEngine:
         self.__corrected_size = self.__interior_cell_size *\
             config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
         self.__diff = self._config.size - self.__corrected_size
+        self.__padding = 0
         # self.__padding = int(
         #     self.__interior_cell_size * self.__perc_padding
         # )
@@ -205,36 +207,43 @@ class DrawerEngine:
     #         for x in range(pix_tot_w):
     #             target_img.pygput_pixel(x, y, color)
 
-    # def __draw_cell_interior(
-    #     self,
-    #     target_img: Image,
-    #     cell: Cell,
-    #     color: int
-    # ) -> None:
-    #     """Draw interior area of a cell using computed geometry."""
-    #     x_cell = cell.cell_position_x
-    #     y_cell = cell.cell_position_y
-    #     inter = self.__interior_cell_size
-    #     wall = self.__wall_thickness
-    #     pad = self.__padding
-    #     if isinstance(cell, FourtyTwoCell):
-    #         start_x = wall + x_cell * (inter + wall) + pad * 2
-    #         start_y = wall + y_cell * (inter + wall) + pad // 2
-    #         x_area = self.__cell_center
-    #         y_area = self.__cell_center
-    #     elif isinstance(cell, (ExitCell, EntryCell)):
-    #         start_x = wall + x_cell * (inter + wall) + pad
-    #         start_y = wall + y_cell * (inter + wall) + pad
-    #         x_area = self.__cell_center
-    #         y_area = self.__cell_center
-    #     else:
-    #         start_x = wall + x_cell * (inter + wall)
-    #         start_y = wall + y_cell * (inter + wall)
-    #         x_area = inter
-    #         y_area = inter
-    #     for dy in range(y_area):
-    #         for dx in range(x_area):
-    #             target_img.put_pixel(start_x + dx, start_y + dy, color)
+    def draw_cell_interior(
+        self,
+        target_img: PyGMLXImageEmulator,
+        cell: Tile,
+        # cell: tuple[int, int],
+        color: int
+    ) -> None:
+        """Draw interior area of a cell using computed geometry."""
+        x_cell = cell.cell_position_x
+        y_cell = cell.cell_position_y
+        # x_cell = cell[0]
+        # y_cell = cell[1]
+        inter = self.__interior_cell_size
+        wall = self.__wall_thickness
+        pad = self.__padding
+        # if isinstance(cell, FourtyTwoCell):
+        #     start_x = wall + x_cell * (inter + wall) + pad * 2
+        #     start_y = wall + y_cell * (inter + wall) + pad // 2
+        #     x_area = self.__cell_center
+        #     y_area = self.__cell_center
+        # elif isinstance(cell, (ExitCell, EntryCell)):
+        #     start_x = wall + x_cell * (inter + wall) + pad
+        #     start_y = wall + y_cell * (inter + wall) + pad
+        #     x_area = self.__cell_center
+        #     y_area = self.__cell_center
+        # else:
+        #     start_x = wall + x_cell * (inter + wall)
+        #     start_y = wall + y_cell * (inter + wall)
+        #     x_area = inter
+        #     y_area = inter
+        start_x = wall + x_cell * (inter + wall)
+        start_y = wall + y_cell * (inter + wall)
+        x_area = inter
+        y_area = inter
+        for dy in range(y_area):
+            for dx in range(x_area):
+                target_img.pygput_pixel(start_x + dx, start_y + dy, color)
 
     def __draw_cell_walls(
         self,
