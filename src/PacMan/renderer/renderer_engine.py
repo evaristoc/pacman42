@@ -116,7 +116,7 @@ class PyGMiniLibXEmulator:
             # event: pygame.event.Event
             # observer.actions(None)
             observer.event_queue = pygame.event.get()
-            observer.event_queue_loop()
+            running = observer.state_loop()
             # for event in pygame.event.get():
             #     if event.type == pygame.QUIT:
             #         running = False

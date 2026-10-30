@@ -138,13 +138,23 @@ class PlayingAction(IAction):
         #     obs._drawer.margin / 2 + obs._mlx.height
         # )
 
+        # # PACMAN ###
+        pm = obs._registry["pacman"]["moves"].pop()
+        print(pm)
+        obs._mlx.pygmlx_put_image_to_window(
+            pm,
+            obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
+            obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[1]) + obs._drawer.bottom_h
+        )
+        obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
+
         # GHOSTS ###
-        for g in obs._glm.character_manager.ghost_mng.ghosts:
-            obs._mlx.pygmlx_put_image_to_window(
-                obs._registry["ghosts"][g.name],
-                obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
-                obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
-            )
+        # for g in obs._glm.character_manager.ghost_mng.ghosts:
+        #     obs._mlx.pygmlx_put_image_to_window(
+        #         obs._registry["ghosts"][g.name],
+        #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
+        #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
+        #     )
 
         # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
         #     obs._mlx.pygmlx_put_image_to_window(
@@ -169,7 +179,6 @@ class Observer:
         self._glm = glm
         self._drawer = drawer
         self.event_queue: list[Event] = []
-        
 
     def register_assets(self, key: str, asset: dict[str, Any]) -> None:
         if not self._registry:
@@ -183,13 +192,16 @@ class Observer:
         if isinstance(self._glm.state, IGameState):
             self.action = self._get_action(state=self._glm.state)().action(self)
 
-    def event_queue_loop(
+    def state_loop(
             self
-    ) -> EventMsg:
+    ) -> bool:
         msgs: EventMsg = {}
-        for event in self.event_queue.get():
-            msgs = self._translate_events(event, msgs)
+        for event in self.event_queue:
+            if event.type == pygame.QUIT:
+                return False
+            self._translate_events(event, msgs)
         self._actions(msgs)
+        return True
 
     def _get_action(
             self,
@@ -200,17 +212,18 @@ class Observer:
     def _translate_events(self,
                           event: Event,
                           msgs: EventMsg
-                          ) -> EventMsg:
-        if not event:
-            return
-        if event.K_DOWN:
-            msgs[InGameEvents.PACMAN_SOUTH] = None
-        if event.K_UP:
-            msgs[InGameEvents.PACMAN_NORTH] = None
-        if event.K_LEFT:
-            msgs[InGameEvents.PACMAN_WEST] = None
-        if event.K_RIGHT:
-            msgs[InGameEvents.PACMAN_EAST] = None
-        if event.K_SPACE:
-            msgs[InGameEvents.PAUSE] = None
+                          ) -> None:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                msgs[InGameEvents.PACMAN_SOUTH] = None
+            if event.key == pygame.K_UP:
+                msgs[InGameEvents.PACMAN_NORTH] = None
+            if event.key == pygame.K_LEFT:
+                msgs[InGameEvents.PACMAN_WEST] = None
+            if event.key == pygame.K_RIGHT:
+                msgs[InGameEvents.PACMAN_EAST] = None
+            if event.key == pygame.K_SPACE:
+                msgs[InGameEvents.PAUSE] = None
+            else:
+                None
         return msgs
