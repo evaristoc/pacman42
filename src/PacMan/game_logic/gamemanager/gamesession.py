@@ -33,12 +33,12 @@ class GameSession:
             return game_over_and_level_won
         if self.timemng.level_running:
             self.pacman.update(delta_ticks=delta_ticks,
-                            new_direction=pacman_move)
+                               new_direction=pacman_move)
             self.ghost_mng.update(delta_ticks,
-                                self.pacman.new_position.get_position_from_tile())
+                                  self.pacman.new_position.get_position_from_tile(),
+                                  self.pacman.direction)
             game_over_and_level_won = self.collision_mng.update()
         return game_over_and_level_won
-
 
 
 class GameSessionFactory:

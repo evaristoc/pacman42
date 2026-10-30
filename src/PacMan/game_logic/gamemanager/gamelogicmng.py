@@ -69,7 +69,7 @@ def test() -> None:
     state = gamelogicmanager.update_logic({MainMenuEvents.START: None})
     while steps > 0:
         event = None
-        if steps % 10 == 0 and steps < 170:
+        if steps % 10 == 0 and steps < 170 and type(state) == InGameState:
             position = gamelogicmanager.session.pacman.new_position.get_position_from_tile()
             tile = gamelogicmanager.session.maze.return_tile_from_position(
                 position=position)

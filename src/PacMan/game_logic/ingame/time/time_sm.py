@@ -75,7 +75,7 @@ class CountDownState(ITimeState):
         return
 
     def restart_countdown(self) -> None:
-        return RuntimeError("Restarted countdown, while in active countdown state.")
+        raise RuntimeError("Restarted countdown, while in active countdown state.")
 
 
 class LevelActiveState(ITimeState):
