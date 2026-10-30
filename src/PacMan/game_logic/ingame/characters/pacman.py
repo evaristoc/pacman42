@@ -77,6 +77,7 @@ class Pacman:
                 self.direction = self.new_direction
             self._process_move(self._direction)
             self.interpolated_position = self.old_position.get_position_from_tile()
+            self.interpolation = (0, 0)
         else:
             self._move_interpolate(delta_ticks=delta_ticks)
         print(f"{delta_ticks}: I'm {self.__class__.__name__}. My interpolated position is {self.interpolated_position}. My new position will be {self.new_position.get_position_from_tile()}. My old position is {self.old_position.get_position_from_tile()}. My direction is {self.direction}")
