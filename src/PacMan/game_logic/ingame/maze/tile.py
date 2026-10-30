@@ -1,10 +1,11 @@
 from enum import Enum
+from dataclasses import dataclass
 
 
 class WallState(Enum):
     """Defines the possible states of a wall on a tile face."""
     OPEN = 1
-    NORMALWALL = 2
+    WALL = 2
     OUTERWALL = 3
 
 
@@ -32,6 +33,12 @@ class TileBits(Enum):
 
 class TileError(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class TileSnapshot:
+    open_walls: dict
+    pellet_state: str
 
 
 class Tile:
@@ -78,6 +85,13 @@ class Tile:
                              "that is not in range 0-255.")
         self._tilebyte = tilebyte
 
+    def view(self) -> TileSnapshot:
+        walls = {'N': self.wall_north.name,
+                 'E': self.wall_east.name,
+                 'S': self.wall_south.name,
+                 'W': self.wall_west.name}
+        return TileSnapshot(open_walls=walls, pellet_state=self.pellet_state.name)
+
     def get_open_walls(self) -> list[tuple[int, int]]:
         open_walls = []
         if self.wall_north == WallState.OPEN:
@@ -90,6 +104,9 @@ class Tile:
             open_walls.append((-1, 0))
         return open_walls
 
+    def get_position_from_tile(self) -> tuple[int, int]:
+        return (self.cell_position_x, self.cell_position_y)
+
     def _set_open_walls_from_tilebyte(self) -> None:
         """Updates WallState properties based on the bits set in tilebyte.
 
@@ -97,16 +114,16 @@ class Tile:
         ensuring outer walls take precedence.
         """
         if self.tilebyte & TileBits.NORTH_NORMAL.value:
-            self.wall_north = WallState.NORMALWALL
+            self.wall_north = WallState.WALL
 
         if self.tilebyte & TileBits.EAST_NORMAL.value:
-            self.wall_east = WallState.NORMALWALL
+            self.wall_east = WallState.WALL
 
         if self.tilebyte & TileBits.SOUTH_NORMAL.value:
-            self.wall_south = WallState.NORMALWALL
+            self.wall_south = WallState.WALL
 
         if self.tilebyte & TileBits.WEST_NORMAL.value:
-            self.wall_west = WallState.NORMALWALL
+            self.wall_west = WallState.WALL
 
         if self.tilebyte & TileBits.NORTH_OUTER.value:
             self.wall_north = WallState.OUTERWALL
@@ -121,13 +138,21 @@ class Tile:
             self.wall_west = WallState.OUTERWALL
 
     def _set_pellet_state_from_tilebyte(self) -> PelletState:
-        if self.tilebyte.bit_count() == 4:
+        if self.tilebyte.bit_count() >= 4:
             print(self)
             return PelletState.NOPELLET
         temporary_tilebyte = self.tilebyte >> 4 & 0x0F
         if temporary_tilebyte.bit_count() > 1:
             return PelletState.POWERPELLET
         return PelletState.NORMALPELLET
+
+    def pellet_eaten_by_pacman(self) -> None:
+        self.pellet_state = PelletState.NOPELLET
+
+    def has_pellet(self) -> bool:
+        if self.pellet_state == PelletState.NOPELLET:
+            return False
+        return True
 
     def __repr__(self) -> str:
         """Returns a string representation of the wall states for each face."""

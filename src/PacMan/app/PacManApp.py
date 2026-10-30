@@ -4,13 +4,13 @@ from src.PacMan.validation_contracts.valid_game_config import (
     ValidBoardConfig)
 from src.PacMan.validation_contracts.parser import DataProcessor
 from src.PacMan.renderer.renderer_engine import (
-                                PyGMiniLibXEmulator,
-                                PyGMLXImageEmulator,
-                                PyMLXPNGEmulator,
-                                PyGMLXTextEmulator)
+    PyGMiniLibXEmulator,
+    PyGMLXImageEmulator,
+    PyMLXPNGEmulator,
+    PyGMLXTextEmulator)
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
-from src.PacMan.game_logic.maze.maze import Maze
+from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 logger = logging.getLogger(__name__)
 
@@ -70,13 +70,14 @@ class PacManApp:
         self.drawer.draw(self.board_img["board"],
                          self.maze.grid,
                          None)
-        print(self.drawer.corrected_size[0], self.drawer.corrected_size[1], self.drawer.margin)
+        print(
+            self.drawer.corrected_size[0], self.drawer.corrected_size[1], self.drawer.margin)
         # board_margin = int(self.drawer.corrected_size[1] / 2)
         self.pygmlx.pygmlx_put_image_to_window(
             self.board_img["board"],
             self.drawer.margin / 2,
             self.drawer.margin / 2
-            )
+        )
         print(self.ghosts_imgs)
         for i, g in enumerate(self.ghosts_imgs):
             self.pygmlx.pygmlx_put_image_to_window(
@@ -101,5 +102,3 @@ class PacManApp:
             self.drawer.corrected_size[0] + 7,
         )
         self.pygmlx.pygmlx_loop()
-
-

@@ -14,6 +14,7 @@ class MainMenuEvents(IEventEnums):
 
 class CheatingMenuEvents(IEventEnums):
     IMPOTENTGHOSTS = auto()
+    RETURN = auto()
 
 
 class HighScoreMenuEvents(IEventEnums):
