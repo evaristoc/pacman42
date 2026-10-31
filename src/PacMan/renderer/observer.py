@@ -112,7 +112,6 @@ class PlayingAction(IAction):
     def action(
             self,
             obs: Observer,
-            state: str,
             tick: int
     ) -> None:
         # INTERIOR CELLS ###
@@ -143,7 +142,17 @@ class PlayingAction(IAction):
         # )
 
         # # PACMAN ###
-        direction = [key for key, value in InGameState.PACMAN_STEPS.items() if value == obs._glm.session.pacman.new_direction][0].name
+        print(dict(vars(InGameState))['PACMAN_STEPS'])
+        pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
+        # print(pacman_steps)
+        # print(dict(vars(obs._glm.session.pacman)))
+        if not obs._glm.session.pacman.new_direction:
+            pD = (-1, 0)
+        else:
+            pD = obs._glm.session.pacman.new_direction
+        direction = [key.name for key in pacman_steps if pacman_steps[key] == pD][0]
+        print(direction)
+        state = "InGameState"
         pm = obs._registry[state]["pacman"][direction].pop()
         print(pm)
         obs._mlx.pygmlx_put_image_to_window(
@@ -151,7 +160,7 @@ class PlayingAction(IAction):
             obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_x),
             obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_y) + obs._drawer.bottom_h
         )
-        if tick % 20:
+        if tick % 5:
             obs._registry[state]["pacman"][direction].append(pm)
         else:
             obs._registry[state]["pacman"][direction].appendleft(pm)
@@ -160,8 +169,8 @@ class PlayingAction(IAction):
         for g in obs._glm.session.ghost_mng.ghosts:
             obs._mlx.pygmlx_put_image_to_window(
                 obs._registry[state]["ghosts"][g.name],
-                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x),
-                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + obs._drawer.bottom_h
+                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * obs._glm.session.ghost_mng.ghosts[g].interpolation[0])),
+                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * obs._glm.session.ghost_mng.ghosts[g].interpolation[1])) + obs._drawer.bottom_h
             )
 
         # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
@@ -204,7 +213,6 @@ class Observer:
         if isinstance(self._glm.state, IGameState):
             self._get_action(state=self._glm.state)().action(
                                             self,
-                                            self._glm.state.__class__.__name__,
                                             tick
                                             )
 
