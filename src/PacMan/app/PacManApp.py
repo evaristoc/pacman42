@@ -69,7 +69,7 @@ class PacManApp:
                 assembler.upload_other_imgs("ghosts",
                                             rsized,
                                             rsized)
-            self.pacman_imgs["InGameEvents"]["pacman"] =\
+            self.characters_imgs["InGameEvents"]["pacman"] =\
                 assembler.upload_pacman_imgs("pacman",
                                              rsized,
                                              rsized)
@@ -160,7 +160,7 @@ class PacManApp:
             0,
             int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
         )
-
+        # print(self.characters_imgs)
         self.pygmlx.pygmlx_put_image_to_window(
             self.characters_imgs["InGameEvents"]["pacman"]["START"],
             int(self.drawer.margin / 2) + 350,
