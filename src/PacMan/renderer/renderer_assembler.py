@@ -33,9 +33,9 @@ class RendererAssembler:
     # def ref_w(self, val: int) -> None:
     #     self._reference_w = val
 
-    def init_glm(self) -> GameLogicManager:
+    def init_glm(self, state: IGameState = InGameState) -> GameLogicManager:
         try:
-            return GameLogicManager(InGameState)
+            return GameLogicManager(state)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")

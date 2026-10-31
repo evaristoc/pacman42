@@ -14,7 +14,7 @@ from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.game_logic.ingame.maze.maze import Maze
-
+from src.PacMan.game_logic.gamemanager.game_sm import InGameState, MainMenuState
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +53,7 @@ class PacManApp:
             bottom = self.drawer.bottom_h
             self.pygmlx = assembler.init_engine(config.size,
                                                 2 * bottom)
-            self.glm = assembler.init_glm()
+            self.glm = assembler.init_glm(InGameState)
             self.maze = self.glm.session.maze
             self.board_img = assembler.init_board(size)
             rsized = self.drawer.resized

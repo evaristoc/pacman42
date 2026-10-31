@@ -189,6 +189,9 @@ class Observer:
     def _actions(self,
                  msgs: EventMsg | None) -> None:
         self._glm.update_logic(msgs)
+        #### introducing the game logic manager .view() function ###
+        snapshot = self._glm.view()
+        print(snapshot.session.timemng)
         if isinstance(self._glm.state, IGameState):
             self.action = self._get_action(state=self._glm.state)().action(self)
 
