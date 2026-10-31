@@ -71,17 +71,17 @@ class RendererAssembler:
             folder: str,
             rsize_w: int | None = None,
             rsize_h: int | None = None,
-            event: IEventEnums | None = None) -> dict[str, PyMLXPNGEmulator]:
+            event: str | None = None) -> dict[str, PyMLXPNGEmulator]:
         # assume ref size cannot be negative, but it could...
         # if self.ref_w == REFWITHNOTSETVALUE:
         #     logger.exception("FATAL: we could not set ref size.")
         #     raise SystemExit(1)
-        _assets = self.cwd.parent / 'assets' / folder if not event else self.cwd.parent / 'assets' / folder / event.__class__.__name__
-        _dict: dict[str, PyMLXPNGEmulator] = {event.__class__.__name__: {}}
+        _assets = self.cwd.parent / 'assets' / folder if not event else self.cwd.parent / 'assets' / folder / event
+        _dict: dict[str, PyMLXPNGEmulator] = {event: {}}
         try:
             # this will sort the paths (they are Path types now)
             sorted_files = sorted(_assets.rglob('*'))
-            print(sorted_files)
+            # print(sorted_files)
             for file in sorted_files:
                 if not file.is_file():
                     continue
@@ -101,9 +101,9 @@ class RendererAssembler:
                                 rsize_w,
                                 rsize_h
                             )
-                print(file.parts)
-                if fname not in _dict:
-                    _dict[fname] = emu
+                # print(file.parts)
+                if fname not in _dict[event]:
+                    _dict[event][fname] = emu
             return _dict
         except Exception as err:
             logger.exception(f"FATAL: we could not load images : {err}")
@@ -114,8 +114,8 @@ class RendererAssembler:
             folder: str,
             rsize_w: int | None = None,
             rsize_h: int | None = None,
-            event: str
-            #event: IEventEnums | None = None
+            event: str | None = None,
+            # event: IEventEnums | None = None
             ) -> dict[str, PyMLXPNGEmulator]:
         # assume ref size cannot be negative, but it could...
         # if self.ref_w == REFWITHNOTSETVALUE:
@@ -128,7 +128,7 @@ class RendererAssembler:
         try:
             # this will sort the paths (they are Path types now)
             sorted_files = sorted(_assets.rglob('*'))
-            print(sorted_files)
+            # print(sorted_files)
             for file in sorted_files:
                 if not file.is_file():
                     continue
@@ -148,7 +148,7 @@ class RendererAssembler:
                                 rsize_w,
                                 rsize_h
                             )
-                print(file.parts)
+                # print(file.parts)
                 if fname not in _dict:
                     _dict[fname] = emu
             return _dict
@@ -160,52 +160,54 @@ class RendererAssembler:
             self,
             folder: str,
             rsize_w: int | None = None,
-            rsize_h: int | None = None,
-            event: IEventEnums | None = InGameEvents) -> dict[str, PyMLXPNGEmulator]:
+            rsize_h: int | None = None) -> dict[str, PyMLXPNGEmulator]:
         # assume ref size cannot be negative, but it could...
         # if self.ref_w == REFWITHNOTSETVALUE:
         #     logger.exception("FATAL: we could not set ref size.")
         #     raise SystemExit(1)
-        _assets = self.cwd.parent / 'assets' / folder / event.name
+        # print(dict(vars(event))['_member_names_'])
         _dict: dict[str, PyMLXPNGEmulator] = {}
-        try:
-            # this will sort the paths (they are Path types now)
-            sorted_files = sorted(_assets.rglob('*'))
-            print(sorted_files)
-            for file in sorted_files:
-                if not file.is_file():
-                    continue
-                with Image.open(_assets / file) as img:
-                    org_w, org_h = img.size
-                fname = Path(file).stem
-                # print(fname, org_w)
-                emu = PyMLXPNGEmulator(
-                            org_w,
-                            org_h
-                        )
-                emu.pygput_from_png(
-                            str(_assets / file)
-                        )
-                if rsize_w and rsize_h:
-                    emu.pygll_resize(
-                                rsize_w,
-                                rsize_h
+        for e in ['PACMAN_NORTH', 'PACMAN_EAST', 'PACMAN_SOUTH', 'PACMAN_WEST']:
+            _assets = self.cwd.parent / 'assets' / folder / e
+            # print(_assets)
+            try:
+                # this will sort the paths (they are Path types now)
+                sorted_files = sorted(_assets.rglob('*'))
+                # print(sorted_files)
+                for file in sorted_files:
+                    if not file.is_file():
+                        continue
+                    with Image.open(_assets / file) as img:
+                        org_w, org_h = img.size
+                    fname = Path(file).stem
+                    # print(fname, org_w)
+                    emu = PyMLXPNGEmulator(
+                                org_w,
+                                org_h
                             )
-                print(file.parts)
-                if "pacman" == file.parts[-3]:
-                    if event.name not in _dict:
-                        _dict[event.name] = deque([])
-                    if "START" not in _dict and fname == 'EAST-1':
-                        _dict["START"] = emu
-                    _dict[event.name].append(emu)
-                else:
-                    if fname not in _dict:
-                        _dict[fname] = emu
-            print(_dict)
-            return _dict
-        except Exception as err:
-            logger.exception(f"FATAL: we could not load images : {err}")
-            raise SystemExit(1)
+                    emu.pygput_from_png(
+                                str(_assets / file)
+                            )
+                    if rsize_w and rsize_h:
+                        emu.pygll_resize(
+                                    rsize_w,
+                                    rsize_h
+                                )
+                    # print(file.parts)
+                    if "pacman" == file.parts[-3]:
+                        if e not in _dict:
+                            _dict[e] = deque([])
+                        if "START" not in _dict and fname == 'EAST-1':
+                            _dict["START"] = emu
+                        _dict[e].append(emu)
+                    else:
+                        if fname not in _dict:
+                            _dict[fname] = emu
+            except Exception as err:
+                logger.exception(f"FATAL: we could not load images : {err}")
+                raise SystemExit(1)
+        # print(_dict)
+        return _dict
 
     def init_hub_text(
             self,
