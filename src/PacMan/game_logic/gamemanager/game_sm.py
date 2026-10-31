@@ -5,7 +5,6 @@ from src.PacMan.validation_contracts.event_enums import (IEventEnums,
                                                          InGameEvents,
                                                          PauseMenuEvents,
                                                          MainMenuEvents,
-                                                         CheatingMenuEvents,
                                                          HighScoreMenuEvents,
                                                          HighScoreRegisterEvents)
 from typing import Any
@@ -72,38 +71,38 @@ class MainMenuState(IGameState):
         return list(events.keys())[0]
 
 
-class CheatingMenuState(IGameState):
-    def __init__(self, context: "GameLogicManager"):
-        self.context: "GameLogicManager" = context
+# class CheatingMenuState(IGameState):
+#     def __init__(self, context: "GameLogicManager"):
+#         self.context: "GameLogicManager" = context
 
-    def update_logic(self,
-                     events: dict[IEventEnums, dict[str, Any] | None] | None,
-                     delta_ticks: int
-                     ) -> Union["IGameState", None]:
-        if events:
-            for event in events.keys():
-                if not isinstance(event, CheatingMenuEvents):
-                    raise ValueError(
-                        f'{event} is not of type "CheatingMenuEvents"')
-            event = self._get_priority_event(events)
-            if event == CheatingMenuEvents.RETURN:
-                return MainMenuState(self.context)
-            elif event == CheatingMenuEvents.IMPOTENTGHOSTS:
-                self.context.toggle_impotent_ghosts()
-                return None
+#     def update_logic(self,
+#                      events: dict[IEventEnums, dict[str, Any] | None] | None,
+#                      delta_ticks: int
+#                      ) -> Union["IGameState", None]:
+#         if events:
+#             for event in events.keys():
+#                 if not isinstance(event, CheatingMenuEvents):
+#                     raise ValueError(
+#                         f'{event} is not of type "CheatingMenuEvents"')
+#             event = self._get_priority_event(events)
+#             if event == CheatingMenuEvents.RETURN:
+#                 return MainMenuState(self.context)
+#             elif event == CheatingMenuEvents.IMPOTENTGHOSTS:
+#                 self.context.toggle_impotent_ghosts()
+#                 return None
 
-        return None
+#         return None
 
-    def _get_priority_event(self,
-                            events: dict[IEventEnums, dict[str, Any] | None]
-                            ) -> IEventEnums:
-        priority_order = [CheatingMenuEvents.RETURN,
-                          CheatingMenuEvents.IMPOTENTGHOSTS]
+#     def _get_priority_event(self,
+#                             events: dict[IEventEnums, dict[str, Any] | None]
+#                             ) -> IEventEnums:
+#         priority_order = [CheatingMenuEvents.RETURN,
+#                           CheatingMenuEvents.IMPOTENTGHOSTS]
 
-        for event in priority_order:
-            if event in events:
-                return event
-        return list(events.keys())[0]
+#         for event in priority_order:
+#             if event in events:
+#                 return event
+#         return list(events.keys())[0]
 
 
 class HighScoreMenuState(IGameState):
