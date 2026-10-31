@@ -112,11 +112,12 @@ class PyGMiniLibXEmulator:
     def pygmlx_loop(self, observer: Observer) -> None:
         clock: pygame.time.Clock = pygame.time.Clock()
         running = True
+        tick = 0
         while running:
             # event: pygame.event.Event
             # observer.actions(None)
             observer.event_queue = pygame.event.get()
-            running = observer.state_loop()
+            running = observer.state_loop(tick)
             # for event in pygame.event.get():
             #     if event.type == pygame.QUIT:
             #         running = False
@@ -126,6 +127,7 @@ class PyGMiniLibXEmulator:
                 if result == 0:
                     break
             clock.tick(60)
+            tick += 1
 
 
 # class PyGMLXImageEmulator:

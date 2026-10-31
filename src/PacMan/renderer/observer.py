@@ -20,7 +20,9 @@ EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 class IAction(Protocol):
     def action(
             self,
-            obs: "Observer"
+            obs: "Observer",
+            state: str,
+            tick: int
             ) -> None:
         ...
 
@@ -109,7 +111,9 @@ class IAction(Protocol):
 class PlayingAction(IAction):
     def action(
             self,
-            obs: Observer
+            obs: Observer,
+            state: str,
+            tick: int
     ) -> None:
         # INTERIOR CELLS ###
         # -- pacman --
@@ -139,19 +143,23 @@ class PlayingAction(IAction):
         # )
 
         # # PACMAN ###
-        pm = obs._registry["pacman"]["moves"].pop()
+        direction = [key for key, value in InGameState.PACMAN_STEPS.items() if value == obs._glm.session.pacman.new_direction][0].name
+        pm = obs._registry[state]["pacman"][direction].pop()
         print(pm)
         obs._mlx.pygmlx_put_image_to_window(
             pm,
             obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_x),
             obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_y) + obs._drawer.bottom_h
         )
-        obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
+        if tick % 20:
+            obs._registry[state]["pacman"][direction].append(pm)
+        else:
+            obs._registry[state]["pacman"][direction].appendleft(pm)
 
         # # GHOSTS ###
         for g in obs._glm.session.ghost_mng.ghosts:
             obs._mlx.pygmlx_put_image_to_window(
-                obs._registry["ghosts"][g.name],
+                obs._registry[state]["ghosts"][g.name],
                 obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x),
                 obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + obs._drawer.bottom_h
             )
@@ -187,23 +195,29 @@ class Observer:
         self._registry[key] = asset
 
     def _actions(self,
-                 msgs: EventMsg | None) -> None:
+                 msgs: EventMsg | None,
+                 tick: int = 0) -> None:
         self._glm.update_logic(msgs)
         #### introducing the game logic manager .view() function ###
         snapshot = self._glm.view()
         print(snapshot.session.timemng)
         if isinstance(self._glm.state, IGameState):
-            self.action = self._get_action(state=self._glm.state)().action(self)
+            self._get_action(state=self._glm.state)().action(
+                                            self,
+                                            self._glm.state.__class__.__name__,
+                                            tick
+                                            )
 
     def state_loop(
-            self
+            self,
+            tick: int
     ) -> bool:
         msgs: EventMsg = {}
         for event in self.event_queue:
             if event.type == pygame.QUIT:
                 return False
             self._translate_events(event, msgs)
-        self._actions(msgs)
+        self._actions(msgs, tick)
         return True
 
     def _get_action(

@@ -2,6 +2,9 @@ import logging
 from collections import deque
 from pathlib import Path
 from PIL import Image
+from src.PacMan.validation_contracts.event_enums import (
+                                            InGameEvents,
+                                            IEventEnums)
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
@@ -63,16 +66,107 @@ class RendererAssembler:
                     w
                 )
 
-    def upload_imgs(
+    def upload_menu_imgs(
             self,
             folder: str,
             rsize_w: int | None = None,
-            rsize_h: int | None = None) -> dict[str, PyMLXPNGEmulator]:
+            rsize_h: int | None = None,
+            event: IEventEnums | None = None) -> dict[str, PyMLXPNGEmulator]:
         # assume ref size cannot be negative, but it could...
         # if self.ref_w == REFWITHNOTSETVALUE:
         #     logger.exception("FATAL: we could not set ref size.")
         #     raise SystemExit(1)
-        _assets = self.cwd.parent / 'assets' / folder
+        _assets = self.cwd.parent / 'assets' / folder if not event else self.cwd.parent / 'assets' / folder / event.__class__.__name__
+        _dict: dict[str, PyMLXPNGEmulator] = {event.__class__.__name__: {}}
+        try:
+            # this will sort the paths (they are Path types now)
+            sorted_files = sorted(_assets.rglob('*'))
+            print(sorted_files)
+            for file in sorted_files:
+                if not file.is_file():
+                    continue
+                with Image.open(_assets / file) as img:
+                    org_w, org_h = img.size
+                fname = Path(file).stem
+                # print(fname, org_w)
+                emu = PyMLXPNGEmulator(
+                            org_w,
+                            org_h
+                        )
+                emu.pygput_from_png(
+                            str(_assets / file)
+                        )
+                if rsize_w and rsize_h:
+                    emu.pygll_resize(
+                                rsize_w,
+                                rsize_h
+                            )
+                print(file.parts)
+                if fname not in _dict:
+                    _dict[fname] = emu
+            return _dict
+        except Exception as err:
+            logger.exception(f"FATAL: we could not load images : {err}")
+            raise SystemExit(1)
+
+    def upload_other_imgs(
+            self,
+            folder: str,
+            rsize_w: int | None = None,
+            rsize_h: int | None = None,
+            event: str
+            #event: IEventEnums | None = None
+            ) -> dict[str, PyMLXPNGEmulator]:
+        # assume ref size cannot be negative, but it could...
+        # if self.ref_w == REFWITHNOTSETVALUE:
+        #     logger.exception("FATAL: we could not set ref size.")
+        #     raise SystemExit(1)
+        #_assets = self.cwd.parent / 'assets' / folder if not event else self.cwd.parent / 'assets' / folder / event.__class__.__name__
+        #_dict: dict[str, PyMLXPNGEmulator] = {event.__class__.__name__: {}}
+        _assets = self.cwd.parent / 'assets' / folder if not event else self.cwd.parent / 'assets' / folder / event
+        _dict: dict[str, PyMLXPNGEmulator] = {event: {}}
+        try:
+            # this will sort the paths (they are Path types now)
+            sorted_files = sorted(_assets.rglob('*'))
+            print(sorted_files)
+            for file in sorted_files:
+                if not file.is_file():
+                    continue
+                with Image.open(_assets / file) as img:
+                    org_w, org_h = img.size
+                fname = Path(file).stem
+                # print(fname, org_w)
+                emu = PyMLXPNGEmulator(
+                            org_w,
+                            org_h
+                        )
+                emu.pygput_from_png(
+                            str(_assets / file)
+                        )
+                if rsize_w and rsize_h:
+                    emu.pygll_resize(
+                                rsize_w,
+                                rsize_h
+                            )
+                print(file.parts)
+                if fname not in _dict:
+                    _dict[fname] = emu
+            return _dict
+        except Exception as err:
+            logger.exception(f"FATAL: we could not load images : {err}")
+            raise SystemExit(1)
+
+    def upload_pacman_imgs(
+            self,
+            folder: str,
+            rsize_w: int | None = None,
+            rsize_h: int | None = None,
+            event: IEventEnums | None = InGameEvents) -> dict[str, PyMLXPNGEmulator]:
+        # assume ref size cannot be negative, but it could...
+        # if self.ref_w == REFWITHNOTSETVALUE:
+        #     logger.exception("FATAL: we could not set ref size.")
+        #     raise SystemExit(1)
+        _assets = self.cwd.parent / 'assets' / folder / event.name
         _dict: dict[str, PyMLXPNGEmulator] = {}
         try:
             # this will sort the paths (they are Path types now)
@@ -98,15 +192,12 @@ class RendererAssembler:
                                 rsize_h
                             )
                 print(file.parts)
-                if "pacman" == file.parts[-2]:
-                    if "moves" not in _dict:
-                        _dict = {
-                            "moves": deque([]),
-                            "still": None
-                        }
-                    if fname == "1":
-                        _dict["still"] = emu
-                    _dict["moves"].append(emu)
+                if "pacman" == file.parts[-3]:
+                    if event.name not in _dict:
+                        _dict[event.name] = deque([])
+                    if "START" not in _dict and fname == 'EAST-1':
+                        _dict["START"] = emu
+                    _dict[event.name].append(emu)
                 else:
                     if fname not in _dict:
                         _dict[fname] = emu
