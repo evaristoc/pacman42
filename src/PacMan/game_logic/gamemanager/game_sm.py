@@ -42,9 +42,8 @@ class IGameState(ABC):
             if not isinstance(event, state_events):
                 raise ValueError(
                     f'{event} is not of type "{state_events.__name__}"')
-            if value:
-                if not isinstance(value, dict):
-                    raise ValueError(f"{value} is not a dictionary.")
+            if value is not None and not isinstance(value, dict):
+                raise ValueError(f"{value} is not a dictionary.")
         return self._get_priority_event(events)
 
     @staticmethod
@@ -69,7 +68,7 @@ class MainMenuState(IGameState):
             elif event == MainMenuEvents.START:
                 return InGameState(self.context)
             elif event == MainMenuEvents.INSTRUCTIONS:
-                return InstructrionsMenuState(self.context)
+                return InstructionsMenuState(self.context)
             elif event == MainMenuEvents.HIGHSCORES:
                 return HighScoreMenuState(self.context)
 
@@ -89,7 +88,7 @@ class MainMenuState(IGameState):
         return list(events.keys())[0]
 
 
-class InstructrionsMenuState(IGameState):
+class InstructionsMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
 
@@ -159,6 +158,7 @@ class PauseMenuState(IGameState):
             if event == PauseMenuEvents.CONTINUE:
                 return InGameState(self.context)
             elif event == PauseMenuEvents.EXIT:
+                self.context.session = None
                 return HighScoreRegisterState(self.context)
         return None
 

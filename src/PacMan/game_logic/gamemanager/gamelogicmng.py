@@ -1,4 +1,4 @@
-from src.PacMan.game_logic.gamemanager.game_sm import IGameState
+from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
 from src.PacMan.game_logic.menu.menu import IMenu, MenuSnapshot
 from src.PacMan.validation_contracts.event_enums import IEventEnums
 from src.PacMan.game_logic.gamemanager.gamesession import GameSession, GameSessionFactory, GameSessionSnapshot
@@ -20,7 +20,7 @@ class GLMSnapshot:
 
 class GameLogicManager:
     def __init__(self,
-                 start_state: Callable[["GameLogicManager"], IGameState]
+                 start_state: Callable[["GameLogicManager"], IGameState] = InGameState
                  ) -> None:
         self.ticks: int = 0
         self.player = Player("anonymous")
@@ -37,7 +37,7 @@ class GameLogicManager:
         if new_state:
             self.state = new_state
 
-    def view(self) -> "GLMSnapshot":
+    def view(self) -> GLMSnapshot:
         if self.menu:
             menu_ss = self.menu.view()
         else:

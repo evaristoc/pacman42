@@ -10,7 +10,6 @@ from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from dataclasses import dataclass
 
 
-
 @dataclass(frozen=True)
 class GameSessionSnapshot:
     timemng: TimeMngSnapshot
@@ -64,15 +63,15 @@ class GameSession:
 
 
 class GameSessionFactory:
-    GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 30, 2: 10, 3: 6}
+    GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 20, 2: 10, 3: 6}
     PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 20, 2: 10, 3: 10}
     MAZE_SIZENSEED_PER_LEVEL: dict[int, tuple[int, int]] = {
         1: (10, 80), 2: (10, 45), 3: (10, 50)}
 
     def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player) -> GameSession:
-        if not isinstance(level, int):
+        if type(level) is not int:
             raise ValueError("level-variable is not an int.")
-        if not level > 0 or not level < 10:
+        if level not in self.MAZE_SIZENSEED_PER_LEVEL:
             raise ValueError(f"level-variable is invalid number: {level}")
         new_maze = MazeFactory(nb_cells=self.MAZE_SIZENSEED_PER_LEVEL[level][0],
                                seed=self.MAZE_SIZENSEED_PER_LEVEL[level][1]).make_maze()
