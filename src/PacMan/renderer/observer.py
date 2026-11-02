@@ -140,7 +140,7 @@ class PlayingAction(IAction):
 
         # # PACMAN ###
         pm = obs._registry["pacman"]["moves"].pop()
-        print(pm)
+        # print(pm)
         obs._mlx.pygmlx_put_image_to_window(
             pm,
             obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_x),

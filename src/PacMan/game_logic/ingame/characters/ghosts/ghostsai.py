@@ -72,21 +72,6 @@ class AIStrategy(ABC):
         start: tuple[int, int],
         target: tuple[int, int]
     ) -> tuple[int, int]:
-        """Calculate the next move toward a target position using pathfinding.
-
-        Uses A* or BFS to find the shortest path, accounting for maze walls and
-        obstacles. This shared utility is used by multiple ghost strategies and
-        by the spawn-return behavior.
-
-        Args:
-            start: The starting (x, y) position.
-            target: The target (x, y) position to pathfind toward.
-
-        Returns:
-            A direction vector (dx, dy) representing the first step of the 
-            path.
-        """
-
         return AStar_next_move(position=start, target=target, maze=self.maze)
 
 
@@ -186,7 +171,7 @@ class ClydeAI(AIStrategy):
         pacman_direction: tuple[int, int]
     ) -> tuple[int, int]:
         distance = self._distance(ghost_pos, pacman_pos)
-        if distance < 3:
+        if distance < 4:
             return self.return_to_spawn(ghost_pos=ghost_pos)
         else:
             return AStar_next_move(position=ghost_pos,

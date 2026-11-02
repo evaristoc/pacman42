@@ -5,10 +5,11 @@ from src.PacMan.validation_contracts.event_enums import (IEventEnums,
                                                          InGameEvents,
                                                          PauseMenuEvents,
                                                          MainMenuEvents,
-                                                         CheatingMenuEvents,
+                                                         InstructionMenuEvents,
                                                          HighScoreMenuEvents,
                                                          HighScoreRegisterEvents)
 from typing import Any
+from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 if TYPE_CHECKING:
     from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 import sys
@@ -24,12 +25,32 @@ class IGameState(ABC):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
 
-
     @abstractmethod
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
                      delta_ticks: int
                      ) -> Union["IGameState", None]:
+        pass
+
+    def _validate_events(self,
+                         events: dict[IEventEnums, dict[str, Any] | None],
+                         state_events: type
+                         ) -> IEventEnums:
+        if not isinstance(events, dict):
+            raise ValueError(f"{events} is not a dictionary..")
+        for event, value in events.items():
+            if not isinstance(event, state_events):
+                raise ValueError(
+                    f'{event} is not of type "{state_events.__name__}"')
+            if value:
+                if not isinstance(value, dict):
+                    raise ValueError(f"{value} is not a dictionary.")
+        return self._get_priority_event(events)
+
+    @staticmethod
+    @abstractmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums:
         pass
 
 
@@ -42,28 +63,24 @@ class MainMenuState(IGameState):
                      delta_ticks: int
                      ) -> Union["IGameState", None]:
         if events:
-            for event in events.keys():
-                if not isinstance(event, MainMenuEvents):
-                    raise ValueError(
-                        f'{event} is not of type "MainMenuEvents"')
-            event = self._get_priority_event(events)
-            if event == MainMenuEvents.QUIT:
+            event = self._validate_events(events, MainMenuEvents)
+            if event == MainMenuEvents.EXIT:
                 sys.exit()
             elif event == MainMenuEvents.START:
                 return InGameState(self.context)
-            elif event == MainMenuEvents.CHEATING:
-                return CheatingMenuState(self.context)
+            elif event == MainMenuEvents.INSTRUCTIONS:
+                return InstructrionsMenuState(self.context)
             elif event == MainMenuEvents.HIGHSCORES:
                 return HighScoreMenuState(self.context)
 
         return None
 
-    def _get_priority_event(self,
-                            events: dict[IEventEnums, dict[str, Any] | None]
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums:
-        priority_order = [MainMenuEvents.QUIT,
+        priority_order = [MainMenuEvents.EXIT,
                           MainMenuEvents.START,
-                          MainMenuEvents.CHEATING,
+                          MainMenuEvents.INSTRUCTIONS,
                           MainMenuEvents.HIGHSCORES]
 
         for event in priority_order:
@@ -72,7 +89,7 @@ class MainMenuState(IGameState):
         return list(events.keys())[0]
 
 
-class CheatingMenuState(IGameState):
+class InstructrionsMenuState(IGameState):
     def __init__(self, context: "GameLogicManager"):
         self.context: "GameLogicManager" = context
 
@@ -81,24 +98,16 @@ class CheatingMenuState(IGameState):
                      delta_ticks: int
                      ) -> Union["IGameState", None]:
         if events:
-            for event in events.keys():
-                if not isinstance(event, CheatingMenuEvents):
-                    raise ValueError(
-                        f'{event} is not of type "CheatingMenuEvents"')
-            event = self._get_priority_event(events)
-            if event == CheatingMenuEvents.RETURN:
+            event = self._validate_events(events, InstructionMenuEvents)
+            if event == InstructionMenuEvents.RETURN:
                 return MainMenuState(self.context)
-            elif event == CheatingMenuEvents.IMPOTENTGHOSTS:
-                self.context.toggle_impotent_ghosts()
-                return None
 
         return None
 
-    def _get_priority_event(self,
-                            events: dict[IEventEnums, dict[str, Any] | None]
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums:
-        priority_order = [CheatingMenuEvents.RETURN,
-                          CheatingMenuEvents.IMPOTENTGHOSTS]
+        priority_order = [InstructionMenuEvents.RETURN]
 
         for event in priority_order:
             if event in events:
@@ -115,18 +124,13 @@ class HighScoreMenuState(IGameState):
                      delta_ticks: int
                      ) -> Union["IGameState", None]:
         if events:
-            for event in events.keys():
-                if not isinstance(event, HighScoreMenuEvents):
-                    raise ValueError(
-                        f'{event} is not of type "HighScoreMenuEvents"')
-            event = self._get_priority_event(events)
+            event = self._validate_events(events, HighScoreMenuEvents)
             if event == HighScoreMenuEvents.RETURN:
                 return MainMenuState(self.context)
-
         return None
 
-    def _get_priority_event(self,
-                            events: dict[IEventEnums, dict[str, Any] | None]
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums:
         priority_order = [HighScoreMenuEvents.RETURN]
 
@@ -151,21 +155,17 @@ class PauseMenuState(IGameState):
                      delta_ticks: int
                      ) -> Union["IGameState", None]:
         if events:
-            for event in events.keys():
-                if not isinstance(event, PauseMenuEvents):
-                    raise ValueError(
-                        f'{event} is not of type "PauseMenuEvents"')
-            event = self._get_priority_event(events)
+            event = self._validate_events(events, PauseMenuEvents)
             if event == PauseMenuEvents.CONTINUE:
                 return InGameState(self.context)
-            elif event == PauseMenuEvents.QUIT:
+            elif event == PauseMenuEvents.EXIT:
                 return HighScoreRegisterState(self.context)
         return None
 
-    def _get_priority_event(self,
-                            events: dict[IEventEnums, dict[str, Any] | None]
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums:
-        priority_order = [PauseMenuEvents.QUIT,
+        priority_order = [PauseMenuEvents.EXIT,
                           PauseMenuEvents.CONTINUE]
 
         for event in priority_order:
@@ -195,18 +195,15 @@ class InGameState(IGameState):
                      ) -> Union["IGameState", None]:
         if self.context.session:
             if events:
-                for event in events.keys():
-                    if not isinstance(event, InGameEvents):
-                        raise ValueError(
-                            f'{event} is not of type "InGameEvents"')
-                event = self._get_priority_event(events)
+                event = self._validate_events(events, InGameEvents)
                 return self._process_event_enums(event, delta_ticks)
             else:
                 return self._normal_ingame_update(delta_ticks=delta_ticks)
         return None
 
-    def _get_priority_event(self, events: dict[IEventEnums, dict[str, Any] | None]) -> IEventEnums:
-        # Define priority order
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums:
         priority_order = [InGameEvents.PAUSE,
                           InGameEvents.PACMAN_NORTH,
                           InGameEvents.PACMAN_EAST,
@@ -236,12 +233,12 @@ class InGameState(IGameState):
                               pacman_move: tuple[int, int] | None = None
                               ) -> IGameState | None:
         if self.context.session:
-            game_over, level_won = self.context.session.update(pacman_move=pacman_move,
-                                                               delta_ticks=delta_ticks)
-            if not game_over:
+            outcome: UpdateOutcome = self.context.session.update(pacman_move=pacman_move,
+                                                                 delta_ticks=delta_ticks)
+            if not outcome.value[0]:
                 return None
 
-            if level_won and not self.context.final_level():
+            if outcome.value[1] and not self.context.final_level():
                 self._increment_level()
                 return None
 
@@ -268,11 +265,7 @@ class HighScoreRegisterState(InGameState):
                      delta_ticks: int
                      ) -> Union["IGameState", None]:
         if events:
-            for event in events.keys():
-                if not isinstance(event, HighScoreRegisterEvents):
-                    raise ValueError(
-                        f'{event} is not of type "HighScoreRegisterEvents"')
-            event = self._get_priority_event(events)
+            event = self._validate_events(events, HighScoreRegisterEvents)
             if event == HighScoreRegisterEvents.CANCEL:
                 return MainMenuState(self.context)
             elif event == HighScoreRegisterEvents.REGISTER:
@@ -284,8 +277,8 @@ class HighScoreRegisterState(InGameState):
 
         return None
 
-    def _get_priority_event(self,
-                            events: dict[IEventEnums, dict[str, Any] | None]
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums:
         priority_order = [HighScoreRegisterEvents.CANCEL,
                           HighScoreRegisterEvents.REGISTER]

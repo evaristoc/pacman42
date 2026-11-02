@@ -36,7 +36,7 @@ class Maze:
         self.height = len(maze)
         self.width = len(maze[0])
         self.outerbound_maze: list[list[int]] = self._find_outerbounds(maze)
-        self.grid: list[list[Tile | None]] = self._build_grid()
+        self.grid: list[list[Tile]] = self._build_grid()
         self.pellets_nr: int = self._count_pellets()
 
     def _find_outerbounds(self, maze: list[list[int]]) -> list[list[int]]:
@@ -110,11 +110,15 @@ class Maze:
         if y_position < 0 or y_position > (self.height - 1):
             return None
 
-        temp_tile = self.grid[position[1]][position[0]]
-        if temp_tile:
-            return temp_tile
-        else:
-            raise ValueError(f"No tile at position: {position}")
+        return self.grid[position[1]][position[0]]
+
+    def return_tile_from_pos_with_validation(self, *,
+                                             position: tuple[int, int]
+                                             ) -> Tile:
+        new_tile = self.return_tile_from_position(position=position)
+        if not new_tile:
+            raise RuntimeError(f"Problem finding tile at {position}")
+        return new_tile
 
     def decrement_pellets(self) -> int | None:
         """Returns the decremented value, or None if can't decrement"""

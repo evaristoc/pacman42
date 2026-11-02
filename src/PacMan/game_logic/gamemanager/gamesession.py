@@ -1,11 +1,14 @@
 from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory, MazeSnapshot
 from src.PacMan.game_logic.ingame.time.time import TimeManager, TimeMngSnapshot
+from src.PacMan.game_logic.ingame.time.time_sm import LevelActiveState
 from src.PacMan.game_logic.ingame.characters.pacman import Pacman, PacmanSnapshot
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager, GhostMngSnapshot
 from src.PacMan.game_logic.ingame.collision import CollisionManager
 from src.PacMan.game_logic.score_mng import ScoreManager
 from src.PacMan.game_logic.player import Player
+from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from dataclasses import dataclass
+
 
 
 @dataclass(frozen=True)
@@ -36,18 +39,18 @@ class GameSession:
     def update(self, *,
                delta_ticks: int,
                pacman_move: tuple[int, int] | None = None
-               ) -> tuple[bool, bool | None]:
-        game_over_and_level_won = self.timemng.update()
-        if game_over_and_level_won[0]:
-            return game_over_and_level_won
-        if self.timemng.level_running:
+               ) -> UpdateOutcome:
+        outcome = self.timemng.update()
+        if outcome.value[0]:
+            return outcome
+        if type(self.timemng.state) is LevelActiveState:
             self.pacman.update(delta_ticks=delta_ticks,
                                new_direction=pacman_move)
             self.ghost_mng.update(delta_ticks,
                                   self.pacman.new_position.get_position_from_tile(),
                                   self.pacman.direction)
-            game_over_and_level_won = self.collision_mng.update()
-        return game_over_and_level_won
+            outcome = self.collision_mng.update()
+        return outcome
 
     def view(self) -> GameSessionSnapshot:
         maze_ss = self.maze.view()
@@ -61,8 +64,8 @@ class GameSession:
 
 
 class GameSessionFactory:
-    GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 10, 2: 10, 3: 6}
-    PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 7, 2: 10, 3: 10}
+    GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 30, 2: 10, 3: 6}
+    PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 20, 2: 10, 3: 10}
     MAZE_SIZENSEED_PER_LEVEL: dict[int, tuple[int, int]] = {
         1: (10, 80), 2: (10, 45), 3: (10, 50)}
 

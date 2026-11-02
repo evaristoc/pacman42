@@ -4,7 +4,8 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import (AIStrategy,
                                                                      PinkyAI,
                                                                      InkyAI)
 from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
-                                                                    ChasingGhostState)
+                                                                    ChasingGhostState,
+                                                                    GhostCollision)
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
 from dataclasses import dataclass
@@ -53,9 +54,9 @@ class Ghost:
         self.maze: Maze = maze
         self.spawn_point: tuple[int, int] = spawn_point
         self.strategy: AIStrategy = ai_strategy
-        self.new_position: Tile = self.maze.return_tile_from_position(
+        self.new_position: Tile = self.maze.return_tile_from_pos_with_validation(
             position=self.spawn_point)
-        self.old_position: Tile = self.maze.return_tile_from_position(
+        self.old_position: Tile = self.maze.return_tile_from_pos_with_validation(
             position=self.spawn_point)
         self.interpolated_position: tuple[float,
                                           float] = self.old_position.get_position_from_tile()
@@ -101,7 +102,7 @@ class Ghost:
     def big_pellet_activated(self) -> None:
         self.state = self.state.big_pellet_activated()
 
-    def collide_with_pacman_and_does_ghost_die(self) -> bool:
+    def collide_with_pacman_and_does_ghost_die(self) -> GhostCollision:
         new_state, ghost_dies = self.state.collide_with_pacman_does_ghost_die()
         if new_state:
             self.state = new_state
@@ -114,8 +115,9 @@ class Ghost:
         old_x = self.old_position.cell_position_x
         old_y = self.old_position.cell_position_y
         new_position = (old_x + dx, old_y + dy)
-        self.new_position = self.maze.return_tile_from_position(
+        new_tile = self.maze.return_tile_from_pos_with_validation(
             position=new_position)
+        self.new_position = new_tile
 
     def _move_interpolate(self, delta_ticks: int) -> None:
         if not self.old_position == self.new_position:
