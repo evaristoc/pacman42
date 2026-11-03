@@ -108,6 +108,12 @@ class Ghost:
             self.state = new_state
         return ghost_dies
 
+    def pacman_dies_reset(self) -> None:
+        self.new_position = self.maze.return_tile_from_pos_with_validation(
+            position=self.spawn_point)
+        self.old_position = self.maze.return_tile_from_pos_with_validation(
+            position=self.spawn_point)
+
     def _process_move(self, move: tuple[int, int] | None) -> None:
         if not move:
             move = (0, 0)
@@ -206,6 +212,10 @@ class GhostManager:
     def big_pellet_activated(self) -> None:
         for ghost in self.ghosts.values():
             ghost.big_pellet_activated()
+
+    def reset(self) -> None:
+        for ghost in self.ghosts.values():
+            ghost.pacman_dies_reset()
 
 
 if __name__ == '__main__':

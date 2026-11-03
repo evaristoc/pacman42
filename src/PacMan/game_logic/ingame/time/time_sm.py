@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from src.PacMan.game_logic.ingame.time.time import TimeManager
 
 COUNTDOWN_TIME = 3
-LEVEL_TIME = 15
+LEVEL_TIME = 60
 
 
 class TimeStateError(Exception):

@@ -77,8 +77,10 @@ class CollisionManager:
                     if self.player.decrement_lives():
                         self.pacman.pacman_dies()
                         self.timemng.restart_countdown()
+                        self.ghostmng.reset()
+                        return UpdateOutcome.GAME_STILL_GOING
                     else:
-                        result = UpdateOutcome.ALL_LIVES_LOST
+                        return UpdateOutcome.ALL_LIVES_LOST
         return result
 
     def _handle_pellet_collisions(self) -> UpdateOutcome:

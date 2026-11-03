@@ -56,7 +56,7 @@ class AStarNode:
 
     @staticmethod
     def _calculate_priority(steps: int, distance_to_target: float) -> float:
-        return steps + 5 * distance_to_target
+        return steps + distance_to_target
 
     @staticmethod
     def _process_move(move: tuple[int, int],
