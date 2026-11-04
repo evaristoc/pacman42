@@ -43,7 +43,7 @@ class DrawerEngine:
         # self.__total_cell_size = self.__interior_cell_size + 2 * self.__wall_thickness
         self._config = config
         self.__perc_wall = .2
-        # self.__perc_padding = .2
+        self.__perc_padding = .2
         self.__total_cell_size = int(
             self._config.size / self._config.nb_cells
             + self.__perc_wall * int(
@@ -59,12 +59,12 @@ class DrawerEngine:
             config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
         self.__diff = self._config.size - self.__corrected_size
         self.__padding = 0
-        # self.__padding = int(
-        #     self.__interior_cell_size * self.__perc_padding
-        # )
-        # self.__cell_center = (
-        #     self.__interior_cell_size - 2 * self.__padding
-        # )
+        self.__padding = int(
+            self.__interior_cell_size * self.__perc_padding
+        )
+        self.__cell_center = (
+            self.__interior_cell_size - 2 * self.__padding
+        )
 
     def init_maze(self) -> Maze:
         try:
@@ -244,6 +244,28 @@ class DrawerEngine:
         for dy in range(y_area):
             for dx in range(x_area):
                 target_img.pygput_pixel(start_x + dx, start_y + dy, color)
+        if cell.has_pellet():
+            self.__draw_pellet(target_img, cell, color=0xffffff)
+
+    def __draw_pellet(
+            self,
+            target_img: PyGMLXImageEmulator,
+            cell: Tile,
+            color: int
+    ):
+        x_cell = cell.cell_position_x
+        y_cell = cell.cell_position_y
+        total = self.__total_cell_size
+        center_x = x_cell + int(total / 2)
+        center_y = y_cell + int(total / 2)
+        radius = self.__cell_center
+        wall = self.__wall_thickness
+        start_x = x_cell * (total - wall)
+        start_y = y_cell * (total - wall)
+        for dx in range(total):
+            for dy in range(total):
+                if ((dx - center_x)**2 + (dy - center_y)**2) < radius:
+                    target_img.pygput_pixel(start_x + dx, start_y + dy, color) 
 
     def __draw_cell_walls(
         self,

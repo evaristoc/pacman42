@@ -53,58 +53,58 @@ class PacManApp:
         """
         try:
             # assembler is a short live object only for assembling
-            assembler = RendererAssembler(config)
+            self.assembler = RendererAssembler(config)
             # drawer will control all relevant metrics
             # it will also paint the canvas
-            self.drawer = assembler.init_drawer()
+            self.drawer = self.assembler.init_drawer()
             size = self.drawer.corrected_size[0]
             bottom = self.drawer.bottom_h
-            self.pygmlx = assembler.init_engine(config.size,
+            self.pygmlx = self.assembler.init_engine(config.size,
                                                 2 * bottom)
-            self.glm = assembler.init_glm(InGameState)
+            self.glm = self.assembler.init_glm(InGameState)
             self.maze = self.glm.session.maze
-            self.board_img = assembler.init_board(size)
+            self.board_img = self.assembler.init_board(size)
             rsized = self.drawer.resized
             self.characters_imgs["InGameEvents"]["ghosts"] =\
-                assembler.upload_other_imgs("ghosts",
+                self.assembler.upload_other_imgs("ghosts",
                                             rsized,
                                             rsized)
             self.characters_imgs["InGameEvents"]["pacman"] =\
-                assembler.upload_pacman_imgs("pacman",
+                self.assembler.upload_pacman_imgs("pacman",
                                              rsized,
                                              rsized)
             self.menus_imgs.update(
-                assembler.upload_menu_imgs("menu",
-                                           100,
-                                           60,
+                self.assembler.upload_menu_imgs("menu",
+                                           int(config.size / 5),
+                                           int(config.size / 8),
                                            "MainMenuEvents")
             )
             self.menus_imgs.update(
-                assembler.upload_menu_imgs("menu",
-                                           100,
-                                           60,
+                self.assembler.upload_menu_imgs("menu",
+                                           int(config.size / 5),
+                                           int(config.size / 8),
                                            "PauseMenuEvents")
             )
             self.menus_imgs.update(
-                assembler.upload_menu_imgs("menu",
-                                           100,
-                                           60,
+                self.assembler.upload_menu_imgs("menu",
+                                           int(config.size / 5),
+                                           int(config.size / 8),
                                            "HighScoreRegisterEvents")
             )
             self.menus_imgs.update(
-                assembler.upload_menu_imgs("menu",
-                                           100,
-                                           60,
+                self.assembler.upload_menu_imgs("menu",
+                                           int(config.size / 5),
+                                           int(config.size / 8),
                                            "GameOver")
             )
-            self.menus_imgs["hub_u"] = assembler.init_hub_text(
+            self.menus_imgs["hub_u"] = self.assembler.init_hub_text(
                 size,
                 bottom,
                 "Score 100  Highest 20000  Remaining 50secs",
                 0,
                 0,
                 "CONSOLA.TTF",
-                24
+                int(config.size / 20.8)
             )
             # self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
         except Exception as err:
@@ -145,9 +145,9 @@ class PacManApp:
         )
         # lower hub
         level = self.pygmlx.pygmlx_new_text_image(
-                                        98,
-                                        48,
-                                        24,
+                                        int(self.assembler._config.size / 5),
+                                        int(self.assembler._config.size / 10),
+                                        int(self.assembler._config.size / 20),
                                         0xF6303F
                                     )
         level.pygput_from_text(
@@ -163,43 +163,20 @@ class PacManApp:
         # print(self.characters_imgs)
         self.pygmlx.pygmlx_put_image_to_window(
             self.characters_imgs["InGameEvents"]["pacman"]["START"],
-            int(self.drawer.margin / 2) + 350,
+            int(self.drawer.margin / 2) + int(0.7 * self.assembler._config.size),
             int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
         )
         self.pygmlx.pygmlx_put_image_to_window(
             self.characters_imgs["InGameEvents"]["pacman"]["START"],
-            int(self.drawer.margin / 2) + 350 + 30,
+            int(self.drawer.margin / 2) + int(0.7 * self.assembler._config.size) + int(0.06 * self.assembler._config.size),
             int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
         )
         self.pygmlx.pygmlx_put_image_to_window(
             self.characters_imgs["InGameEvents"]["pacman"]["START"],
-            int(self.drawer.margin / 2) + 350 + 60,
+            int(self.drawer.margin / 2) + int(0.7 * self.assembler._config.size) + int(0.12 * self.assembler._config.size),
             int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
         )
-        # print(self.ghosts_imgs)
-        # for i, g in enumerate(self.ghosts_imgs):
-        #     self.pygmlx.pygmlx_put_image_to_window(
-        #         self.ghosts_imgs[g],
-        #         self.drawer.next_char_coord(i),
-        #         self.drawer.next_char_coord(0)
-        #     )
-        # for i, p in enumerate(self.pacman_imgs):
-        #     self.pygmlx.pygmlx_put_image_to_window(
-        #         self.pacman_imgs[p],
-        #         self.drawer.next_char_coord(i),
-        #         self.drawer.next_char_coord(1)
-        #     )
-        # imgmlxtext: PyGMLXTextEmulator = self.pygmlx.pygmlx_new_text_image(
-        #     self.drawer.corrected_size[0],
-        #     self.drawer.bottom_h,
-        #     40)
-        # imgmlxtext.pygput_from_text(0, 0, "I am Pacman.")
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     imgmlxtext,
-        #     14,
-        #     self.drawer.corrected_size[0] + 7,
-        # )
-        observer = Observer(self.pygmlx, self.glm, self.drawer)
+        observer = Observer(self.pygmlx, self.glm, self.drawer, self.assembler._config.size)
         observer.register_assets("board", self.board_img)
         observer.register_assets("InGameState", self.characters_imgs["InGameEvents"])
         observer.register_assets("MainMenuState", self.menus_imgs["MainMenuEvents"])

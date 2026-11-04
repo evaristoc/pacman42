@@ -109,11 +109,15 @@ class IAction(Protocol):
 
 
 class PlayingAction(IAction):
+    def _init_start(self,
+                    obs: Observer) -> None:
+        
+        
     def action(
             self,
             obs: Observer,
             tick: int
-    ) -> None:
+    ) -> None:            
         # INTERIOR CELLS ###
         # -- pacman --
         obs._drawer.draw_cell_interior(
@@ -169,8 +173,10 @@ class PlayingAction(IAction):
         for g in obs._glm.session.ghost_mng.ghosts:
             obs._mlx.pygmlx_put_image_to_window(
                 obs._registry[state]["ghosts"][g.name],
-                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * obs._glm.session.ghost_mng.ghosts[g].interpolation[0])),
-                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * obs._glm.session.ghost_mng.ghosts[g].interpolation[1])) + obs._drawer.bottom_h
+                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x),
+                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + obs._drawer.bottom_h
+                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * obs._glm.session.ghost_mng.ghosts[g].interpolation[0])),
+                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * obs._glm.session.ghost_mng.ghosts[g].interpolation[1])) + obs._drawer.bottom_h
             )
 
         # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
@@ -190,11 +196,13 @@ class Observer:
     def __init__(self,
                  mlx: PyGMiniLibXEmulator,
                  glm: GameLogicManager,
-                 drawer: "DrawerEngine") -> None:
+                 drawer: "DrawerEngine",
+                 size: int) -> None:
         self._registry: dict[str, Any] | None = None
         self._mlx = mlx
         self._glm = glm
         self._drawer = drawer
+        self._size = size
         self.event_queue: list[Event] = []
 
     def register_assets(self, key: str, asset: dict[str, Any]) -> None:
