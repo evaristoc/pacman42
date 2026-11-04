@@ -11,10 +11,10 @@ def _find_env_directory() -> Path:
     return env_dir
 
 
-def get_db_path() -> Path:
+def get_db_path() -> str:
     env_dir = _find_env_directory()
     db_name = 'score.db'
-    return env_dir / db_name
+    return str(env_dir / db_name)
 
 
 if __name__ == '__main__':

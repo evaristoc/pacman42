@@ -10,6 +10,7 @@ authors = [
 ]
 dependencies = [
     "numpy>=2.4.6",
+    "peewee>=4.5.3",
     "rich==13.0.0",
 ]
 
