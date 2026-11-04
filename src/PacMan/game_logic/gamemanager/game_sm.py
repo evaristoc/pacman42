@@ -269,10 +269,21 @@ class HighScoreRegisterState(InGameState):
             if event == HighScoreRegisterEvents.CANCEL:
                 return MainMenuState(self.context)
             elif event == HighScoreRegisterEvents.REGISTER:
-                event_dict: dict[str,
-                                 Any] | None = events[HighScoreRegisterEvents.REGISTER]
-                if event_dict:
-                    self.context.player.set_name(event_dict['name'])
+                payload = events.get(HighScoreRegisterEvents.REGISTER)
+                if payload is None:
+                    raise RuntimeError("Tried to register without a payload.")
+
+                name = payload.get("name")
+                if not isinstance(name, str) or not name.strip():
+                    raise RuntimeError("Passed payload without a valid name.")
+            
+                name = name.strip()
+                score = self.context.player.score
+
+                with self.context.dbm as db:
+                    db.add_player(name, score)
+
+                self.context.player.set_name(name)
                 return MainMenuState(self.context)
 
         return None

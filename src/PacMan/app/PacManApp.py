@@ -13,6 +13,7 @@ from src.PacMan.renderer.renderer_engine import (
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
+from src.PacMan.database.db_mng import DatabaseManager, create_database_mng
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ class PacManApp:
         self.assembler: RendererAssembler | None = None
         self.drawer: DrawerEngine | None = None
         self.pygmlx: PyGMiniLibXEmulator | None = None
+        self.dbm: DatabaseManager | None = None
         self.glm: GameLogicManager | None = None
         self.board: dict[str, PyGMLXImageEmulator] | None = None
         self.ghosts_imgs: dict[str, PyMLXPNGEmulator] | None = None
@@ -53,7 +55,8 @@ class PacManApp:
             bottom = self.drawer.bottom_h
             self.pygmlx = assembler.init_engine(config.size,
                                                 2 * bottom)
-            self.glm = assembler.init_glm()
+            self.dbm = create_database_mng()
+            self.glm = assembler.init_glm(self.dbm)
             self.maze = self.glm.session.maze
             self.board_img = assembler.init_board(size)
             rsized = self.drawer.resized

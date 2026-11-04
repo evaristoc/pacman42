@@ -18,7 +18,7 @@ class Player:
     """
     name: str
     score: int = 0
-    lives: int = 5
+    lives: int = 0
     level: int = 1
 
     def to_dict(self) -> dict:

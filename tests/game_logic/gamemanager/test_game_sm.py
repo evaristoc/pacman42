@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 from typing import Any, cast
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 import pytest
 
@@ -32,13 +32,15 @@ def make_session(
 
 
 def make_context(session: Mock | None = None) -> Any:
-    player = SimpleNamespace(level=1, set_name=Mock())
+    player = SimpleNamespace(level=1, set_name=Mock(), score=300)
+    dbm = MagicMock()
     return SimpleNamespace(
         session=session,
         player=player,
         final_level=Mock(return_value=False),
         create_game_session=Mock(),
         state=None,
+        dbm=dbm
     )
 
 
@@ -248,13 +250,12 @@ def test_register_without_name_returns_to_menu_without_setting_name(
     payload: dict[str, str] | None,
 ) -> None:
     context = make_context()
+    with pytest.raises(RuntimeError):
+        HighScoreRegisterState(context).update_logic(
+            {HighScoreRegisterEvents.REGISTER: payload},
+            1,
+        )
 
-    result = HighScoreRegisterState(context).update_logic(
-        {HighScoreRegisterEvents.REGISTER: payload},
-        1,
-    )
-
-    assert isinstance(result, MainMenuState)
     context.player.set_name.assert_not_called()
 
 
