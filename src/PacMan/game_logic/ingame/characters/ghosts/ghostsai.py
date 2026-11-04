@@ -133,12 +133,15 @@ class InkyAI(AIStrategy):
         """Inky-specific chase logic."""
         pos_x, pos_y = pacman_pos
         dir_x, dir_y = pacman_direction
+        temp_tile: Tile | None = None
         for x in range(3, -1, -1):
-            temp_tile: Tile | None = self.maze.return_tile_from_position(
+            temp_tile = self.maze.return_tile_from_position(
                 position=((pos_x + (dir_x * x)), (pos_y + (dir_y * x))))
             if temp_tile:
-                origin = temp_tile.get_position_from_tile()
                 break
+        if not temp_tile:
+            raise RuntimeError("Problem while getting origin for triangulation.")
+        origin: tuple[int, int] = temp_tile.get_position_from_tile()
         blinky_pos = self.blinky.new_position.get_position_from_tile()
         vector_O_to_blinky = (
             (blinky_pos[0] - origin[0]), (blinky_pos[1] - origin[1]))

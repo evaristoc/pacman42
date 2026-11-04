@@ -82,7 +82,7 @@ def create_database_mng() -> DatabaseManager:
 if __name__ == '__main__':
     db_manager = create_database_mng()
     with db_manager as db:
-        db.delete_player("John")
+        db.delete_player("dfsafd")
         scores = db.get_high_scores(10)
         for score in scores:
             print(f"Name: {score.name}, Score: {score.score}")

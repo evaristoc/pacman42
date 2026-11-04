@@ -72,7 +72,7 @@ class ChasingGhostState(IGhostState):
 class FrightenedGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
-        self.frightened_timer: float = time.time() + 30
+        self.frightened_timer: float = time.time() + 12
         self.tick_speed: int = self.context.speed
 
     def update(self, *,
