@@ -156,6 +156,11 @@ class DrawerEngine:
                         cast(Tile, c),
                         elements["walls"]
                     )
+                    self.draw_cell_interior(
+                        target_img,
+                        c,
+                        0x000000
+                    )
                 # if "fourtytwo" in elements and isinstance(c, FourtyTwoCell):
                 #     self.__draw_cell_interior(
                 #         target_img,

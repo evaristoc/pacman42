@@ -69,6 +69,12 @@ class PyGMiniLibXEmulator:
         self.screen.blit(surface, (x, y))
         pygame.display.flip()
 
+    def contains(self, x, y):
+        return (
+            self.x <= x < self.x + self.width
+            and self.y <= y < self.y + self.height
+        )
+
     # def pygmlx_string_put(self,
     #                       x: int,
     #                       y: int,

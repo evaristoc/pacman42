@@ -18,8 +18,9 @@ from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.gamemanager.game_sm import InGameState, MainMenuState
-logger = logging.getLogger(__name__)
 
+
+logger = logging.getLogger(__name__)
 
 class PacManApp:
     def __init__(self) -> None:

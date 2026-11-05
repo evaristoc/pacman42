@@ -109,8 +109,8 @@ class IAction(Protocol):
 
 
 class PlayingAction(IAction):
-    def _init_start(self,
-                    obs: Observer) -> None:
+    # def _init_start(self,
+    #                 obs: Observer) -> None:
         
         
     def action(
@@ -146,7 +146,7 @@ class PlayingAction(IAction):
         # )
 
         # # PACMAN ###
-        print(dict(vars(InGameState))['PACMAN_STEPS'])
+        print(dict(vars(InGameState))['PACMAN_STEPS'], InGameState.__name__)
         pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
         # print(pacman_steps)
         # print(dict(vars(obs._glm.session.pacman)))
