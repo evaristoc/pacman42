@@ -78,20 +78,31 @@ class GameLogicManager:
         return False
 
 
-def debug():
+def debug() -> None:
     from src.PacMan.database.db_mng import create_database_mng
     from src.PacMan.game_logic.gamemanager.game_sm import MainMenuState
-    from src.PacMan.validation_contracts.event_enums import MainMenuEvents, HighScoreRegisterEvents
+    from src.PacMan.validation_contracts.event_enums import MainMenuEvents, HighScoreRegisterEvents, InGameEvents
     import time
+    import random
 
     dbm = create_database_mng()
     glm = GameLogicManager(dbm, start_state=MainMenuState)
 
     snapshot = glm.view()
+    glm.update_logic({MainMenuEvents.START: None})
+    time.sleep(3)
     ###### GAME_LOOP #####
-    for i in range(20):
-        glm.update_logic(None)
-        if i % 5 == 0:
+    for i in range(200):
+        if snapshot.game_state == 'HighScoreRegisterState':
+            glm.update_logic({HighScoreRegisterEvents.REGISTER: {'name' : 'Charlie'}})
+        elif snapshot.game_state == 'InGameState' and i % 3 == 0:
+            moves = [InGameEvents.PACMAN_EAST, InGameEvents.PACMAN_NORTH, InGameEvents.PACMAN_SOUTH, InGameEvents.PACMAN_WEST]
+            event: dict[IEventEnums, dict[Any, Any] | None] | None = {random.choice(moves): None}
+            glm.update_logic(event)
+        else:
+            glm.update_logic(None)
+        snapshot = glm.view()
+        if i % 20 == 0:
             print(f"Current highscore: {snapshot.highscores}")
         time.sleep(0.3)
 

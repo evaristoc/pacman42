@@ -277,11 +277,14 @@ class HighScoreRegisterState(InGameState):
                 if not isinstance(name, str) or not name.strip():
                     raise RuntimeError("Passed payload without a valid name.")
             
-                name = name.strip()
+                name = name.strip().lower().capitalize()
                 score = self.context.player.score
 
                 with self.context.dbm as db:
-                    db.add_player(name, score)
+                    if db.player_exists(name):
+                        db.update_if_better_score(name, score)
+                    else:
+                        db.add_player(name, score)
 
                 self.context.player.set_name(name)
                 return MainMenuState(self.context)

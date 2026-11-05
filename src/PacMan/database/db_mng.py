@@ -1,4 +1,4 @@
-from peewee import SqliteDatabase, Database, Model, CharField, IntegerField, DateTimeField
+from peewee import SqliteDatabase, Database, Model, CharField, IntegerField, DateTimeField, DoesNotExist
 from src.PacMan.database.db_path import get_db_path
 from datetime import datetime
 from typing import List
@@ -56,6 +56,19 @@ class DatabaseManager:
         result = Player.delete().where(  # type: ignore
             Player.name == name).execute()  # type: ignore
         return result > 0  # type: ignore
+    
+    def player_exists(self, name: str) -> bool:
+        try:
+            self.get_player(name)
+        except DoesNotExist:
+            return False
+        return True
+
+    def update_if_better_score(self, name: str, score: int) -> Player:
+        player = self.get_player(name)
+        if score >= player.score:
+            return self.update_score(name, score)
+        return player
 
     def __enter__(self) -> "DatabaseManager":
         self._db = SqliteDatabase(self._path)
