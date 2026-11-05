@@ -2,6 +2,7 @@ import logging
 from collections import deque
 from pathlib import Path
 from PIL import Image
+from typing import Any
 from src.PacMan.validation_contracts.event_enums import (
                                             InGameEvents,
                                             IEventEnums)
@@ -59,15 +60,18 @@ class RendererAssembler:
         # return PyGMiniLibXEmulator(w,
         #                            w + w / BOTTOMPARTSCREEN)
 
-    def init_board(self, w: int) -> PyGMLXImageEmulator:
+    def init_board(self,
+                   dct: dict[str, Any],
+                   w: int) -> None:
         # maze
-        return PyMLXPNGEmulator(
+        dct["InGameState"]["assets"]["board"]["img"] = PyGMLXImageEmulator(
                     w,
                     w
                 )
 
     def upload_menu_imgs(
             self,
+            dct: dict[str, Any],
             folder: str,
             rsize_w: int | None = None,
             rsize_h: int | None = None,

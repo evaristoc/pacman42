@@ -15,6 +15,7 @@ from src.PacMan.renderer.renderer_engine import (
     PyGMLXTextEmulator)
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
+from src.PacMan.renderer.assets import ASSETS
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.gamemanager.game_sm import InGameState, MainMenuState
@@ -28,15 +29,15 @@ class PacManApp:
         self.drawer: DrawerEngine | None = None
         self.pygmlx: PyGMiniLibXEmulator | None = None
         self.glm: GameLogicManager | None = None
-        self.board: dict[str, PyGMLXImageEmulator] | None = None
-        self.characters_imgs: dict[
-            str,
-            dict[str, PyMLXPNGEmulator | list[PyMLXPNGEmulator]]] | None = {
-                                                    "InGameEvents": {
-                                                        "pacman": {},
-                                                        "ghosts": {}
-                                                    }}
-        self.menus_imgs: dict[str, dict[str, PyGMLXTextEmulator]] | None = {}
+        # self.board: dict[str, PyGMLXImageEmulator] | None = None
+        # self.characters_imgs: dict[
+        #     str,
+        #     dict[str, PyMLXPNGEmulator | list[PyMLXPNGEmulator]]] | None = {
+        #                                             "InGameEvents": {
+        #                                                 "pacman": {},
+        #                                                 "ghosts": {}
+        #                                             }}
+        # self.menus_imgs: dict[str, dict[str, PyGMLXTextEmulator]] | None = {}
         # self.assets: dict[str, Any] | None = None
 
     def __str__(self) -> str:
@@ -64,41 +65,44 @@ class PacManApp:
                                                 2 * bottom)
             self.glm = self.assembler.init_glm(InGameState)
             self.maze = self.glm.session.maze
-            self.board_img = self.assembler.init_board(size)
+            self.assembler.init_board(ASSETS, size)
             rsized = self.drawer.resized
-            self.characters_imgs["InGameEvents"]["ghosts"] =\
-                self.assembler.upload_other_imgs("ghosts",
-                                            rsized,
-                                            rsized)
-            self.characters_imgs["InGameEvents"]["pacman"] =\
-                self.assembler.upload_pacman_imgs("pacman",
-                                             rsized,
-                                             rsized)
-            self.menus_imgs.update(
-                self.assembler.upload_menu_imgs("menu",
-                                           int(config.size / 5),
-                                           int(config.size / 8),
-                                           "MainMenuEvents")
+            self.assembler.upload_other_imgs(
+                                        ASSETS,
+                                        "ghosts",
+                                        rsized,
+                                        rsized)
+            self.assembler.upload_pacman_imgs(
+                                        ASSETS,
+                                        "pacman",
+                                        rsized,
+                                        rsized)
+            self.assembler.upload_menu_imgs(
+                                        ASSETS,
+                                        "menus/MainMenuEvents",
+                                        int(config.size * ASSETS["MainMenuState"]["assets"]["metadata"]["resize_w_prop"]),
+                                        int(config.size * ASSETS["MainMenuState"]["assets"]["metadata"]["resize_h_prop"])
             )
             self.menus_imgs.update(
-                self.assembler.upload_menu_imgs("menu",
-                                           int(config.size / 5),
-                                           int(config.size / 8),
-                                           "PauseMenuEvents")
+                self.assembler.upload_menu_imgs(
+                                        ASSETS,
+                                        "menus/PauseMenuEvents",
+                                        int(config.size * ASSETS["PauseMenuState"]["assets"]["metadata"]["resize_w_prop"]),
+                                        int(config.size * ASSETS["PauseMenuState"]["assets"]["metadata"]["resize_h_prop"]))
             )
             self.menus_imgs.update(
-                self.assembler.upload_menu_imgs("menu",
-                                           int(config.size / 5),
-                                           int(config.size / 8),
-                                           "HighScoreRegisterEvents")
+                self.assembler.upload_menu_imgs(
+                                        "menu/HighScoreRegisterState",
+                                        int(config.size * ASSETS["HighScoreRegisterState"]["assets"]["metadata"]["resize_w_prop"]),
+                                        int(config.size * ASSETS["HighScoreRegisterState"]["assets"]["metadata"]["resize_h_prop"]))
             )
             self.menus_imgs.update(
-                self.assembler.upload_menu_imgs("menu",
-                                           int(config.size / 5),
-                                           int(config.size / 8),
-                                           "GameOver")
+                self.assembler.upload_menu_imgs(
+                                        "menu/GameOver",
+                                        int(config.size / 5),
+                                        int(config.size / 8))
             )
-            self.menus_imgs["hub_u"] = self.assembler.init_hub_text(
+            self.assembler.init_hub_text(
                 size,
                 bottom,
                 "Score 100  Highest 20000  Remaining 50secs",
