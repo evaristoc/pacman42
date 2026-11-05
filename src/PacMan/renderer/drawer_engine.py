@@ -116,9 +116,9 @@ class DrawerEngine:
     def bottom_h(self) -> int:
         return int(self.corrected_size[0] / self.BOTTOMPARTSCREEN)
 
-    @property
-    def resized(self) -> int:
-        return int(self.corrected_size[0] / (2 * self._config.nb_cells))
+    # @property
+    # def resized(self) -> int:
+    #     return int(self.corrected_size[0] / (2 * self._config.nb_cells))
 
     @property
     def margin(self) -> int:

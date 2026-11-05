@@ -15,10 +15,17 @@ from src.PacMan.renderer.renderer_engine import (
     PyGMLXTextEmulator)
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
-from src.PacMan.renderer.assets import ASSETS
+from src.PacMan.renderer.assets import (
+                                ImgsAsset,
+                                ImgMetadata,
+                                TextMetadata,
+                                Source,
+                                Assets,
+                                Events,
+                                AssetMap)
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.game_logic.ingame.maze.maze import Maze
-from src.PacMan.game_logic.gamemanager.game_sm import InGameState, MainMenuState
+
 
 
 logger = logging.getLogger(__name__)
@@ -53,6 +60,15 @@ class PacManApp:
         gets config and keep the state of initial values to
         assemble the whole board relative to those values
         """
+        from src.PacMan.validation_contracts.event_enums import (
+                                            MainMenuEvents,
+                                            PauseMenuEvents,
+                                            InGameEvents)
+        from src.PacMan.game_logic.gamemanager.game_sm import (
+                                                InGameState,
+                                                MainMenuState)
+        from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
+                                                GhostName)
         try:
             # assembler is a short live object only for assembling
             self.assembler = RendererAssembler(config)
@@ -65,13 +81,53 @@ class PacManApp:
                                                 2 * bottom)
             self.glm = self.assembler.init_glm(InGameState)
             self.maze = self.glm.session.maze
-            self.assembler.init_board(ASSETS, size)
-            rsized = self.drawer.resized
-            self.assembler.upload_other_imgs(
-                                        ASSETS,
+            board: ImgsAsset = self.assembler.load_board(size, size)
+            # rsized = self.drawer.resized
+            char_meta: ImgMetadata = ImgMetadata(
+                resize_w_prop=1 / (2 * self.assembler._config.nb_cells),
+                resize_h_prop=1 / (2 * self.assembler._config.nb_cells)
+            )
+            ghosts: ImgsAsset = self.assembler.upload_imgs(
                                         "ghosts",
-                                        rsized,
-                                        rsized)
+                                        self.drawer.corrected_size[0],
+                                        self.drawer.corrected_size[0],
+                                        char_meta,
+                                        GhostName)
+            pacman: ImgsAsset = self.assembler.upload_imgs(
+                                        "pacman",
+                                        self.drawer.corrected_size[0],
+                                        self.drawer.corrected_size[0],
+                                        char_meta,
+                                        InGameState)
+            menu_meta: ImgMetadata = ImgMetadata(
+                resize_w_prop=1 / 5,
+                resize_h_prop=1 / 8,
+                gap_y_prop=1 / 50
+            )
+            main_menu: ImgsAsset = self.assembler.upload_imgs(
+                                        "menus/main",
+                                        self.drawer.corrected_size[0],
+                                        self.drawer.corrected_size[0],
+                                        menu_meta,
+                                        MainMenuEvents)
+            pause_menu: ImgsAsset = self.assembler.upload_imgs(
+                                        "menus/pause",
+                                        self.drawer.corrected_size[0],
+                                        self.drawer.corrected_size[0],
+                                        menu_meta,
+                                        PauseMenuEvents)
+            register_menu: ImgsAsset = self.assembler.upload_imgs(
+                                        "menus/register",
+                                        self.drawer.corrected_size[0],
+                                        self.drawer.corrected_size[0],
+                                        menu_meta,
+                                        PauseMenuEvents)
+            hub_lives: ImgsAsset = self.assembler.upload_imgs(
+                                    "menus/hub_bottom/lives",
+                                    self.drawer.corrected_size[0],
+                                    self.drawer.corrected_size[0],
+                                    char_meta,
+                                    PauseMenuEvents)
             self.assembler.upload_pacman_imgs(
                                         ASSETS,
                                         "pacman",
