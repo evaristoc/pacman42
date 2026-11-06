@@ -84,51 +84,42 @@ class RendererAssembler:
             ) -> ImgsAsset:
         _assets = self.cwd.parent / 'assets' / folder
         if event:
+            print(folder, vars(event))
+            _names = getattr(event, '_member_names_')
             if event.__name__ == 'GhostName':
-                _names = GhostName.__members__.keys()
                 _names = _names + ['DEAD', 'POWERUP']
-            else:
-                _names = event.__members__.keys()
-                if folder == 'pacman':
-                    _names.remove('PAUSE')
-                    _pacmanE = _names[:]
-                    _temp_sources: list[Source] = []
-                    _names = [f'{n}-v' for v in range(1, 4, 1) for n in _names]
+            if folder == 'pacman':
+                _names.remove('PAUSE')
+                _temp_sources: list[Source] = []
+                _files = [f'{n}-{str(v)}' for v in range(1, 4, 1) for n in _names]
         else:
             # lives
             _names = [folder.split('/')[-1].upper() for i in range(3)]
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         try:
             for stem in _names:
-                path = _assets / Path(stem + '.png')
-                if not path.is_file():
-                    logger.exception(f"FATAL: we could not load image : {path}")
-                    raise SystemExit(1)
-                with Image.open(path) as img:
-                    org_w, org_h = img.size
-                # print(fname, org_w)
-                img = PyMLXPNGEmulator(
-                            org_w,
-                            org_h
-                        )
-                img.pygput_from_png(
-                            str(path)
-                        )
-                rsize_w = int(org_w * metadata.resize_w_prop)
-                rsize_h = int(org_h * metadata.resize_h_prop) 
-                img.pygll_resize(
-                            rsize_w,
-                            rsize_h
-                        )
-                if folder == 'pacman':
-                    source = Source(
-                        event_name=stem,
-                        path=path,
-                        img=img,
-                        metadata=metadata
-                    )
-                    _temp_sources.append(source) 
-                else:
+                if folder != 'pacman':
+                    print(folder, stem)
+                    path = _assets / Path(stem + '.png')
+                    if not path.is_file():
+                        logger.exception(f"FATAL: we could not load image : {path}")
+                        raise SystemExit(1)
+                    with Image.open(path) as img:
+                        org_w, org_h = img.size
+                    # print(fname, org_w)
+                    img = PyMLXPNGEmulator(
+                                org_w,
+                                org_h
+                            )
+                    img.pygput_from_png(
+                                str(path)
+                            )
+                    rsize_w = int(org_w * metadata.resize_w_prop)
+                    rsize_h = int(org_h * metadata.resize_h_prop) 
+                    img.pygll_resize(
+                                rsize_w,
+                                rsize_h
+                            )
                     source = Source(
                         path=path,
                         img=img,
@@ -139,15 +130,68 @@ class RendererAssembler:
                             stem: source
                         }
                     )
-            if folder == 'pacman':
-                for e in _pacmanE:
-                    for s in _temp_sources:
-                        if e in s.event_name:
-                            imgassets.sources.append(s)
-                    imgassets.sources = deque(sorted(
-                        imgassets.sources,
-                        key=lambda iats: int(iats.asset_name.split('-')[-1])
-                    ))
+                else:
+                    for f in _files:
+                        if stem in f:
+                            path = _assets / stem / Path(f + '.png')
+                            if not path.is_file():
+                                logger.exception(f"FATAL: we could not load image : {path}")
+                                raise SystemExit(1)
+                            with Image.open(path) as img:
+                                org_w, org_h = img.size
+                            # print(fname, org_w)
+                            img = PyMLXPNGEmulator(
+                                        org_w,
+                                        org_h
+                                    )
+                            img.pygput_from_png(
+                                        str(path)
+                                    )
+                            rsize_w = int(org_w * metadata.resize_w_prop)
+                            rsize_h = int(org_h * metadata.resize_h_prop) 
+                            img.pygll_resize(
+                                        rsize_w,
+                                        rsize_h
+                                    )
+                            source = Source(
+                                event_name=f,
+                                path=path,
+                                img=img,
+                                metadata=metadata
+                            )
+                            _temp_sources.append(source)
+                            # imgassets.sources.update(
+                            #     {
+                            #         f: source
+                            #     }
+                if folder == 'pacman':
+                    for e in _names:
+                        q = []
+                        for s in _temp_sources:
+                            if e in s.event_name:
+                                q.append(s)
+                        q = sorted(
+                            q,
+                            key=lambda iats: int(iats.event_name.split('-')[-1])
+                        )
+                        imgassets.sources[e] = deque(q)
+                        #         imgassets.sources.update(
+                        #             {
+                        #              asset_name: e,
+                        #              sources: s
+                        #              })
+                        # imgassets.sources = deque(sorted(
+                        #     imgassets.sources,
+                        #     key=lambda iats: int(iats.asset_name.split('-')[-1])
+                        # ))
+                    # if folder == 'pacman':
+                    #     source = Source(
+                    #         event_name=stem,
+                    #         path=path,
+                    #         img=img,
+                    #         metadata=metadata
+                    #     )
+                    #     _temp_sources.append(source) 
             return imgassets
         except Exception as err:
             logger.exception(f"FATAL: we could not load images : {err}")

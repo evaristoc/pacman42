@@ -64,26 +64,32 @@ class Assets:
     state_name: str = field(default='')
     img_assets: dict[str, ImgsAsset] = field(default_factory=dict)
 
+    # def eventmap(
+    #         self,
+    #         e: pygame.event.Event,
+    #         cb: Callable[[pygame.event.Event], IEventEnums]) -> IEventEnums:
+    #     ...
 
-@dataclass
-class EventMap:
-    state_name: str = field(default='')
-    eventmapfunc: Callable[[pygame.Event], IEventEnums] | None = None
+
+# @dataclass
+# class EventMap:
+#     state_name: str = field(default='')
+#     eventmapfunc: Callable[[pygame.Event], IEventEnums] | None = None
 
 
-@dataclass
-class AssetMap:
-    events = field(default_factory=Events)
-    assets = field(default_factory=Assets)
+# @dataclass
+# class AssetComp:
+#     eventmap = field(default_factory=EventMap)
+#     assets = field(default_factory=Assets)
 
 
 @dataclass
 class AssetRegistry:
-    InGameState.__name__ = field(default_factory=AssetMap)
-    MainMenuState.__name__ = field(default_factory=AssetMap)
-    PauseMenuState.__name__ = field(default_factory=AssetMap)
-    HighScoreMenuState.__name__ = field(default_factory=AssetMap)
-    HighScoreRegisterState.__name__ = field(default_factory=AssetMap)
+    ingamestate: Assets = field(default_factory=Assets)
+    mainmenustate: Assets = field(default_factory=Assets)
+    pausemenustate: Assets = field(default_factory=Assets)
+    highscoremenustate: Assets = field(default_factory=Assets)
+    highscoreregisterstate: Assets = field(default_factory=Assets)
 
 
 # ASSETS: dict[str, Any] = {
