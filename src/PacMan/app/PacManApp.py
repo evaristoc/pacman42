@@ -1,30 +1,21 @@
 import logging
-from typing import Any
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
-from src.PacMan.validation_contracts.event_enums import (
-                                            InGameEvents,
-                                            IEventEnums)
 from src.PacMan.validation_contracts.parser import DataProcessor
 from src.PacMan.renderer.observer import Observer
-from src.PacMan.renderer.renderer_engine import (
-    PyGMiniLibXEmulator,
-    PyGMLXImageEmulator,
-    PyMLXPNGEmulator,
-    PyGMLXTextEmulator)
+from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import DrawerEngine
 from src.PacMan.renderer.assets import (
                                 ImgsAsset,
                                 ImgMetadata,
                                 TextMetadata,
-                                Source,
+                                EventMap,
                                 Assets,
-                                Events,
                                 AssetMap)
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
-from src.PacMan.game_logic.ingame.maze.maze import Maze
+
 
 
 
@@ -66,7 +57,9 @@ class PacManApp:
                                             InGameEvents)
         from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState,
-                                                MainMenuState)
+                                                MainMenuState,
+                                                PauseMenuState,
+                                                HighScoreRegisterState)
         from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
                                                 GhostName)
         try:
@@ -84,90 +77,98 @@ class PacManApp:
             board: ImgsAsset = self.assembler.load_board(size, size)
             # rsized = self.drawer.resized
             char_meta: ImgMetadata = ImgMetadata(
-                resize_w_prop=1 / (2 * self.assembler._config.nb_cells),
-                resize_h_prop=1 / (2 * self.assembler._config.nb_cells)
+                resize_w_prop=1/(2 * self.assembler._config.nb_cells),
+                resize_h_prop=1/(2 * self.assembler._config.nb_cells)
             )
             ghosts: ImgsAsset = self.assembler.upload_imgs(
                                         "ghosts",
-                                        self.drawer.corrected_size[0],
-                                        self.drawer.corrected_size[0],
                                         char_meta,
                                         GhostName)
             pacman: ImgsAsset = self.assembler.upload_imgs(
                                         "pacman",
-                                        self.drawer.corrected_size[0],
-                                        self.drawer.corrected_size[0],
                                         char_meta,
                                         InGameState)
             menu_meta: ImgMetadata = ImgMetadata(
-                resize_w_prop=1 / 5,
-                resize_h_prop=1 / 8,
-                gap_y_prop=1 / 50
+                resize_w_prop=1/5,
+                resize_h_prop=1/8,
+                gap_y_prop=1/50
             )
             main_menu: ImgsAsset = self.assembler.upload_imgs(
                                         "menus/main",
-                                        self.drawer.corrected_size[0],
-                                        self.drawer.corrected_size[0],
                                         menu_meta,
                                         MainMenuEvents)
             pause_menu: ImgsAsset = self.assembler.upload_imgs(
                                         "menus/pause",
-                                        self.drawer.corrected_size[0],
-                                        self.drawer.corrected_size[0],
                                         menu_meta,
                                         PauseMenuEvents)
             register_menu: ImgsAsset = self.assembler.upload_imgs(
                                         "menus/register",
-                                        self.drawer.corrected_size[0],
-                                        self.drawer.corrected_size[0],
                                         menu_meta,
                                         PauseMenuEvents)
-            hub_lives: ImgsAsset = self.assembler.upload_imgs(
-                                    "menus/hub_bottom/lives",
-                                    self.drawer.corrected_size[0],
-                                    self.drawer.corrected_size[0],
-                                    char_meta,
-                                    PauseMenuEvents)
-            self.assembler.upload_pacman_imgs(
-                                        ASSETS,
-                                        "pacman",
-                                        rsized,
-                                        rsized)
-            self.assembler.upload_menu_imgs(
-                                        ASSETS,
-                                        "menus/MainMenuEvents",
-                                        int(config.size * ASSETS["MainMenuState"]["assets"]["metadata"]["resize_w_prop"]),
-                                        int(config.size * ASSETS["MainMenuState"]["assets"]["metadata"]["resize_h_prop"])
+            # three lives
+            hub_bottom_img: ImgsAsset = self.assembler.upload_imgs(
+                                    "menus/hub_bottom/live",
+                                    char_meta)
+            hub_meta: TextMetadata = TextMetadata(
+                resize_w_prop=1/5,
+                resize_h_prop=1/10
             )
-            self.menus_imgs.update(
-                self.assembler.upload_menu_imgs(
-                                        ASSETS,
-                                        "menus/PauseMenuEvents",
-                                        int(config.size * ASSETS["PauseMenuState"]["assets"]["metadata"]["resize_w_prop"]),
-                                        int(config.size * ASSETS["PauseMenuState"]["assets"]["metadata"]["resize_h_prop"]))
-            )
-            self.menus_imgs.update(
-                self.assembler.upload_menu_imgs(
-                                        "menu/HighScoreRegisterState",
-                                        int(config.size * ASSETS["HighScoreRegisterState"]["assets"]["metadata"]["resize_w_prop"]),
-                                        int(config.size * ASSETS["HighScoreRegisterState"]["assets"]["metadata"]["resize_h_prop"]))
-            )
-            self.menus_imgs.update(
-                self.assembler.upload_menu_imgs(
-                                        "menu/GameOver",
-                                        int(config.size / 5),
-                                        int(config.size / 8))
-            )
-            self.assembler.init_hub_text(
-                size,
-                bottom,
-                "Score 100  Highest 20000  Remaining 50secs",
-                0,
-                0,
-                "CONSOLA.TTF",
-                int(config.size / 20.8)
-            )
+            hub_top: ImgsAsset = self.assembler.upload_hub_text(
+                                        "top_text",
+                                        size,
+                                        bottom,
+                                        "Score: {:>8}    Remaining {:>4}secs",
+                                        0,
+                                        0,
+                                        hub_meta
+                                    )
+            hub_botton_text: ImgsAsset = self.assembler.upload_hub_text(
+                                        "bottom_text",
+                                        size,
+                                        bottom,
+                                        "Level: {:>3}",
+                                        0,
+                                        0,
+                                        hub_meta
+                                    )
             # self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
+            ingame_assets: Assets = Assets(
+                state_name=InGameState.__name__,
+                img_assets={
+                    ghosts.asset_name: ghosts,
+                    pacman.asset_name: pacman,
+                    board.asset_name: board,
+                    hub_top.asset_name: hub_top,
+                    hub_bottom_img.asset_name: hub_bottom_img,
+                    hub_botton_text.asset_name: hub_botton_text
+                }
+            )
+            main_assets: Assets = Assets(
+                state_name=MainMenuState.__name__,
+                img_assets={
+                    main_menu.asset_name: main_menu
+                }                
+            )
+            pause_assets: Assets = Assets(
+                state_name=PauseMenuState.__name__,
+                img_assets={
+                    pause_menu.asset_name: pause_menu
+                }
+            )
+            register_assets: Assets = Assets(
+                state_name=HighScoreRegisterState.__name__,
+                img_assets={
+                    register_menu.asset_name: register_menu
+                }
+            )
+            def pacman_dispatcher(e: pygame.event.Event) -> InGameEvents:
+                ...
+
+            pacman_events: EventMap = EventMap(
+                state_name=InGameState.__name__,
+                eventmapfunc=pacman_dispatcher
+            )
+
         except Exception as err:
             logger.exception(err)
             raise SystemExit(1)
