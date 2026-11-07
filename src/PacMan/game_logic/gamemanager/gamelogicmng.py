@@ -9,7 +9,7 @@ from src.PacMan.game_logic.highscore import HighScoreSnapshot, db_highsc_to_snap
 from typing import Any, Callable
 from dataclasses import dataclass
 
-MAX_LEVEL = 3
+MAX_LEVEL = 2
 
 
 @dataclass(frozen=True)
@@ -28,7 +28,7 @@ class GameLogicManager:
                                        IGameState] = InGameState,
                  ) -> None:
         self.ticks: int = 0
-        self.player = Player("anonymous")
+        self.player = Player()
         self.scoremng = ScoreManager(self.player)
         self.dbm: DatabaseManager = databasemng
         self.session: GameSession | None = None
@@ -69,6 +69,9 @@ class GameLogicManager:
                                                          self.scoremng,
                                                          self.player)
 
+    def end_game_session(self) -> None:
+        self.session = None
+
     def toggle_impotent_ghosts(self) -> None:
         return
 
@@ -86,24 +89,17 @@ def debug() -> None:
     import random
 
     dbm = create_database_mng()
-    glm = GameLogicManager(dbm, start_state=MainMenuState)
+    glm = GameLogicManager(dbm, start_state=InGameState)
+    glm.session.maze.pellets_nr = 0
 
     snapshot = glm.view()
-    glm.update_logic({MainMenuEvents.START: None})
-    time.sleep(3)
-    ###### GAME_LOOP #####
-    for i in range(200):
-        if snapshot.game_state == 'HighScoreRegisterState':
-            glm.update_logic({HighScoreRegisterEvents.REGISTER: {'name' : 'Charlie'}})
-        elif snapshot.game_state == 'InGameState' and i % 3 == 0:
-            moves = [InGameEvents.PACMAN_EAST, InGameEvents.PACMAN_NORTH, InGameEvents.PACMAN_SOUTH, InGameEvents.PACMAN_WEST]
-            event: dict[IEventEnums, dict[Any, Any] | None] | None = {random.choice(moves): None}
-            glm.update_logic(event)
-        else:
-            glm.update_logic(None)
-        snapshot = glm.view()
-        if i % 20 == 0:
-            print(f"Current highscore: {snapshot.highscores}")
-        time.sleep(0.3)
+    for _ in range(400):
+        glm.update_logic(None)
+        snapshot=glm.view()
+        with open('output.txt', 'a') as f:
+            print(snapshot.game_state, file=f)
+            if snapshot.session:
+                print(snapshot.session.pacman, snapshot.session.ghostmng, file=f)
+        time.sleep(0.1)
 
 
