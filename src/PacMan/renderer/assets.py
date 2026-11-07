@@ -36,7 +36,7 @@ class ImgMetadata:
 
 
 @dataclass
-class TextMetadata:
+class TextMetadata(ImgMetadata):
     text: HubDialogue = field(default_factory=HubDialogue)
     text_x_prop: float | None = field(default=None)
     text_y_prop: float | None = field(default=None)
@@ -63,6 +63,7 @@ class ImgsAsset:
 class Assets:
     state_name: str = field(default='')
     img_assets: dict[str, ImgsAsset] = field(default_factory=dict)
+    event_handler: Callable[[pygame.event.Event], None] | None = None
 
     # def eventmap(
     #         self,

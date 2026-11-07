@@ -1,10 +1,13 @@
 import logging
-from typing import cast
+from typing import cast, Any
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidBoardConfig)
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
 from src.PacMan.game_logic.ingame.maze.tile import Tile
-from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory
+from src.PacMan.game_logic.ingame.maze.maze import (
+                                            Maze,
+                                            MazeFactory,
+                                            TileSnapshot) 
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
 logger = logging.getLogger(__name__)
@@ -25,22 +28,6 @@ class DrawerEngine:
     BOTTOMPARTSCREEN = 5
 
     def __init__(self, config: ValidBoardConfig) -> None:
-        # self.__perc_wall = .2
-        # # self.__perc_padding = .2
-        # self.__total_cell_size = config.size // config.nb_cells
-        # self.__wall_thickness = int(
-        #     self.__total_cell_size * self.__perc_wall
-        # )
-        # self.__interior_cell_size = int(
-        #     self.__total_cell_size - 2 * self.__wall_thickness
-        # )
-        # self.__real_length = self.__interior_cell_size *\
-        #     config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
-
-        # diff = config.size - self.__real_length
-        # self.__wall_thickness += int(self.__wall_thickness / config.size * diff)
-        # self.__interior_cell_size += int(self.__interior_cell_size / config.size * diff)
-        # self.__total_cell_size = self.__interior_cell_size + 2 * self.__wall_thickness
         self._config = config
         self.__perc_wall = .2
         self.__perc_padding = .2
@@ -116,13 +103,13 @@ class DrawerEngine:
     def bottom_h(self) -> int:
         return int(self.corrected_size[0] / self.BOTTOMPARTSCREEN)
 
-    # @property
-    # def resized(self) -> int:
-    #     return int(self.corrected_size[0] / (2 * self._config.nb_cells))
-
     @property
     def margin(self) -> int:
         return int(self.corrected_size[1] / 2 )
+
+    @property
+    def resized(self) -> int:
+        return int(self.corrected_size[0] / (2 * self._config.nb_cells))
 
     def next_char_coord(self, v: int) -> int:
         img_size = self.resized
@@ -137,7 +124,7 @@ class DrawerEngine:
     def draw(
         self,
         target_img: PyGMLXImageEmulator,
-        state: list[list[Tile | tuple[Tile, str]]],
+        state: Any | list[list[Tile]],
         els: dict[str, int] | None
     ) -> None:
         """Render maze cells, walls, and overlays onto target image."""
@@ -222,11 +209,9 @@ class DrawerEngine:
         """Draw interior area of a cell using computed geometry."""
         x_cell = cell.cell_position_x
         y_cell = cell.cell_position_y
-        # x_cell = cell[0]
-        # y_cell = cell[1]
         inter = self.__interior_cell_size
         wall = self.__wall_thickness
-        pad = self.__padding
+        # pad = self.__padding
         # if isinstance(cell, FourtyTwoCell):
         #     start_x = wall + x_cell * (inter + wall) + pad * 2
         #     start_y = wall + y_cell * (inter + wall) + pad // 2
@@ -263,7 +248,7 @@ class DrawerEngine:
         total = self.__total_cell_size
         center_x = x_cell + int(total / 2)
         center_y = y_cell + int(total / 2)
-        radius = self.__cell_center
+        radius = int(self.__cell_center + self.__cell_center * 0.2)
         wall = self.__wall_thickness
         start_x = x_cell * (total - wall)
         start_y = y_cell * (total - wall)

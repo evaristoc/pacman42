@@ -69,12 +69,6 @@ class PyGMiniLibXEmulator:
         self.screen.blit(surface, (x, y))
         pygame.display.flip()
 
-    def contains(self, x, y):
-        return (
-            self.x <= x < self.x + self.width
-            and self.y <= y < self.y + self.height
-        )
-
     # def pygmlx_string_put(self,
     #                       x: int,
     #                       y: int,
@@ -136,35 +130,6 @@ class PyGMiniLibXEmulator:
             tick += 1
 
 
-# class PyGMLXImageEmulator:
-#     def __init__(self, width: int, height: int, buffer: np.ndarray = None) -> None:
-#         self.width = width
-#         self.height = height
-#         if buffer is not None:
-#             self.buffer = buffer
-#         else:
-#             self.buffer = np.zeros((self.height, self.width, 4), dtype=np.uint8)
-
-#     def pygput_pixel(self, x: int, y: int, color: int) -> None:
-#         r = (color >> 16) & 0xFF
-#         g = (color >> 8) & 0xFF
-#         b = color & 0xFF
-#         self.buffer[y, x, 0] = r
-#         self.buffer[y, x, 1] = g
-#         self.buffer[y, x, 2] = b
-#         self.buffer[y, x, 3] = 255
-
-#     def pygll_save_img(self, filepath: str) -> None:
-#         pil_img = Image.fromarray(self.buffer, mode="RGBA")
-#         pil_img.save(filepath)
-
-#     def pygll_resize(self, new_width: int, new_height: int) -> None:
-#         pil_img = Image.fromarray(self.buffer, mode="RGBA")
-#         resized_img = pil_img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-#         self.width = new_width
-#         self.height = new_height
-#         self.buffer = np.array(resized_img, dtype=np.uint8)
-
 class PyGMLXImageEmulator:
     def __init__(self,
                  width: int,
@@ -177,6 +142,12 @@ class PyGMLXImageEmulator:
         self.buffer = np.zeros((self.height,
                                 self.width,
                                 4), dtype=np.uint8)
+
+    def contains(self, x, y, start_x, start_y):
+        return (
+            start_x <= x < start_x + self.width
+            and start_y <= y < start_y + self.height
+        )
 
     def pygput_pixel(self,
                      x: int,

@@ -9,7 +9,7 @@ class MainMenuEvents(IEventEnums):
     START = auto()
     INSTRUCTIONS = auto()
     HIGHSCORES = auto()
-    EXIT = auto()
+    QUIT = auto()
 
 
 class InstructionMenuEvents(IEventEnums):

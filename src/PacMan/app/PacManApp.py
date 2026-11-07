@@ -76,13 +76,17 @@ class PacManApp:
             bottom = self.drawer.bottom_h
             self.pygmlx = self.assembler.init_engine(config.size,
                                                 2 * bottom)
-            self.glm = self.assembler.init_glm(InGameState)
-            self.maze = self.glm.session.maze
+            self.glm = self.assembler.init_glm(MainMenuState)
+            # self.maze = self.glm.session.maze
             board: ImgsAsset = self.assembler.load_board(size, size)
             # rsized = self.drawer.resized
             char_meta: ImgMetadata = ImgMetadata(
                 resize_w_prop=1/(2 * self.assembler._config.nb_cells),
-                resize_h_prop=1/(2 * self.assembler._config.nb_cells)
+                resize_h_prop=1/(2 * self.assembler._config.nb_cells),
+                y_pos_prop=0,
+                x_pos_prop=0,
+                gap_x_prop=0,
+                gap_y_prop=0
             )
             ghosts: ImgsAsset = self.assembler.upload_imgs(
                                         "ghosts",
@@ -93,9 +97,12 @@ class PacManApp:
                                         char_meta,
                                         InGameEvents)
             menu_meta: ImgMetadata = ImgMetadata(
-                resize_w_prop=1/5,
-                resize_h_prop=1/8,
-                gap_y_prop=1/50
+                resize_w_prop=1/3,
+                resize_h_prop=1/4,
+                gap_y_prop=1/5,
+                x_pos_prop=.09,
+                y_pos_prop=.1,
+                # gap_y_prop=1/100
             )
             main_menu: ImgsAsset = self.assembler.upload_imgs(
                                         "menus/main",
@@ -173,8 +180,7 @@ class PacManApp:
                mainmenustate=main_assets,
                pausemenustate=pause_assets,
                highscoreregisterstate=register_assets 
-            ) 
-
+            )
         except Exception as err:
             logger.exception(err)
             raise SystemExit(1)
@@ -183,8 +189,11 @@ class PacManApp:
         """
         mount the different parts and start the game
         """
-        print(self.assetregistry)
-        Observer(self.pygmlx, self.glm, self.drawer, self.assembler._config.size)
+        # print(self.assetregistry)
+        observer = Observer(self.pygmlx,
+                            self.glm,
+                            self.drawer,
+                            self.assetregistry)
         self.pygmlx.pygmlx_loop(observer)
         # # if self.drawer is None or self.pygmlx is None or self.maze is None or self.board_img is None or self.ghosts_imgs is None or self.pacman_imgs is None:
         # #     logger.exception("FATAL: no assembler was defined.")

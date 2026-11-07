@@ -26,9 +26,6 @@ from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
 
 logger = logging.getLogger(__name__)
 
-# REFWITHNOTSETVALUE = -1
-# BOTTOMPARTSCREEN = 5
-
 
 class RendererAssembler:
     def __init__(self, config: ValidBoardConfig) -> None:
@@ -73,7 +70,9 @@ class RendererAssembler:
         )
         return ImgsAsset(
             asset_name='board',
-            sources=source
+            sources={
+                'board': source
+            }
         )
 
     def upload_imgs(
@@ -115,7 +114,7 @@ class RendererAssembler:
                                 str(path)
                             )
                     rsize_w = int(org_w * metadata.resize_w_prop)
-                    rsize_h = int(org_h * metadata.resize_h_prop) 
+                    rsize_h = int(org_h * metadata.resize_h_prop)
                     img.pygll_resize(
                                 rsize_w,
                                 rsize_h

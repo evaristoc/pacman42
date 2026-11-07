@@ -50,8 +50,8 @@ class MainMenuState(IGameState):
                 sys.exit()
             elif event == MainMenuEvents.START:
                 return InGameState(self.context)
-            elif event == MainMenuEvents.CHEATING:
-                return CheatingMenuState(self.context)
+            # elif event == MainMenuEvents.CHEATING:
+            #     return CheatingMenuState(self.context)
             elif event == MainMenuEvents.HIGHSCORES:
                 return HighScoreMenuState(self.context)
 
@@ -62,7 +62,7 @@ class MainMenuState(IGameState):
                             ) -> IEventEnums:
         priority_order = [MainMenuEvents.QUIT,
                           MainMenuEvents.START,
-                          MainMenuEvents.CHEATING,
+                        #   MainMenuEvents.CHEATING,
                           MainMenuEvents.HIGHSCORES]
 
         for event in priority_order:
