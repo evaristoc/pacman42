@@ -56,7 +56,7 @@ class AStarNode:
 
     @staticmethod
     def _calculate_priority(steps: int, distance_to_target: float) -> float:
-        return steps + 5 * distance_to_target
+        return steps + distance_to_target
 
     @staticmethod
     def _process_move(move: tuple[int, int],
@@ -92,9 +92,8 @@ def _find_path(position: tuple[int, int],
                target: tuple[int, int],
                maze: Maze) -> AStarNode | None:
     visited: set[tuple[int, int]] = set()
-    steps = 0
     start_node = AStarNode(position=position,
-                           steps=steps,
+                           steps=0,
                            target=target,
                            )
     priority_queue: list[AStarNode] = list()
@@ -108,11 +107,8 @@ def _find_path(position: tuple[int, int],
             continue
 
         visited.add(current.position)
-
-        steps += 1
         successors = _generate_successors(current_node=current,
                                           maze=maze,
-                                          steps=steps,
                                           target=target)
         for successor in successors:
             heapq.heappush(priority_queue, successor)
@@ -121,7 +117,6 @@ def _find_path(position: tuple[int, int],
 
 def _generate_successors(*, current_node: AStarNode,
                          maze: Maze,
-                         steps: int,
                          target: tuple[int, int]
                          ) -> list[AStarNode]:
     current_pos_x, current_pos_y = current_node.position
@@ -135,7 +130,7 @@ def _generate_successors(*, current_node: AStarNode,
     for move in possible_moves:
         temp_node = AStarNode(prev_node=current_node,
                               move=move,
-                              steps=steps,
+                              steps=current_node.steps + 1,
                               target=target)
         successors.append(temp_node)
     return successors

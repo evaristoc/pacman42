@@ -16,6 +16,7 @@ from src.PacMan.renderer.assets import (
                                 Assets
                                 )
 # from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
+from src.PacMan.database.db_mng import DatabaseManager
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostName
 from src.PacMan.renderer.renderer_engine import (PyGMiniLibXEmulator,
@@ -40,9 +41,9 @@ class RendererAssembler:
     # def ref_w(self, val: int) -> None:
     #     self._reference_w = val
 
-    def init_glm(self, state: IGameState = InGameState) -> GameLogicManager:
+    def init_glm(self, databasemng: DatabaseManager, state: IGameState = InGameState) -> GameLogicManager:
         try:
-            return GameLogicManager(state)
+            return GameLogicManager(databasemng, state)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")

@@ -15,7 +15,8 @@ from src.PacMan.renderer.assets import (
                                 Assets,
                                 AssetRegistry)
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
-
+from src.PacMan.database.db_mng import DatabaseManager, create_database_mng
+from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class PacManApp:
         self.assembler: RendererAssembler | None = None
         self.drawer: DrawerEngine | None = None
         self.pygmlx: PyGMiniLibXEmulator | None = None
+        self.dbm: DatabaseManager | None = None
         self.glm: GameLogicManager | None = None
         self.assetregistry: AssetRegistry | None = None
         # self.board: dict[str, PyGMLXImageEmulator] | None = None
@@ -76,7 +78,8 @@ class PacManApp:
             bottom = self.drawer.bottom_h
             self.pygmlx = self.assembler.init_engine(config.size,
                                                 2 * bottom)
-            self.glm = self.assembler.init_glm(MainMenuState)
+            self.dbm = create_database_mng()
+            self.glm = self.assembler.init_glm(self.dbm, MainMenuState)
             # self.maze = self.glm.session.maze
             board: ImgsAsset = self.assembler.load_board(size, size)
             # rsized = self.drawer.resized
@@ -86,8 +89,8 @@ class PacManApp:
                 y_pos_prop=0,
                 x_pos_prop=0,
                 gap_x_prop=0,
-                gap_y_prop=0
-            )
+                gap_y_prop=0)
+            rsized = self.drawer.resized
             ghosts: ImgsAsset = self.assembler.upload_imgs(
                                         "ghosts",
                                         char_meta,
@@ -195,72 +198,4 @@ class PacManApp:
                             self.drawer,
                             self.assetregistry)
         self.pygmlx.pygmlx_loop(observer)
-        # # if self.drawer is None or self.pygmlx is None or self.maze is None or self.board_img is None or self.ghosts_imgs is None or self.pacman_imgs is None:
-        # #     logger.exception("FATAL: no assembler was defined.")
-        # #     raise SystemExit(1)
-        # self.drawer.draw(self.board_img,
-        #                  self.maze.grid,
-        #                  None)
-        # # print(
-        # #     self.drawer.corrected_size[0],
-        # #     self.drawer.corrected_size[1],
-        # #     self.drawer.margin)
-        # # board_margin = int(self.drawer.corrected_size[1] / 2)
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     self.board_img,
-        #     int(self.drawer.margin / 2),
-        #     int(self.drawer.margin / 2) + self.drawer.bottom_h
-        #     )
-        # # for i, img in enumerate(self.menus_imgs["start"].keys()):
-        # #     self.pygmlx.pygmlx_put_image_to_window(
-        # #         self.menus_imgs["start"][img],
-        # #         int(self.drawer.margin / 2) + 150,
-        # #         int(self.drawer.margin / 2) + self.drawer.bottom_h + i * 100
-        # #         )   
-        # # upper hub
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     self.menus_imgs["hub_u"],
-        #     int(self.drawer.margin / 2),
-        #     int(self.drawer.margin / 2)
-        # )
-        # # lower hub
-        # level = self.pygmlx.pygmlx_new_text_image(
-        #                                 int(self.assembler._config.size / 5),
-        #                                 int(self.assembler._config.size / 10),
-        #                                 int(self.assembler._config.size / 20),
-        #                                 0xF6303F
-        #                             )
-        # level.pygput_from_text(
-        #     0,
-        #     0,
-        #     "Level 1"
-        # )
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     level,
-        #     0,
-        #     int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
-        # )
-        # # print(self.characters_imgs)
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     self.characters_imgs["InGameEvents"]["pacman"]["START"],
-        #     int(self.drawer.margin / 2) + int(0.7 * self.assembler._config.size),
-        #     int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
-        # )
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     self.characters_imgs["InGameEvents"]["pacman"]["START"],
-        #     int(self.drawer.margin / 2) + int(0.7 * self.assembler._config.size) + int(0.06 * self.assembler._config.size),
-        #     int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
-        # )
-        # self.pygmlx.pygmlx_put_image_to_window(
-        #     self.characters_imgs["InGameEvents"]["pacman"]["START"],
-        #     int(self.drawer.margin / 2) + int(0.7 * self.assembler._config.size) + int(0.12 * self.assembler._config.size),
-        #     int(self.drawer.margin / 2) + self.drawer.bottom_h + self.drawer.corrected_size[0]
-        # )
-        # observer = Observer(self.pygmlx, self.glm, self.drawer, self.assembler._config.size)
-        # observer.register_assets("board", self.board_img)
-        # observer.register_assets("InGameState", self.characters_imgs["InGameEvents"])
-        # observer.register_assets("MainMenuState", self.menus_imgs["MainMenuEvents"])
-        # observer.register_assets("HighScoreMenuState", self.menus_imgs["HighScoreRegisterEvents"])
-        # observer.register_assets("PauseMenuState", self.menus_imgs["PauseMenuEvents"])
-        # observer.register_assets("GameOverState", self.menus_imgs["GameOver"])
-        # self.pygmlx.pygmlx_loop(observer)
+
