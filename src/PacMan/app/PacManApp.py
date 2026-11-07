@@ -7,7 +7,7 @@ from src.PacMan.validation_contracts.parser import DataProcessor
 from src.PacMan.renderer.observer import Observer
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
-from src.PacMan.renderer.drawer_engine import DrawerEngine
+from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
 from src.PacMan.renderer.assets import (
                                 ImgsAsset,
                                 ImgMetadata,
@@ -23,21 +23,11 @@ logger = logging.getLogger(__name__)
 class PacManApp:
     def __init__(self) -> None:
         self.assembler: RendererAssembler | None = None
-        self.drawer: DrawerEngine | None = None
+        self.drawer: BoardDrawerEngine | None = None
         self.pygmlx: PyGMiniLibXEmulator | None = None
         self.dbm: DatabaseManager | None = None
         self.glm: GameLogicManager | None = None
         self.assetregistry: AssetRegistry | None = None
-        # self.board: dict[str, PyGMLXImageEmulator] | None = None
-        # self.characters_imgs: dict[
-        #     str,
-        #     dict[str, PyMLXPNGEmulator | list[PyMLXPNGEmulator]]] | None = {
-        #                                             "InGameEvents": {
-        #                                                 "pacman": {},
-        #                                                 "ghosts": {}
-        #                                             }}
-        # self.menus_imgs: dict[str, dict[str, PyGMLXTextEmulator]] | None = {}
-        # self.assets: dict[str, Any] | None = None
 
     def __str__(self) -> str:
         return "I am PacMan!"
@@ -74,87 +64,60 @@ class PacManApp:
             # drawer will control all relevant metrics
             # it will also paint the canvas
             self.drawer = self.assembler.init_drawer()
-            size = self.drawer.corrected_size[0]
-            bottom = self.drawer.bottom_h
-            self.pygmlx = self.assembler.init_engine(config.size,
-                                                2 * bottom)
+            self.pygmlx = self.assembler.init_engine()
             self.dbm = create_database_mng()
             self.glm = self.assembler.init_glm(self.dbm, MainMenuState)
             # self.maze = self.glm.session.maze
-            board: ImgsAsset = self.assembler.load_board(size, size)
+            background: ImgsAsset = self.assembler.img_loader_dispatcher(
+                                        "background",
+                                        None)
+            board: ImgsAsset = self.assembler.img_loader_dispatcher(
+                                        "board",
+                                        self.drawer)
             # rsized = self.drawer.resized
-            char_meta: ImgMetadata = ImgMetadata(
-                resize_w_prop=1/(2 * self.assembler._config.nb_cells),
-                resize_h_prop=1/(2 * self.assembler._config.nb_cells),
-                y_pos_prop=0,
-                x_pos_prop=0,
-                gap_x_prop=0,
-                gap_y_prop=0)
-            rsized = self.drawer.resized
-            ghosts: ImgsAsset = self.assembler.upload_imgs(
+            ghosts: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "ghosts",
-                                        char_meta,
                                         GhostName)
-            pacman: ImgsAsset = self.assembler.upload_imgs(
+            pacman: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "pacman",
-                                        char_meta,
                                         InGameEvents)
-            menu_meta: ImgMetadata = ImgMetadata(
-                resize_w_prop=1/3,
-                resize_h_prop=1/4,
-                gap_y_prop=1/5,
-                x_pos_prop=.09,
-                y_pos_prop=.1,
-                # gap_y_prop=1/100
-            )
-            main_menu: ImgsAsset = self.assembler.upload_imgs(
+            main_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "menus/main",
-                                        menu_meta,
                                         MainMenuEvents)
-            pause_menu: ImgsAsset = self.assembler.upload_imgs(
+            pause_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "menus/pause",
-                                        menu_meta,
                                         PauseMenuEvents)
-            register_menu: ImgsAsset = self.assembler.upload_imgs(
+            register_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "menus/register",
-                                        menu_meta,
                                         HighScoreRegisterEvents)
             # three lives
-            hub_bottom_img: ImgsAsset = self.assembler.upload_imgs(
+            hub_bottom_img: ImgsAsset = self.assembler.img_loader_dispatcher(
                                     "menus/hub_bottom/live",
-                                    char_meta)
-            hub_meta: TextMetadata = TextMetadata(
-                resize_w_prop=1/5,
-                resize_h_prop=1/10
-            )
-            hub_top: ImgsAsset = self.assembler.upload_hub_text(
-                                        "top_text",
-                                        size,
-                                        bottom,
-                                        "Score: {:>8}    Remaining {:>4}secs",
-                                        0,
-                                        0,
-                                        hub_meta
-                                    )
-            hub_botton_text: ImgsAsset = self.assembler.upload_hub_text(
-                                        "bottom_text",
-                                        size,
-                                        bottom,
-                                        "Level: {:>3}",
-                                        0,
-                                        0,
-                                        hub_meta
-                                    )
+                                    None)
+            # hub_top: ImgsAsset = self.assembler.text_loader_dispatcher(
+            #                             "top_hub",
+            #                             "Score: {:>8}    Remaining {:>4}secs",
+            #                         )
+            # hub_botton_text: ImgsAsset = self.assembler.text_loader_dispatcher(
+            #                             "bottom_hub",
+            #                             "Level: {:>3}",
+            #                         )
             # self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
+            init_assets: Assets = Assets(
+                state_name='init',
+                img_assets={
+                    background.asset_name: background
+                }
+            )
             ingame_assets: Assets = Assets(
                 state_name=InGameState.__name__,
                 img_assets={
                     ghosts.asset_name: ghosts,
                     pacman.asset_name: pacman,
                     board.asset_name: board,
-                    hub_top.asset_name: hub_top,
+                    # hub_top.asset_name: hub_top,
                     hub_bottom_img.asset_name: hub_bottom_img,
-                    hub_botton_text.asset_name: hub_botton_text
+                    # hub_botton_text.asset_name: hub_botton_text
                 },
             )
             ingame_assets.event_handler = MethodType(pacman_eh, ingame_assets)
@@ -179,10 +142,11 @@ class PacManApp:
                 }
             )
             self.assetregistry = AssetRegistry(
+               init=init_assets,
                ingamestate=ingame_assets,
                mainmenustate=main_assets,
                pausemenustate=pause_assets,
-               highscoreregisterstate=register_assets 
+               highscoreregisterstate=register_assets
             )
         except Exception as err:
             logger.exception(err)
