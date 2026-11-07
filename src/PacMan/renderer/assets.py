@@ -33,6 +33,9 @@ class ImgMetadata:
     resize_h_prop: float | None = field(default=None)
     gap_x_prop:  float | None = field(default=None)
     gap_y_prop:  float | None = field(default=None)
+    size_vp_w: int | None = field(default=None)
+    size_vp_h: int | None = field(default=None)
+    default_color: int | None = field(default=0x00000000)
 
 
 @dataclass
@@ -86,6 +89,7 @@ class Assets:
 
 @dataclass
 class AssetRegistry:
+    init: Assets = field(default_factory=Assets)
     ingamestate: Assets = field(default_factory=Assets)
     mainmenustate: Assets = field(default_factory=Assets)
     pausemenustate: Assets = field(default_factory=Assets)
