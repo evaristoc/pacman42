@@ -56,6 +56,10 @@ class IGameState(ABC):
 
 
 class MainMenuState(IGameState):
+    def __init__(self, context: "GameLogicManager"):
+        super().__init__(context=context)
+        self.context.reset_player()
+
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
                      delta_ticks: int

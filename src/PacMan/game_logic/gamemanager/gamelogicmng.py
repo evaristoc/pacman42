@@ -72,6 +72,9 @@ class GameLogicManager:
     def end_game_session(self) -> None:
         self.session = None
 
+    def reset_player(self) -> None:
+        self.player = Player()
+
     def toggle_impotent_ghosts(self) -> None:
         return
 
@@ -95,11 +98,10 @@ def debug() -> None:
     snapshot = glm.view()
     for _ in range(400):
         glm.update_logic(None)
-        snapshot=glm.view()
+        snapshot = glm.view()
         with open('output.txt', 'a') as f:
             print(snapshot.game_state, file=f)
             if snapshot.session:
-                print(snapshot.session.pacman, snapshot.session.ghostmng, file=f)
+                print(snapshot.session.pacman,
+                      snapshot.session.ghostmng, file=f)
         time.sleep(0.1)
-
-
