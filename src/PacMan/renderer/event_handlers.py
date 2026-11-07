@@ -40,20 +40,10 @@ def mainmenu_eh(
     if event.type == pygame.MOUSEBUTTONDOWN:
         imgassets: ImgsAsset = self.img_assets
         x, y = event.pos
-        min_x_prop = min([
-            imgassets['main'].sources['START'].metadata.x_pos_prop,
-            imgassets['main'].sources['INSTRUCTIONS'].metadata.x_pos_prop,
-            imgassets['main'].sources['HIGHSCORES'].metadata.x_pos_prop,
-            imgassets['main'].sources['QUIT'].metadata.x_pos_prop
-        ])
         for i, sk in enumerate(imgassets['main'].sources.keys()):
-            y_prop = imgassets['main'].sources[sk].metadata.y_pos_prop
-            print(imgassets['main'].sources[sk].img.height, imgassets['main'].sources[sk].metadata.resize_w_prop)
-            tw = imgassets['main'].sources[sk].img.width / imgassets['main'].sources[sk].metadata.resize_w_prop
-            th = imgassets['main'].sources[sk].img.height / imgassets['main'].sources[sk].metadata.resize_h_prop
-            start_x = tw * min_x_prop
-            start_y = th * y_prop * i + imgassets['main'].sources[sk].metadata.gap_y_prop * th
-            if imgassets['main'].sources[sk].img.contains(x, y, int(start_x), int(start_y)):
+            start_x = imgassets['main'].sources[sk].metadata.x_pos_prop
+            start_y = imgassets['main'].sources[sk].metadata.y_pos_prop
+            if imgassets['main'].sources[sk].img.contains(x, y, start_x, start_y):
                 if sk == 'EXIT':
                     SystemExit(0)
                 msgs[getattr(MainMenuEvents, sk)] = None
