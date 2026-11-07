@@ -2,16 +2,17 @@ from __future__ import annotations
 import pygame
 from pygame import Event
 from typing import TypeVar, Type, Any, Protocol, TYPE_CHECKING
-from src.PacMan.validation_contracts.event_enums import (
-                                        InGameEvents)
-from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager, GLMSnapshot
+from src.PacMan.game_logic.gamemanager.gamelogicmng import (
+                                                    GameLogicManager,
+                                                    GLMSnapshot)
 from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 IGameState,
                                                 MainMenuState,
-                                                InGameState)
+                                                InGameState,
+                                                GameOverPlayerLost)
 if TYPE_CHECKING:  # only required for parameter type assignment 
+    from src.PacMan.renderer.drawer_engine import BoardDrawerEngine    
     from src.PacMan.renderer.assets import AssetRegistry
-    from src.PacMan.renderer.drawer_engine import DrawerEngine
     from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
     from src.PacMan.renderer.event_handlers import EventMsg
 
@@ -136,17 +137,12 @@ class MainMenuAction(IAction):
             0,
             0
         )
-        x_prop = -1
         print(list(obs._registry.mainmenustate.img_assets['main'].sources.keys()))
-        for i, s in enumerate(obs._registry.mainmenustate.img_assets['main'].sources.values()):
-            print(s)
-            if x_prop == -1:
-                x_prop = s.metadata.x_pos_prop
-            y_prop = s.metadata.y_pos_prop
+        for s in obs._registry.mainmenustate.img_assets['main'].sources.values():
             obs._mlx.pygmlx_put_image_to_window(
                 s.img,
-                int(obs._mlx.view_w * x_prop),
-                int(obs._mlx.view_h * y_prop * i + s.metadata.gap_y_prop * obs._mlx.view_h)
+                s.metadata.x_pos_prop,
+                s.metadata.y_pos_prop
             )
 
 
@@ -173,14 +169,11 @@ class PlayingAction(IAction):
 
     def _init_state(
             self,
-            obs: "Observer"             
+            obs: "Observer"  
     ) -> None:
-        background = obs._mlx.pygmlx_new_image(
-            obs._mlx.width,
-            obs._mlx.height
-        )
+        background = obs._registry.init.img_assets['background'].sources['background']
         obs._mlx.pygmlx_put_image_to_window(
-            background,
+            background.img,
             0,
             0
         )
@@ -193,8 +186,8 @@ class PlayingAction(IAction):
                          None)
         obs._mlx.pygmlx_put_image_to_window(
             board_asset.img,
-            int(obs._drawer.margin / 2),
-            int(obs._drawer.margin / 2) + obs._drawer.bottom_h
+            board_asset.metadata.x_pos_prop,
+            board_asset.metadata.y_pos_prop
             )
 
     def _update_state(
@@ -222,8 +215,8 @@ class PlayingAction(IAction):
             )
         obs._mlx.pygmlx_put_image_to_window(
             board_asset.img,
-            obs._drawer.margin / 2,
-            obs._drawer.margin / 2 + obs._drawer.bottom_h
+            board_asset.metadata.x_pos_prop,
+            board_asset.metadata.y_pos_prop
         )
         # MENUS ###
         # # -- hub --
@@ -243,7 +236,7 @@ class PlayingAction(IAction):
                      for key in pacman_steps if pacman_steps[key] == pD][0]
         print(direction)
         pm = assets.img_assets["pacman"].sources[direction].pop()
-        print(pm)
+        # print(pm)
         obs._mlx.pygmlx_put_image_to_window(
             pm.img,
             obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_x),
@@ -274,7 +267,8 @@ class PlayingAction(IAction):
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     MainMenuState: MainMenuAction,
-    InGameState: PlayingAction
+    InGameState: PlayingAction,
+    GameOverPlayerLost: MainMenuAction
 }
 
 
@@ -282,7 +276,7 @@ class Observer:
     def __init__(self,
                  mlx: PyGMiniLibXEmulator,
                  glm: GameLogicManager,
-                 drawer: DrawerEngine,
+                 drawer: BoardDrawerEngine,
                  assetregistry: AssetRegistry) -> None:
         self._registry = assetregistry
         self._mlx = mlx
@@ -314,6 +308,12 @@ class Observer:
             if snapshot.player.level != self._currentlevel:
                 self._currentlevel = snapshot.player.level
                 self._levelchanged = True
+            print(self._statechanged)
+            # if self._glm.state.__class__.__name__.lower() == 'gameoverplayerlost':
+            #     self._currentlevel = 1
+            #     self._currentstate = 'ingamestate'
+            #     self._levelchanged = False
+            #     self._statechanged = False
             self._get_action(state=self._glm.state)().action(
                                             self,
                                             tick

@@ -13,7 +13,7 @@ from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 logger = logging.getLogger(__name__)
 
 
-class DrawerEngine:
+class BoardDrawerEngine:
     DEFAULT_COLORS = {
         "background": 0xFF5500FF,
         "fourtytwo": 0xFFFFFFFF,
