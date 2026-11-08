@@ -208,15 +208,18 @@ class BoardDrawerEngine:
         total = self.__total_cell_size
         center_x = x_cell + int(total / 2)
         center_y = y_cell + int(total / 2)
-        radius = int(self.__cell_center + self.__cell_center * 0.2)
+        if cell.pellet_state.value == 1:
+            radius = int(self.__cell_center + self.__cell_center * 0.2)
+        if cell.pellet_state.value == 2:
+            radius = int(self.__cell_center + self.__cell_center * 3)
+            color = 0x0011AAFF
         wall = self.__wall_thickness
         start_x = x_cell * (total - wall)
         start_y = y_cell * (total - wall)
         for dx in range(total):
             for dy in range(total):
                 if ((dx - center_x)**2 + (dy - center_y)**2) < radius:
-                    if start_x + dx < self.__corrected_size and start_y + dy < self.__corrected_size:
-                        target_img.pygput_pixel(start_x + dx, start_y + dy, color) 
+                    target_img.pygput_pixel(start_x + dx, start_y + dy, color) 
 
     def __draw_cell_walls(
         self,
