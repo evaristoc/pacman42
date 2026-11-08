@@ -214,15 +214,20 @@ class PlayingAction(IAction):
         obs._drawer.draw_cell_interior(
             board_asset.img,
             obs._glm.session.pacman.new_position,
-            0x000
+            0xff000000
         )
-        # -- ghosts --
-
+        # # -- ghosts --
+        # for g in obs._glm.session.ghost_mng.ghosts:
+        #     obs._drawer.draw_cell_interior(
+        #         board_asset.img,
+        #         obs._glm.session.ghost_mng.ghosts[g].old_position,
+        #         0xff000000
+        #     )
         for g in obs._glm.session.ghost_mng.ghosts:
             obs._drawer.draw_cell_interior(
                 board_asset.img,
                 obs._glm.session.ghost_mng.ghosts[g].new_position,
-                0x000
+                0xff000000
             )
         obs._mlx.pygmlx_put_image_to_window(
             board_asset.img,
@@ -270,6 +275,8 @@ class PlayingAction(IAction):
         for g in obs._glm.session.ghost_mng.ghosts:
             obs._mlx.pygmlx_put_image_to_window(
                 assets.img_assets["ghosts"].sources[g.name].img,
+                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * obs._glm.session.ghost_mng.ghosts[g].interpolation[0]),
+                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * obs._glm.session.ghost_mng.ghosts[g].interpolation[1]) + obs._drawer.bottom_h
                 obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x),
                 obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + obs._drawer.bottom_h
                 # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * obs._glm.session.ghost_mng.ghosts[g].interpolation[0])),
