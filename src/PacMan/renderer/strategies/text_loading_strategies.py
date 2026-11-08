@@ -1,18 +1,15 @@
 import logging
-from collections import deque
 from abc import ABC, abstractmethod
-from pathlib import Path
-from PIL import Image
-from typing import Any, TypeVar, overload, TYPE_CHECKING
-from src.PacMan.validation_contracts.event_enums import (
-                                            IEventEnums)
+from typing import TYPE_CHECKING
 from src.PacMan.renderer.assets import (
                                 Source,
-                                ImgMetadata,
                                 TextMetadata,
+                                ImgMetadata,
                                 ImgsAsset,
                                 )
-from src.PacMan.renderer.renderer_engine import (PyGMLXTextEmulator)
+from src.PacMan.renderer.renderer_engine import (
+                                    PyGMLXTextEmulator,
+                                    PyGMLXImageEmulator)
 if TYPE_CHECKING:  # only required for parameter type assignment 
     from src.PacMan.renderer.renderer_assembler import RendererAssembler
 
@@ -34,11 +31,11 @@ class TextLoaderStrategy(ABC):
 class HubTextLoaderStrategy(TextLoaderStrategy):
     def upload_text(
             self,
-            asset_name: str,
+            folder: str,
             msg: str,
             assembler: RendererAssembler
             ) -> ImgsAsset:
-        imgasset: ImgsAsset = ImgsAsset(asset_name=asset_name)
+        imgasset: ImgsAsset = ImgsAsset(asset_name=folder)
         metadata: TextMetadata = TextMetadata()
         metadata.text = msg
         metadata.font_path = 'CONSOLA.ttf'
@@ -47,30 +44,39 @@ class HubTextLoaderStrategy(TextLoaderStrategy):
         metadata.text_x_prop = 5
         metadata.text_y_prop = 5
         metadata.x_pos_prop = 0
-        metadata.y_pos_prop = 0 if 'top' in asset_name else (
+        metadata.y_pos_prop = 0 if 'top' in folder else (
             assembler._config.size + int(assembler._config.size /
                                          assembler._config.hub_panels_prop)
             )
+        w = assembler._config.size
+        h = int(assembler._config.size /
+                assembler._config.hub_panels_prop)
+        font_size = int(assembler._config.size /
+                        metadata.font_size_prop)
         source = Source(
             img=PyGMLXTextEmulator(
-                            assembler._config.size,
-                            int(
-                                assembler._config.size /
-                                assembler._config.hub_panels_prop),
-                            metadata.font_path,
-                            int(assembler._config.size *
-                                metadata.font_size_prop),
-                            metadata.color
+                            width=w,
+                            height=h,
+                            font_path=metadata.font_path,
+                            font_size=font_size,
+                            color=metadata.color
                             ),
-            metadata=metadata
+            metadata=metadata,
         )
+        for y in range(h):
+            for x in range(w):
+                source.img.pygput_pixel(
+                    x,
+                    y,
+                    metadata.bg_color
+                )
         source.img.pygput_from_text(
                             metadata.text_x_prop,
                             metadata.text_y_prop,
                             metadata.text)
         imgasset.sources.update(
             {
-                asset_name: source
+                folder: source,
             }
         )
         return imgasset

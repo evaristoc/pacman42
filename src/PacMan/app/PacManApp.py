@@ -16,9 +16,9 @@ from src.PacMan.renderer.assets import (
                                 AssetRegistry)
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.database.db_mng import DatabaseManager, create_database_mng
-from src.PacMan.game_logic.ingame.maze.maze import Maze
 
 logger = logging.getLogger(__name__)
+
 
 class PacManApp:
     def __init__(self) -> None:
@@ -66,7 +66,9 @@ class PacManApp:
             self.drawer = self.assembler.init_drawer()
             self.pygmlx = self.assembler.init_engine()
             self.dbm = create_database_mng()
-            self.glm = self.assembler.init_glm(self.dbm, MainMenuState)
+            self.glm = self.assembler.init_glm(self.dbm,
+                                               self.assembler._config.cheat,
+                                               MainMenuState)
             # self.maze = self.glm.session.maze
             background: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "background",
@@ -94,15 +96,14 @@ class PacManApp:
             hub_bottom_img: ImgsAsset = self.assembler.img_loader_dispatcher(
                                     "menus/hub_bottom/live",
                                     None)
-            # hub_top: ImgsAsset = self.assembler.text_loader_dispatcher(
-            #                             "top_hub",
-            #                             "Score: {:>8}    Remaining {:>4}secs",
-            #                         )
-            # hub_botton_text: ImgsAsset = self.assembler.text_loader_dispatcher(
-            #                             "bottom_hub",
-            #                             "Level: {:>3}",
-            #                         )
-            # self.assets = self.board_img | self.ghosts_imgs | self.pacman_imgs
+            hub_top: ImgsAsset = self.assembler.text_loader_dispatcher(
+                                        "top_hub",
+                                        "Score: {:>8}    Remaining {:>4}secs",
+                                    )
+            hub_botton_text: ImgsAsset = self.assembler.text_loader_dispatcher(
+                                        "bottom_hub",
+                                        "Level: {:>3}",
+                                    )
             init_assets: Assets = Assets(
                 state_name='init',
                 img_assets={
@@ -115,9 +116,9 @@ class PacManApp:
                     ghosts.asset_name: ghosts,
                     pacman.asset_name: pacman,
                     board.asset_name: board,
-                    # hub_top.asset_name: hub_top,
+                    hub_top.asset_name: hub_top,
                     hub_bottom_img.asset_name: hub_bottom_img,
-                    # hub_botton_text.asset_name: hub_botton_text
+                    hub_botton_text.asset_name: hub_botton_text
                 },
             )
             ingame_assets.event_handler = MethodType(pacman_eh, ingame_assets)
@@ -160,6 +161,7 @@ class PacManApp:
         observer = Observer(self.pygmlx,
                             self.glm,
                             self.drawer,
+                            self.assembler,
                             self.assetregistry)
         self.pygmlx.pygmlx_loop(observer)
 

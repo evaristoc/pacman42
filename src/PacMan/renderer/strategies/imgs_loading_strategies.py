@@ -67,18 +67,18 @@ class BackgroundLoaderStrategy(ImageLoaderStrategy):
         metadata: ImgMetadata = ImgMetadata(
                 x_pos_prop=0,
                 y_pos_prop=0,
-                default_color=0xff000000
+                bg_color=0xff000000
             )
         source = Source(
             img=PyGMLXImageEmulator(w, h),
-            metadata=metadata
+            metadata=metadata,
         )
         for y in range(h):
             for x in range(w):
                 source.img.pygput_pixel(
                     x,
                     y,
-                    metadata.default_color
+                    metadata.bg_color
                 )
         return ImgsAsset(
             asset_name=folder,
@@ -86,7 +86,6 @@ class BackgroundLoaderStrategy(ImageLoaderStrategy):
                 folder: source
             }
         )
-
 
 
 class LivesLoaderStrategy(ImageLoaderStrategy):
@@ -129,7 +128,8 @@ class LivesLoaderStrategy(ImageLoaderStrategy):
                 source = Source(
                     path=path,
                     img=img,
-                    metadata=metadata
+                    metadata=metadata,
+                    type='png'
                 )
                 imgassets.sources.update(
                     {
@@ -212,7 +212,8 @@ class MenuLoaderStrategy(ImageLoaderStrategy):
                 source = Source(
                     path=path,
                     img=img,
-                    metadata=metadata
+                    metadata=metadata,
+                    type='png'
                 )
                 imgassets.sources.update(
                     {
@@ -273,7 +274,8 @@ class GhostsLoaderStrategy(ImageLoaderStrategy):
                 source = Source(
                     path=path,
                     img=img,
-                    metadata=metadata
+                    metadata=metadata,
+                    type='png'
                 )
                 imgassets.sources.update(
                     {
@@ -337,7 +339,8 @@ class PacManLoaderStrategy(ImageLoaderStrategy):
                         event_name=f,
                         path=path,
                         img=img,
-                        metadata=metadata
+                        metadata=metadata,
+                        type='deque_png'
                     )
                     _temp_sources.append(source)
             for e in _names:

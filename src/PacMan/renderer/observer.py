@@ -11,10 +11,11 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState,
                                                 GameOverPlayerLost)
 if TYPE_CHECKING:  # only required for parameter type assignment 
-    from src.PacMan.renderer.drawer_engine import BoardDrawerEngine    
-    from src.PacMan.renderer.assets import AssetRegistry
+    from src.PacMan.renderer.drawer_engine import BoardDrawerEngine   
+    from src.PacMan.renderer.assets import ImgsAsset, AssetRegistry
     from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
     from src.PacMan.renderer.event_handlers import EventMsg
+    from src.PacMan.renderer.renderer_assembler import RendererAssembler
 
 T = TypeVar("T", bound="IAction")
 
@@ -189,6 +190,13 @@ class PlayingAction(IAction):
             board_asset.metadata.x_pos_prop,
             board_asset.metadata.y_pos_prop
             )
+        # hub_top = assets.img_assets["top_hub"].sources["top_hub"]
+
+        # obs._mlx.pygmlx_put_image_to_window(
+        #     hub_top.img,
+        #     hub_top.metadata.x_pos_prop,
+        #     hub_top.metadata.y_pos_prop
+        #     )        
 
     def _update_state(
             self,
@@ -225,7 +233,16 @@ class PlayingAction(IAction):
         #     obs._drawer.margin / 2,
         #     obs._drawer.margin / 2 + obs._mlx.height
         # )
-
+        if not tick % 60:
+            hub_top: ImgsAsset = obs._assembler.text_loader_dispatcher(
+                                        "top_hub",
+                                        "Score: {:>8}    Remaining {:>4}secs".format(100, 90),
+                                    )
+            obs._mlx.pygmlx_put_image_to_window(
+                hub_top.sources['top_hub'].img,
+                hub_top.sources['top_hub'].metadata.x_pos_prop,
+                hub_top.sources['top_hub'].metadata.y_pos_prop
+            )      
         # # PACMAN ###
         pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
         if not obs._glm.session.pacman.new_direction:
@@ -277,11 +294,13 @@ class Observer:
                  mlx: PyGMiniLibXEmulator,
                  glm: GameLogicManager,
                  drawer: BoardDrawerEngine,
+                 assembler: RendererAssembler,
                  assetregistry: AssetRegistry) -> None:
         self._registry = assetregistry
         self._mlx = mlx
         self._glm = glm
         self._drawer = drawer
+        self._assembler = assembler
         self._currentstate: str = ""
         self._statechanged: bool = False
         self._currentlevel: int = 0

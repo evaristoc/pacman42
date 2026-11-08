@@ -94,12 +94,12 @@ class RendererAssembler:
 
     def text_loader_dispatcher(
             self,
-            asset_name: str,
+            folder: str,
             msg: str
             ) -> ImgsAsset:
-        if 'hub' in asset_name:
-            self._textstrategies['hub'].upload_text(
-                asset_name,
+        if 'hub' in folder:
+            return self._textstrategies['hub'].upload_text(
+                folder,
                 msg,
                 self
             )

@@ -9,20 +9,6 @@ from src.PacMan.renderer.renderer_engine import (
                             PyMLXPNGEmulator,
                             PyGMLXTextEmulator
 )
-from src.PacMan.game_logic.gamemanager.game_sm import (
-                            InGameState,
-                            MainMenuState,
-                            HighScoreMenuState,
-                            HighScoreRegisterState,
-                            PauseMenuState)
-
-
-class HubDialogue:
-    text_template: str = ""
-
-    def create_text(self,
-                    **values: str | int | float) -> str:
-        return self.text_template.format(**values)
 
 
 @dataclass
@@ -35,22 +21,27 @@ class ImgMetadata:
     gap_y_prop:  float | None = field(default=None)
     size_vp_w: int | None = field(default=None)
     size_vp_h: int | None = field(default=None)
-    default_color: int | None = field(default=0x00000000)
+    bg_color: int | None = field(default=0x00000000)
 
 
 @dataclass
 class TextMetadata(ImgMetadata):
-    text: HubDialogue = field(default_factory=HubDialogue)
+    text: str = field(default='')
+    text_template: str = field(default='')
     text_x_prop: float | None = field(default=None)
     text_y_prop: float | None = field(default=None)
     font_size_prop: float = field(default=1.0 / 20.8)
     font_path: str = field(default="CONSOLA.TTF")
     color: int = field(default=0xF6303F)
 
+    def create_text(self,
+                    **values: str | int | float) -> None:
+        self.text = self.text_template.format(**values)
 
 @dataclass
 class Source:
     event_name: str = field(default='')
+    type: str = field(default='runtime')
     path: Path = field(default_factory=Path)
     img: (PyGMLXTextEmulator | PyMLXPNGEmulator | PyGMLXImageEmulator) = field(default_factory=PyGMLXImageEmulator)
     metadata: (ImgMetadata | TextMetadata) = field(default_factory=ImgMetadata)
