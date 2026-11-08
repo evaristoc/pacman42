@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
 from src.PacMan.validation_contracts.event_enums import (
                                             IEventEnums)
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
@@ -55,9 +54,12 @@ class RendererAssembler:
     def init_glm(
             self,
             databasemng: DatabaseManager,
+            cheat: bool = False,
             state: IGameState = InGameState) -> GameLogicManager:
         try:
-            return GameLogicManager(databasemng, state)
+            return GameLogicManager(databasemng=databasemng, 
+                                    friendly_ghosts=cheat, 
+                                    start_state=state)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")

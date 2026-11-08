@@ -34,6 +34,7 @@ class CollisionManager:
         player: Player,
         timemng: TimeManager,
         scoremng: ScoreManager,
+        friendly_ghosts: bool,
         detector: CollisionDetector = CollisionDetector()
     ) -> None:
         self.maze = maze
@@ -42,12 +43,14 @@ class CollisionManager:
         self.player = player
         self.scoremng = scoremng
         self.timemng = timemng
+        self.friendly_ghosts = friendly_ghosts
         self.detector = detector
 
     def update(self) -> UpdateOutcome:
-        ghost_outcome = self._handle_ghost_collisions()
-        if ghost_outcome.value[0]:  # game is over
-            return ghost_outcome
+        if not self.friendly_ghosts:
+            ghost_outcome = self._handle_ghost_collisions()
+            if ghost_outcome.value[0]:  # game is over
+                return ghost_outcome
         return self._handle_pellet_collisions()
 
     def _handle_ghost_collisions(self) -> UpdateOutcome:

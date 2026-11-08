@@ -22,12 +22,14 @@ class GLMSnapshot:
 
 
 class GameLogicManager:
-    def __init__(self,
+    def __init__(self, *,
                  databasemng: DatabaseManager,
+                 friendly_ghosts: bool = False,
                  start_state: Callable[["GameLogicManager"],
                                        IGameState] = InGameState,
                  ) -> None:
         self.ticks: int = 0
+        self.friendly_ghosts: bool = friendly_ghosts
         self.player = Player()
         self.scoremng = ScoreManager(self.player)
         self.dbm: DatabaseManager = databasemng
@@ -67,7 +69,8 @@ class GameLogicManager:
     def create_game_session(self) -> GameSession:
         return GameSessionFactory().create_game_new_game(self.player.level,
                                                          self.scoremng,
-                                                         self.player)
+                                                         self.player,
+                                                         self.friendly_ghosts)
 
     def end_game_session(self) -> None:
         self.session = None
@@ -75,7 +78,7 @@ class GameLogicManager:
     def reset_player(self) -> None:
         self.player = Player()
 
-    def toggle_impotent_ghosts(self) -> None:
+    def toggle_friendly_ghosts(self) -> None:
         return
 
     def final_level(self) -> bool:
@@ -92,8 +95,6 @@ def debug() -> None:
     import random
 
     dbm = create_database_mng()
-    glm = GameLogicManager(dbm, start_state=InGameState)
-    glm.session.maze.pellets_nr = 0
 
     snapshot = glm.view()
     for _ in range(400):

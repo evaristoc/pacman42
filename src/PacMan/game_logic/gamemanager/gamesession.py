@@ -68,7 +68,7 @@ class GameSessionFactory:
     MAZE_SIZENSEED_PER_LEVEL: dict[int, tuple[int, int]] = {
         1: (10, 80), 2: (10, 45), 3: (10, 50)}
 
-    def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player) -> GameSession:
+    def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player, friendly_ghosts: bool) -> GameSession:
         if type(level) is not int:
             raise ValueError("level-variable is not an int.")
         if level not in self.MAZE_SIZENSEED_PER_LEVEL:
@@ -84,7 +84,8 @@ class GameSessionFactory:
                                             ghostmng=new_ghostmng,
                                             timemng=new_timemng,
                                             player=player,
-                                            scoremng=scoremng)
+                                            scoremng=scoremng,
+                                            friendly_ghosts=friendly_ghosts)
         return GameSession(maze=new_maze,
                            timemng=new_timemng,
                            pacman=new_pacman,
