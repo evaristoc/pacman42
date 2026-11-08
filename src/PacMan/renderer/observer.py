@@ -190,13 +190,16 @@ class PlayingAction(IAction):
             board_asset.metadata.x_pos_prop,
             board_asset.metadata.y_pos_prop
             )
-        # hub_top = assets.img_assets["top_hub"].sources["top_hub"]
-
-        # obs._mlx.pygmlx_put_image_to_window(
-        #     hub_top.img,
-        #     hub_top.metadata.x_pos_prop,
-        #     hub_top.metadata.y_pos_prop
-        #     )        
+        level = obs._glm.scoremng.player.level
+        hub_bottom: ImgsAsset = obs._assembler.text_loader_dispatcher(
+            "bottom_hub",
+            "Level: {:>3}".format(str(level)),
+            )
+        obs._mlx.pygmlx_put_image_to_window(
+            hub_bottom.sources['bottom_hub'].img,
+            hub_bottom.sources['bottom_hub'].metadata.x_pos_prop,
+            hub_bottom.sources['bottom_hub'].metadata.y_pos_prop
+        )
 
     def _update_state(
             self,
@@ -228,16 +231,15 @@ class PlayingAction(IAction):
         )
         # MENUS ###
         # # -- hub --
-        # obs._mlx.pygmlx_put_image_to_window(
-        #     obs._registry["menus"]["hub"],
-        #     obs._drawer.margin / 2,
-        #     obs._drawer.margin / 2 + obs._mlx.height
-        # )
+        score = obs._glm.scoremng.player.score
+        snapshot = obs._glm.session.timemng.view()
         if not tick % 60:
             hub_top: ImgsAsset = obs._assembler.text_loader_dispatcher(
-                                        "top_hub",
-                                        "Score: {:>8}    Remaining {:>4}secs".format(100, 90),
-                                    )
+                "top_hub",
+                "Score: {:>8}    Remaining {:>4}secs".format(
+                    str(score),
+                    str(snapshot.countdown_time)),
+            )
             obs._mlx.pygmlx_put_image_to_window(
                 hub_top.sources['top_hub'].img,
                 hub_top.sources['top_hub'].metadata.x_pos_prop,

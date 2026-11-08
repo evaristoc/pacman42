@@ -4,12 +4,10 @@ from typing import TYPE_CHECKING
 from src.PacMan.renderer.assets import (
                                 Source,
                                 TextMetadata,
-                                ImgMetadata,
                                 ImgsAsset,
                                 )
 from src.PacMan.renderer.renderer_engine import (
-                                    PyGMLXTextEmulator,
-                                    PyGMLXImageEmulator)
+                                    PyGMLXTextEmulator)
 if TYPE_CHECKING:  # only required for parameter type assignment 
     from src.PacMan.renderer.renderer_assembler import RendererAssembler
 
@@ -37,6 +35,7 @@ class HubTextLoaderStrategy(TextLoaderStrategy):
             ) -> ImgsAsset:
         imgasset: ImgsAsset = ImgsAsset(asset_name=folder)
         metadata: TextMetadata = TextMetadata()
+        metadata.text_template = msg
         metadata.text = msg
         metadata.font_path = 'CONSOLA.ttf'
         metadata.font_size_prop = 20.8
