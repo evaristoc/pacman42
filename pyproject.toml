@@ -17,7 +17,7 @@ dependencies = [
 [tool.mypy]
 files = ["src"]
 ignore_missing_imports = true
-warn_unused_ignore = true
+warn_unused_ignores = true
 check_untyped_defs = true
 disallow_untyped_defs = true
 strict = false

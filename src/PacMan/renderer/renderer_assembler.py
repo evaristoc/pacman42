@@ -55,7 +55,7 @@ class RendererAssembler:
             self,
             databasemng: DatabaseManager,
             cheat: bool = False,
-            state: IGameState = InGameState) -> GameLogicManager:
+            state: IGameState = InGameState) -> None:
         try:
             return GameLogicManager(databasemng=databasemng, 
                                     friendly_ghosts=cheat, 

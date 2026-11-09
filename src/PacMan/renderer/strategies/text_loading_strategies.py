@@ -21,7 +21,7 @@ class TextLoaderStrategy(ABC):
             self,
             asset_name: str,
             msg: str,
-            assembler: RendererAssembler
+            assembler: 'RendererAssembler'
             ) -> ImgsAsset:
         ...
 
@@ -31,7 +31,7 @@ class HubTextLoaderStrategy(TextLoaderStrategy):
             self,
             folder: str,
             msg: str,
-            assembler: RendererAssembler
+            assembler: 'RendererAssembler'
             ) -> ImgsAsset:
         imgasset: ImgsAsset = ImgsAsset(asset_name=folder)
         metadata: TextMetadata = TextMetadata()

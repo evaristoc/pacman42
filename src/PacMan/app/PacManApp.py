@@ -157,11 +157,17 @@ class PacManApp:
         """
         mount the different parts and start the game
         """
-        # print(self.assetregistry)
-        observer = Observer(self.pygmlx,
-                            self.glm,
-                            self.drawer,
-                            self.assembler,
-                            self.assetregistry)
-        self.pygmlx.pygmlx_loop(observer)
+        if (
+            self.pygmlx is not None 
+            and self.glm is not None 
+            and self.drawer is not None 
+            and self.assembler is not None 
+            and self.assetregistry is not None
+        ):
+            observer = Observer(self.pygmlx,
+                                self.glm,
+                                self.drawer,
+                                self.assembler,
+                                self.assetregistry)
+            self.pygmlx.pygmlx_loop(observer)
 
