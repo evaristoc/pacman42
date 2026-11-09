@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
+from src.PacMan.app_config.config import COUNTDOWN_TIME, LEVEL_TIME
 import time
 
 if TYPE_CHECKING:
     from src.PacMan.game_logic.ingame.time.time import TimeManager
-
-COUNTDOWN_TIME = 3
-LEVEL_TIME = 60
 
 
 class TimeStateError(Exception):
@@ -169,7 +167,8 @@ class LevelPauseState(ITimeState):
         if self.level_active:
             time_remaining: float | None = self.context._level_time_remaining
             if not time_remaining:
-                raise TimeStateError("Got level_active == True, but no valid end time.")
+                raise TimeStateError(
+                    "Got level_active == True, but no valid end time.")
             else:
                 self.context._level_end_time = (time.time() +
                                                 time_remaining)

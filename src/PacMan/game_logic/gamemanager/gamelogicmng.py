@@ -85,24 +85,3 @@ class GameLogicManager:
         if self.player.level == MAX_LEVEL:
             return True
         return False
-
-
-def debug() -> None:
-    from src.PacMan.database.db_mng import create_database_mng
-    from src.PacMan.game_logic.gamemanager.game_sm import MainMenuState
-    from src.PacMan.validation_contracts.event_enums import MainMenuEvents, HighScoreRegisterEvents, InGameEvents
-    import time
-    import random
-
-    dbm = create_database_mng()
-
-    snapshot = glm.view()
-    for _ in range(400):
-        glm.update_logic(None)
-        snapshot = glm.view()
-        with open('output.txt', 'a') as f:
-            print(snapshot.game_state, file=f)
-            if snapshot.session:
-                print(snapshot.session.pacman,
-                      snapshot.session.ghostmng, file=f)
-        time.sleep(0.1)

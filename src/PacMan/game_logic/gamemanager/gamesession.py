@@ -6,6 +6,7 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager, 
 from src.PacMan.game_logic.ingame.collision import CollisionManager
 from src.PacMan.game_logic.score_mng import ScoreManager
 from src.PacMan.game_logic.player import Player
+from src.PacMan.app_config.config import PACMAN_SPEED_PER_LVL, GHOST_SPEED_PER_LVL, MAZE_NR_CELLS, MAZE_SEED
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from dataclasses import dataclass
 
@@ -13,7 +14,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class GameSessionSnapshot:
     timemng: TimeMngSnapshot
-    ghostmng: GhostMngSnapshot
+    ghost_mng: GhostMngSnapshot
     pacman: PacmanSnapshot
     maze: MazeSnapshot
 
@@ -58,27 +59,22 @@ class GameSession:
         pacman_ss = self.pacman.view()
         return GameSessionSnapshot(pacman=pacman_ss,
                                    timemng=timemng_ss,
-                                   ghostmng=ghost_mng_ss,
+                                   ghost_mng=ghost_mng_ss,
                                    maze=maze_ss)
 
 
 class GameSessionFactory:
-    GHOST_SPEED_PER_LEVEL: dict[int, int] = {1: 20, 2: 10, 3: 6}
-    PACMAN_SPEED_PER_LEVEL: dict[int, int] = {1: 20, 2: 10, 3: 10}
-    MAZE_SIZENSEED_PER_LEVEL: dict[int, tuple[int, int]] = {
-        1: (10, 80), 2: (10, 45), 3: (10, 50)}
-
     def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player, friendly_ghosts: bool) -> GameSession:
         if type(level) is not int:
             raise ValueError("level-variable is not an int.")
-        if level not in self.MAZE_SIZENSEED_PER_LEVEL:
+        if level not in MAZE_SEED.keys():
             raise ValueError(f"level-variable is invalid number: {level}")
-        new_maze = MazeFactory(nb_cells=self.MAZE_SIZENSEED_PER_LEVEL[level][0],
-                               seed=self.MAZE_SIZENSEED_PER_LEVEL[level][1]).make_maze()
-        new_pacman = Pacman(new_maze, speed=self.PACMAN_SPEED_PER_LEVEL[level])
+        new_maze = MazeFactory(nb_cells=MAZE_NR_CELLS,
+                               seed=MAZE_SEED[level]).make_maze()
+        new_pacman = Pacman(new_maze, speed=PACMAN_SPEED_PER_LVL[level])
         new_timemng = TimeManager()
         new_ghostmng = GhostManager(
-            new_maze, speed=self.GHOST_SPEED_PER_LEVEL[level])
+            new_maze, speed=GHOST_SPEED_PER_LVL[level])
         new_collisionmng = CollisionManager(maze=new_maze,
                                             pacman=new_pacman,
                                             ghostmng=new_ghostmng,

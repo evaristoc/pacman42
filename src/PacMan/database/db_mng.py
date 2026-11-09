@@ -1,5 +1,7 @@
-from peewee import SqliteDatabase, Database, Model, CharField, IntegerField, DateTimeField, DoesNotExist
 from src.PacMan.database.db_path import get_db_path
+from peewee import (SqliteDatabase, Database, Model,
+                    CharField, IntegerField, DateTimeField,
+                    DoesNotExist)
 from datetime import datetime
 from typing import List
 
@@ -23,40 +25,40 @@ class DatabaseManager:
 
     def add_player(self, name: str, score: int = 0) -> Player:
         """Create a new player"""
-        player, created = Player.get_or_create(                            # type: ignore
+        player, created = Player.get_or_create(
             name=name,
             defaults={'score': score}
         )
 
-        return player  # type: ignore
+        return player
 
     def update_score(self, name: str, score: int) -> Player:
         """Update a player's score"""
-        player = Player.get(  # type: ignore
+        player = Player.get(
             Player.name == name)
         player.score = score
         player.last_played = datetime.now()
-        player.save()  # type: ignore
+        player.save()
         return player
 
     def get_high_scores(self, limit: int = 10) -> List[Player]:
         """Retrieve high scores in descending order"""
         return list(
-            Player.select()  # type: ignore
-            .order_by(Player.score.desc())  # type: ignore
+            Player.select()
+            .order_by(Player.score.desc())
             .limit(limit)
         )
 
     def get_player(self, name: str) -> Player:
         """Retrieve a single player by name"""
-        return Player.get(Player.name == name)  # type: ignore
+        return Player.get(Player.name == name)
 
     def delete_player(self, name: str) -> bool:
         """Delete a player"""
-        result = Player.delete().where(  # type: ignore
-            Player.name == name).execute()  # type: ignore
-        return result > 0  # type: ignore
-    
+        result = Player.delete().where(
+            Player.name == name).execute()
+        return result > 0
+
     def player_exists(self, name: str) -> bool:
         try:
             self.get_player(name)
@@ -73,8 +75,8 @@ class DatabaseManager:
     def __enter__(self) -> "DatabaseManager":
         self._db = SqliteDatabase(self._path)
         Player._meta.database = self._db
-        self._db.create_tables([Player])  # type: ignore
-        return self  # type: ignore
+        self._db.create_tables([Player])
+        return self
 
     def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
         """Context manager exit"""

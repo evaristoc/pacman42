@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from src.PacMan.app_config.config import PLAYER_LIVES
 
 
 @dataclass(frozen=True)
@@ -16,7 +17,7 @@ class Player:
     for storage and restored between game sessions.
     """
     score: int = 0
-    lives: int = 0
+    lives: int = PLAYER_LIVES
     level: int = 1
 
     def view(self) -> PlayerSnapshot:
