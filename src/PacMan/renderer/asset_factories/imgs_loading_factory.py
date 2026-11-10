@@ -26,7 +26,7 @@ ConfiguratorT = TypeVar('ConfiguratorT', bound=Union[type[IEventEnums],
 logger = logging.getLogger(__name__)
 
 
-class ImageLoaderStrategy(ABC):
+class ImageLoader(ABC):
     """The interface all specific image loaders must implement."""
     @abstractmethod
     def load(self,
@@ -37,7 +37,7 @@ class ImageLoaderStrategy(ABC):
         pass
 
 
-class BackgroundLoaderStrategy(ImageLoaderStrategy):
+class BackgroundLoader(ImageLoader):
     def load(
             self,
             folder: str,
@@ -83,7 +83,7 @@ class BackgroundLoaderStrategy(ImageLoaderStrategy):
         )
 
 
-class LivesLoaderStrategy(ImageLoaderStrategy):
+class LivesLoader(ImageLoader):
     def load(
             self,
             folder: str,
@@ -162,7 +162,7 @@ class LivesLoaderStrategy(ImageLoaderStrategy):
             raise SystemExit(1)
 
 
-class BoardLoaderStrategy(ImageLoaderStrategy):
+class BoardLoader(ImageLoader):
     def load(
             self,
             folder: str,
@@ -199,7 +199,7 @@ class BoardLoaderStrategy(ImageLoaderStrategy):
         )
 
 
-class MenuLoaderStrategy(ImageLoaderStrategy):
+class MenuLoader(ImageLoader):
     def load(
             self,
             folder: str,
@@ -274,7 +274,7 @@ class MenuLoaderStrategy(ImageLoaderStrategy):
             raise SystemExit(1)
 
 
-class GhostsLoaderStrategy(ImageLoaderStrategy):
+class GhostsLoader(ImageLoader):
     def load(
             self,
             folder: str,
@@ -347,7 +347,7 @@ class GhostsLoaderStrategy(ImageLoaderStrategy):
             raise SystemExit(1)
 
 
-class PacManLoaderStrategy(ImageLoaderStrategy):
+class PacManLoader(ImageLoader):
     def load(
             self,
             folder: str,

@@ -103,6 +103,9 @@ class PlayingAction(IAction):
         # # NOTE I need to compute before loading, need those values
         # self.drawer.compute(gloop._assembler._config)
         # gloop._drawer.basic_calcs()
+        # nb_cells = self.glm.session.maze.nb_cells
+        # self.assewmber._config = self.assewmber._config.model_copy(
+        #     update={"nb_cells": nb_cells})       
         ...
 
     def _init_state(
@@ -132,7 +135,7 @@ class PlayingAction(IAction):
                 board_.metadata.y_pos_prop
                 )
         level = gloop._glm.scoremng.player.level
-        hub_bottom: ImgsAsset = gloop._assembler.text_loader_dispatcher(
+        hub_bottom: ImgsAsset = gloop._assembler.text_loader_factdispatcher(
             "bottom_hub",
             "Level: {:>3}".format(str(level)),
             )
@@ -151,45 +154,18 @@ class PlayingAction(IAction):
             tick: int
     ) -> None:
         assets = gloop._registry.ingamestate
-        snapshot: GLMSnapshot = gloop._glm.view()
-        # INTERIOR CELLS ###
-        # -- pacman --
-        board_ = assets.img_assets["board"].get_source('board')
-        gloop._drawer.draw_cell_interior(
-            board_.img,
-            gloop._glm.session.pacman.new_position,
-            0xff000000
-        )
-        # # -- ghosts --
-        # for g in gloop._glm.session.ghost_mng.ghosts:
-        #     gloop._drawer.draw_cell_interior(
-        #         board_asset.img,
-        #         gloop._glm.session.ghost_mng.ghosts[g].old_position,
-        #         0xff000000
-        #     )
-        for g in gloop._glm.session.ghost_mng.ghosts:
-            gloop._drawer.draw_cell_interior(
-                board_.img,
-                gloop._glm.session.ghost_mng.ghosts[g].new_position,
-                0xff000000
-            )
-        if (board_.metadata and board_.metadata.x_pos_prop is not None
-                and board_.metadata.y_pos_prop is not None):
-            gloop._mlx.pygmlx_put_image_to_window(
-                board_.img,
-                board_.metadata.x_pos_prop,
-                board_.metadata.y_pos_prop
-            )
-        # MENUS ###
-        # # -- hub --
-        score = gloop._glm.scoremng.player.score
-        snapshot = gloop._glm.session.timemng.view()
-        if not tick % 60:
-            hub_top: ImgsAsset = gloop._assembler.text_loader_dispatcher(
+        snapshot: GLMSnapshot = gloop._glm.view()       
+        # # snapshot = gloop._glm.session.timemng.view()
+        # # str(gloop._glm.session.timemng._countdown_time_remaining)),
+        # print(111, gloop._glm.session.timemng._discrete_cd_time)
+        # print(111, gloop._glm.session.timemng._countdown_time_remaining)
+        # print(111, gloop._glm.session.timemng._countdown_time_remaining)
+        # print(111, gloop._glm.view().session.timemng.level_time)
+        if gloop._glm.view().session.timemng.level_time is None:
+            hub_top: ImgsAsset = gloop._assembler.text_loader_factdispatcher(
                 "top_hub",
-                "Score: {:>8}    Remaining {:>4}secs".format(
-                    str(score),
-                    str(snapshot.countdown_time)),
+                "     STARTING AT {:>4}secs!!!! ".format(
+                    str(gloop._glm.session.timemng._discrete_cd_time))
             )
             ht_ = hub_top.get_source("top_hub")
             if (ht_.metadata and ht_.metadata.x_pos_prop is not None
@@ -199,59 +175,107 @@ class PlayingAction(IAction):
                     ht_.metadata.x_pos_prop,
                     ht_.metadata.y_pos_prop
                 )
-        # # PACMAN ###
-        pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
-        if not gloop._glm.session.pacman.new_direction:
-            pD = (-1, 0)
         else:
-            pD = gloop._glm.session.pacman.new_direction
-        direction = [key.name
-                     for key in pacman_steps if pacman_steps[key] == pD][0]
-        print(direction)
-        p_animations = assets.img_assets["pacman"].get_animation(direction)
-        p_nextmove = p_animations.pop()
-        # print(pm)
-        gloop._mlx.pygmlx_put_image_to_window(
-            p_nextmove.img,
-            gloop._drawer.next_char_coord(
-                            gloop._glm
-                            .session
-                            .pacman.new_position.cell_position_x),
-            gloop._drawer.next_char_coord(
-                            gloop._glm
-                            .session
-                            .pacman
-                            .new_position
-                            .cell_position_y) + gloop._drawer.bottom_h
-        )
-        if tick % 5:
-            p_animations.append(p_nextmove)
-        else:
-            p_animations.appendleft(p_nextmove)
-
-        # # GHOSTS ###
-        for g in gloop._glm.session.ghost_mng.ghosts:
-            g_ = assets.img_assets["ghosts"].get_source(g.name)
+            score = gloop._glm.scoremng.player.score
+            # INTERIOR CELLS ###
+            # -- pacman --
+            board_ = assets.img_assets["board"].get_source('board')
+            gloop._drawer.draw_cell_interior(
+                board_.img,
+                gloop._glm.session.pacman.new_position,
+                0xff000000
+            )
+            # # -- ghosts --
+            # for g in gloop._glm.session.ghost_mng.ghosts:
+            #     gloop._drawer.draw_cell_interior(
+            #         board_asset.img,
+            #         gloop._glm.session.ghost_mng.ghosts[g].old_position,
+            #         0xff000000
+            #     )
+            for g in gloop._glm.session.ghost_mng.ghosts:
+                gloop._drawer.draw_cell_interior(
+                    board_.img,
+                    gloop._glm.session.ghost_mng.ghosts[g].new_position,
+                    0xff000000
+                )
+            if (board_.metadata and board_.metadata.x_pos_prop is not None
+                    and board_.metadata.y_pos_prop is not None):
+                gloop._mlx.pygmlx_put_image_to_window(
+                    board_.img,
+                    board_.metadata.x_pos_prop,
+                    board_.metadata.y_pos_prop
+                )
+            # MENUS ###
+            # # -- hub --
+            if not tick % 60:
+                hub_top: ImgsAsset = gloop._assembler\
+                    .text_loader_factdispatcher(
+                        "top_hub",
+                        "Score: {:>8}    Remaining{:>4}secs".format(
+                            str(score),
+                            str(gloop._glm.view().session.timemng.level_time))
+                    )
+                ht_ = hub_top.get_source("top_hub")
+                if (ht_.metadata and ht_.metadata.x_pos_prop is not None
+                        and ht_.metadata.y_pos_prop is not None):
+                    gloop._mlx.pygmlx_put_image_to_window(
+                        ht_.img,
+                        ht_.metadata.x_pos_prop,
+                        ht_.metadata.y_pos_prop
+                    )
+            # # PACMAN ###
+            pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
+            if not gloop._glm.session.pacman.new_direction:
+                pD = (-1, 0)
+            else:
+                pD = gloop._glm.session.pacman.new_direction
+            direction = [key.name
+                         for key in pacman_steps if pacman_steps[key] == pD][0]
+            print(direction)
+            p_animations = assets.img_assets["pacman"].get_animation(direction)
+            p_nextmove = p_animations.pop()
+            # print(pm)
             gloop._mlx.pygmlx_put_image_to_window(
-                g_.img,
+                p_nextmove.img,
                 gloop._drawer.next_char_coord(
-                            gloop._glm
-                            .session
-                            .ghost_mng
-                            .ghosts[g]
-                            .new_position
-                            .cell_position_x),
+                                gloop._glm
+                                .session
+                                .pacman.new_position.cell_position_x),
                 gloop._drawer.next_char_coord(
-                            gloop._glm
-                            .session
-                            .ghost_mng
-                            .ghosts[g]
-                            .new_position
-                            .cell_position_y) + gloop._drawer.bottom_h)
-                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
-                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._drawer.bottom_h
-                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
-                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1])) + gloop._drawer.bottom_h
+                                gloop._glm
+                                .session
+                                .pacman
+                                .new_position
+                                .cell_position_y) + gloop._drawer.bottom_h
+            )
+            if tick % 5 % gloop._glm.session.maze.nb_cells:
+                p_animations.append(p_nextmove)
+            else:
+                p_animations.appendleft(p_nextmove)
+
+            # # GHOSTS ###
+            for g in gloop._glm.session.ghost_mng.ghosts:
+                g_ = assets.img_assets["ghosts"].get_source(g.name)
+                gloop._mlx.pygmlx_put_image_to_window(
+                    g_.img,
+                    gloop._drawer.next_char_coord(
+                                gloop._glm
+                                .session
+                                .ghost_mng
+                                .ghosts[g]
+                                .new_position
+                                .cell_position_x),
+                    gloop._drawer.next_char_coord(
+                                gloop._glm
+                                .session
+                                .ghost_mng
+                                .ghosts[g]
+                                .new_position
+                                .cell_position_y) + gloop._drawer.bottom_h)
+                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
+                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._drawer.bottom_h
+                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
+                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1])) + gloop._drawer.bottom_h
 
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {

@@ -2,23 +2,22 @@ import logging
 from pathlib import Path
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
 from src.PacMan.renderer.assets import ImgsAsset
-from src.PacMan.renderer.strategies.imgs_loading_strategies import (
-                                            ConfiguratorT)
 from src.PacMan.database.db_mng import DatabaseManager
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
-from src.PacMan.renderer.strategies.imgs_loading_strategies import (
-                                            BackgroundLoaderStrategy,
-                                            BoardLoaderStrategy,
-                                            ImageLoaderStrategy,
-                                            LivesLoaderStrategy,
-                                            MenuLoaderStrategy,
-                                            GhostsLoaderStrategy,
-                                            PacManLoaderStrategy)
-from src.PacMan.renderer.strategies.text_loading_strategies import (
-                                            TextLoaderStrategy,
-                                            HubTextLoaderStrategy)
+from src.PacMan.renderer.asset_factories.imgs_loading_factory import (
+                                            ConfiguratorT,
+                                            BackgroundLoader,
+                                            BoardLoader,
+                                            ImageLoader,
+                                            LivesLoader,
+                                            MenuLoader,
+                                            GhostsLoader,
+                                            PacManLoader)
+from src.PacMan.renderer.asset_factories.text_loading_factory import (
+                                            TextLoader,
+                                            HubTextLoader)
 from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
 
 
@@ -29,16 +28,16 @@ class RendererAssembler:
     def __init__(self, config: ValidBoardConfig) -> None:
         self._config = config
         self.cwd = Path(__file__).resolve().parent
-        self._imgstrategies: dict[str, ImageLoaderStrategy] = {
-            "background": BackgroundLoaderStrategy(),
-            "board": BoardLoaderStrategy(),
-            "lives": LivesLoaderStrategy(),
-            "menus": MenuLoaderStrategy(),
-            "ghosts": GhostsLoaderStrategy(),
-            "pacman": PacManLoaderStrategy()
+        self._imgasset_map: dict[str, ImageLoader] = {
+            "background": BackgroundLoader(),
+            "board": BoardLoader(),
+            "lives": LivesLoader(),
+            "menus": MenuLoader(),
+            "ghosts": GhostsLoader(),
+            "pacman": PacManLoader()
         }
-        self._textstrategies: dict[str, TextLoaderStrategy] = {
-            'hub': HubTextLoaderStrategy()
+        self._textasset_map: dict[str, TextLoader] = {
+            'hub': HubTextLoader()
         }
 
     def init_glm(
@@ -70,32 +69,32 @@ class RendererAssembler:
                          "the emulator (init_engine)")
             raise SystemExit(1)
 
-    def img_loader_dispatcher(
+    def img_loader_factdispatcher(
             self,
             folder: str,
             event: ConfiguratorT | None = None
     ) -> ImgsAsset:
         if 'live' in folder:
-            return self._imgstrategies['lives'].load(folder, self)
+            return self._imgasset_map['lives'].load(folder, self)
         if 'background' in folder:
-            return self._imgstrategies['background'].load(folder, self)
+            return self._imgasset_map['background'].load(folder, self)
         if 'board' in folder:
-            return self._imgstrategies['board'].load(folder, self, event)
+            return self._imgasset_map['board'].load(folder, self, event)
         if 'menus' in folder:
-            return self._imgstrategies['menus'].load(folder, self, event)
+            return self._imgasset_map['menus'].load(folder, self, event)
         if 'ghosts' in folder:
-            return self._imgstrategies['ghosts'].load(folder, self, event)
+            return self._imgasset_map['ghosts'].load(folder, self, event)
         if 'pacman' in folder:
-            return self._imgstrategies['pacman'].load(folder, self, event)
+            return self._imgasset_map['pacman'].load(folder, self, event)
         return ImgsAsset()
 
-    def text_loader_dispatcher(
+    def text_loader_factdispatcher(
             self,
             folder: str,
             msg: str
             ) -> ImgsAsset:
         if 'hub' in folder:
-            return self._textstrategies['hub'].upload_text(
+            return self._textasset_map['hub'].upload_text(
                 folder,
                 msg,
                 self

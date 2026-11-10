@@ -18,7 +18,7 @@ class ValidAppEntriesConfig(BaseModel):
             data["board"] = {
                 "cheat": data.get("cheat"),
                 "size": data.get("size"),
-                "nb_cells": data.get("nb_cells"),
+                # "nb_cells": data.get("nb_cells"),
                 "hub_panels_prop": data.get("hub_panels_prop")
             }
         return data

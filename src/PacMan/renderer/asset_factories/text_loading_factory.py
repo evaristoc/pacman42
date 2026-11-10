@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class TextLoaderStrategy(ABC):
+class TextLoader(ABC):
     @abstractmethod
     def upload_text(
             self,
@@ -27,7 +27,7 @@ class TextLoaderStrategy(ABC):
         ...
 
 
-class HubTextLoaderStrategy(TextLoaderStrategy):
+class HubTextLoader(TextLoader):
     def upload_text(
             self,
             folder: str,

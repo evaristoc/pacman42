@@ -1,5 +1,6 @@
 import logging
 from types import MethodType
+from src.PacMan.app_config.config import MAZE_NR_CELLS
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
@@ -67,46 +68,58 @@ class PacManApp:
             self.glm = self.assembler.init_glm(self.dbm,
                                                self.assembler._config.cheat,
                                                MainMenuState)
-            # TODO update nb_cells config before drawer
+            nb_cells = MAZE_NR_CELLS
+            self.assembler._config = self.assembler._config.model_copy(
+                update={"nb_cells": nb_cells})
             self.drawer = self.assembler.init_drawer()
             # NOTE I need to compute before loading, need those values
             self.drawer.compute(self.assembler._config)
             self.pygmlx = self.assembler.init_engine()
             # self.maze = self.glm.session.maze
-            background: ImgsAsset = self.assembler.img_loader_dispatcher(
+            background: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                         "background",
                                         None)
-            board: ImgsAsset = self.assembler.img_loader_dispatcher(
+            board: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                         "board",
                                         self.drawer)
             # rsized = self.drawer.resized
-            ghosts: ImgsAsset = self.assembler.img_loader_dispatcher(
+            ghosts: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                         "ghosts",
                                         GhostName)
-            pacman: ImgsAsset = self.assembler.img_loader_dispatcher(
+            pacman: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                         "pacman",
                                         InGameEvents)
             pacman.event_handler = MethodType(pacman_eh, pacman)
-            main_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
+            main_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                         "menus/main",
                                         MainMenuEvents)
             main_menu.event_handler = MethodType(menuwithexit_eh, main_menu)
-            pause_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
+            pause_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                         "menus/pause",
                                         PauseMenuEvents)
             pause_menu.event_handler = MethodType(menuwithexit_eh, pause_menu)
-            register_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
+            register_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                         "menus/register",
                                         HighScoreRegisterEvents)
             # three lives
-            hub_bottom_img: ImgsAsset = self.assembler.img_loader_dispatcher(
+            hub_bottom_img: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
                                     "menus/hub_bottom/live",
                                     None)
-            hub_top: ImgsAsset = self.assembler.text_loader_dispatcher(
+            hub_top: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
                                         "top_hub",
                                         "Score: {:>8}    Remaining {:>4}secs",
                                     )
-            hub_botton_text: ImgsAsset = self.assembler.text_loader_dispatcher(
+            hub_botton_text: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
                                         "bottom_hub",
                                         "Level: {:>3}",
                                     )
