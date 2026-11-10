@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
 from src.PacMan.renderer.assets import ImgsAsset
-from src.PacMan.renderer.strategies.imgs_loading_strategies import ConfiguratorT
+from src.PacMan.renderer.strategies.imgs_loading_strategies import (
+                                            ConfiguratorT)
 from src.PacMan.database.db_mng import DatabaseManager
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
@@ -55,14 +56,19 @@ class RendererAssembler:
             raise SystemExit(1)
 
     def init_drawer(self) -> BoardDrawerEngine:
-        return BoardDrawerEngine(self._config)
+        return BoardDrawerEngine()
 
     def init_engine(self) -> PyGMiniLibXEmulator:
-        return PyGMiniLibXEmulator(self._config.size,
-                                   self._config.size + 2 * int(
-                                       self._config.size /
-                                       self._config.hub_panels_prop
-                                   ))
+        if self._config and self._config.size and self._config.hub_panels_prop:
+            return PyGMiniLibXEmulator(self._config.size,
+                                       self._config.size + 2 * int(
+                                        self._config.size /
+                                        self._config.hub_panels_prop
+                                        ))
+        else:
+            logger.error("FATAL: we could not get the size to build "
+                         "the emulator (init_engine)")
+            raise SystemExit(1)
 
     def img_loader_dispatcher(
             self,
@@ -81,6 +87,7 @@ class RendererAssembler:
             return self._imgstrategies['ghosts'].load(folder, self, event)
         if 'pacman' in folder:
             return self._imgstrategies['pacman'].load(folder, self, event)
+        return ImgsAsset()
 
     def text_loader_dispatcher(
             self,
@@ -93,4 +100,4 @@ class RendererAssembler:
                 msg,
                 self
             )
-
+        return ImgsAsset()

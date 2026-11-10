@@ -1,13 +1,10 @@
 import logging
 from typing import cast, Any
+from pydantic import ValidationError
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidBoardConfig)
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
 from src.PacMan.game_logic.ingame.maze.tile import Tile
-from src.PacMan.game_logic.ingame.maze.maze import (
-                                            Maze,
-                                            MazeFactory,
-                                            TileSnapshot) 
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 
 logger = logging.getLogger(__name__)
@@ -27,14 +24,29 @@ class BoardDrawerEngine:
 
     BOTTOMPARTSCREEN = 5
 
-    def __init__(self, config: ValidBoardConfig) -> None:
-        self._config = config
-        self.__perc_wall = .2
-        self.__perc_padding = .2
+    def __init__(self) -> None:
+        self._size: int = 0
+        self._nb_cells: int = 0
+        self.__perc_wall: float = .2
+        self.__perc_padding: float = .2
+        self.__total_cell_size: int = 0
+        self.__wall_thickness: int = 0
+        self.__interior_cell_size: int = 0
+        self.__corrected_size: int = 0
+        self.__diff: int = 0
+        self.__padding: int = 0
+        self.__cell_center: int = 0
+
+    def compute(self, config: ValidBoardConfig) -> None:
+        if config.size is None or config.nb_cells is None:
+            logger.error("Board size and number of cells must be defined")
+            raise SystemExit(1)
+        self._size = config.size
+        self._nb_cells = config.nb_cells
         self.__total_cell_size = int(
-            self._config.size / self._config.nb_cells
+            self._size / self._nb_cells
             + self.__perc_wall * int(
-                self._config.size / self._config.nb_cells
+                self._size / self._nb_cells
             ))
         self.__wall_thickness = int(
             self.__total_cell_size * self.__perc_wall
@@ -43,55 +55,42 @@ class BoardDrawerEngine:
             self.__total_cell_size - 2 * self.__wall_thickness
         )
         self.__corrected_size = self.__interior_cell_size *\
-            config.nb_cells + self.__wall_thickness * (config.nb_cells + 1)
-        self.__diff = self._config.size - self.__corrected_size
-        self.__padding = 0
+            self._nb_cells + self.__wall_thickness * (self._nb_cells + 1)
+        self.__diff = self._size - self.__corrected_size
         self.__padding = int(
             self.__interior_cell_size * self.__perc_padding
         )
         self.__cell_center = (
             self.__interior_cell_size - 2 * self.__padding
         )
-        # self._config = config
-        # self.__perc_wall = .2
-        # self.__perc_padding = .2
-        # self.__total_cell_size = int(
-        #     self._config.size / self._config.nb_cells)
-        #     # + self.__perc_wall * int(
-        #     #     self._config.size / self._config.nb_cells
-        #     # ))
-        # self.__wall_thickness = int(
-        #     self.__total_cell_size * self.__perc_wall
-        # )
-        # self.__interior_cell_size = (
-        #     self.__total_cell_size - 2 * self.__wall_thickness
-        # )
-        # self.__corrected_size = self.__interior_cell_size *\
-        #     config.nb_cells + 2 * self.__wall_thickness * config.nb_cells
-        # self.__diff = self._config.size - self.__corrected_size
-        # self.__padding = 0
-        # self.__padding = int(
-        #     self.__interior_cell_size * self.__perc_padding
-        # )
-        # self.__cell_center = (
-        #     self.__interior_cell_size - 2 * self.__padding
-        # )
-        # print("in drawer", self.__corrected_size, self._config)
-
-    def init_maze(self) -> Maze:
-        try:
-            return MazeFactory(self._config.nb_cells).make_map()
-        except Exception:
-            logger.error("FATAL: maze couldnot be made with following params: "
-                         f"perfect True, seed 42, config: {self._config}")
 
     def init_engine(self) -> PyGMiniLibXEmulator:
-        if self._config.size is not None:
-            return PyGMiniLibXEmulator(self._config.size,
-                                       self._config.size)
+        if self._size is not None:
+            return PyGMiniLibXEmulator(self._size,
+                                       self._size)
         else:
             logger.error("FATAL: height or width found to be None.")
             raise SystemExit()
+
+    @property
+    def nb_cells(self) -> None:
+        return
+
+    # # NOTE: this is not the best place to update / validate the config
+    # @nb_cells.setter
+    # def nb_cells(self, val: int) -> None:
+    #     self._nb_cells = self._config.nb_cells
+        # try:
+        #     self._config = self._config.model_copy(
+        #         update={
+        #             "nb_cells": val
+        #         }
+        #     )
+        #     self._nb_cells = self._config.nb_cells
+        # except ValidationError:
+        #     logger.error(f"FATAL: this nb of cells: {val} is not "
+        #                  "in the accepted range (check contracts)")
+        #     raise SystemExit(1)
     
     @property
     def tot_cell_size(self) -> tuple[int, str]:
@@ -134,7 +133,7 @@ class BoardDrawerEngine:
 
     @property
     def resized(self) -> int:
-        return int(self.corrected_size[0] / (2 * self._config.nb_cells))
+        return int(self.corrected_size[0] / (2 * self._nb_cells))
 
     def next_char_coord(self, v: int) -> int:
         img_size = self.resized
@@ -202,7 +201,7 @@ class BoardDrawerEngine:
             target_img: PyGMLXImageEmulator,
             cell: Tile,
             color: int
-    ):
+    ) -> None:
         x_cell = cell.cell_position_x
         y_cell = cell.cell_position_y
         total = self.__total_cell_size

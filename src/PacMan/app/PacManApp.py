@@ -4,7 +4,7 @@ from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
 from src.PacMan.validation_contracts.parser import DataProcessor
-from src.PacMan.renderer.observer import Observer
+from src.PacMan.renderer.game_loop import GameLoop
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
@@ -49,8 +49,10 @@ class PacManApp:
                                             HighScoreRegisterEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
-                                                mainmenu_eh,
-                                                pausemenu_eh)
+                                                menuwithexit_eh,
+                                                # mainmenu_eh,
+                                                # pausemenu_eh
+                                                )
         from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState,
                                                 MainMenuState,
@@ -63,12 +65,15 @@ class PacManApp:
             self.assembler = RendererAssembler(config)
             # drawer will control all relevant metrics
             # it will also paint the canvas
-            self.drawer = self.assembler.init_drawer()
-            self.pygmlx = self.assembler.init_engine()
             self.dbm = create_database_mng()
             self.glm = self.assembler.init_glm(self.dbm,
                                                self.assembler._config.cheat,
                                                MainMenuState)
+            # TODO update nb_cells config before drawer
+            self.drawer = self.assembler.init_drawer()
+            # NOTE I need to compute before loading, need those values
+            self.drawer.compute(self.assembler._config)
+            self.pygmlx = self.assembler.init_engine()
             # self.maze = self.glm.session.maze
             background: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "background",
@@ -83,12 +88,15 @@ class PacManApp:
             pacman: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "pacman",
                                         InGameEvents)
+            pacman.event_handler = MethodType(pacman_eh, pacman)
             main_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "menus/main",
                                         MainMenuEvents)
+            main_menu.event_handler = MethodType(menuwithexit_eh, main_menu)
             pause_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "menus/pause",
                                         PauseMenuEvents)
+            pause_menu.event_handler = MethodType(menuwithexit_eh, pause_menu)
             register_menu: ImgsAsset = self.assembler.img_loader_dispatcher(
                                         "menus/register",
                                         HighScoreRegisterEvents)
@@ -121,21 +129,18 @@ class PacManApp:
                     hub_botton_text.asset_name: hub_botton_text
                 },
             )
-            ingame_assets.event_handler = MethodType(pacman_eh, ingame_assets)
             main_assets: Assets = Assets(
                 state_name=MainMenuState.__name__,
                 img_assets={
                     main_menu.asset_name: main_menu
                 }
             )
-            main_assets.event_handler = MethodType(mainmenu_eh, main_assets)
             pause_assets: Assets = Assets(
                 state_name=PauseMenuState.__name__,
                 img_assets={
                     pause_menu.asset_name: pause_menu
                 }
             )
-            pause_assets.event_handler = MethodType(pausemenu_eh, main_assets)
             register_assets: Assets = Assets(
                 state_name=HighScoreRegisterState.__name__,
                 img_assets={
@@ -158,15 +163,15 @@ class PacManApp:
         mount the different parts and start the game
         """
         if (
-            self.pygmlx is not None 
-            and self.glm is not None 
-            and self.drawer is not None 
-            and self.assembler is not None 
+            self.pygmlx is not None
+            and self.glm is not None
+            and self.drawer is not None
+            and self.assembler is not None
             and self.assetregistry is not None
         ):
-            observer = Observer(self.pygmlx,
+            gameloop = GameLoop(self.pygmlx,
                                 self.glm,
                                 self.drawer,
                                 self.assembler,
                                 self.assetregistry)
-            self.pygmlx.pygmlx_loop(observer)
+            self.pygmlx.pygmlx_loop(gameloop)

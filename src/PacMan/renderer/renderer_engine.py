@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 from enum import IntEnum
 from typing import Any, Callable, TypeAlias
 from src.PacMan.app_config.console import console
-from src.PacMan.renderer.observer import Observer
+from src.PacMan.renderer.game_loop import GameLoop
 
 TLoopHookCB: TypeAlias = Callable[[Any], int]
 PixelBuffer: TypeAlias = np.ndarray
@@ -109,21 +109,21 @@ class PyGMiniLibXEmulator:
         self._loop_hook = funct_ptr
         self._loop_param = param
 
-    def pygmlx_loop(self, observer: Observer) -> None:
+    def pygmlx_loop(self, gameloop: GameLoop) -> None:
         clock: pygame.time.Clock = pygame.time.Clock()
         running = True
         tick = 0
         while running:
             # event: pygame.event.Event
-            # observer.actions(None)
-            observer.event_queue = pygame.event.get()
-            running = observer.state_loop(tick)
+            # gameloop.actions(None)
+            gameloop.event_queue = pygame.event.get()
+            running = gameloop.state_loop(tick)
             # for event in pygame.event.get():
             #     if event.type == pygame.QUIT:
             #         running = False
-            #     # observer.actions(event=event)
+            #     # gameloop.actions(event=event)
             if self._loop_hook is not None:
-                result: int = self.mlx_loop_hook(self._loop_param)
+                result = self._loop_hook(self._loop_param)
                 if result == 0:
                     break
             clock.tick(60)
@@ -143,7 +143,11 @@ class PyGMLXImageEmulator:
                                 self.width,
                                 4), dtype=np.uint8)
 
-    def contains(self, x, y, start_x, start_y):
+    def contains(self,
+                 x: int,
+                 y: int,
+                 start_x: int,
+                 start_y: int) -> bool:
         return (
             start_x <= x < start_x + self.width
             and start_y <= y < start_y + self.height
@@ -224,6 +228,7 @@ class PyGMLXTextEmulator(PyGMLXImageEmulator):
         self.font_path = "src/PacMan/assets/fonts/" + font_path  # as it runs from root...
         self.font_size = font_size
         self.color = color
+        self.font: ImageFont.FreeTypeFont | ImageFont.ImageFont
         self._load_font()
 
     def _load_font(self) -> None:
@@ -262,10 +267,11 @@ class PyGMLXTextEmulator(PyGMLXImageEmulator):
         self.buffer[:] = np.array(pil_img,
                                   dtype=np.uint8)
 
-    def _measure_text(self, text: str) -> tuple[int, int, int, int]:
+    def _measure_text(self, text: str) -> tuple[int, ...]:
         dummy_img = Image.new("RGBA", (1, 1))
         draw = ImageDraw.Draw(dummy_img)
-        return draw.textbbox((0, 0), text, font=self.font)
+        bbox = draw.textbbox((0, 0), text, font=self.font)
+        return tuple(int(value) for value in bbox)
 
     def pygll_put_text_fitted(
             self,

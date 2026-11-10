@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 import pygame
 from pygame import Event
-from typing import TypeVar, Type, Any, Protocol, TYPE_CHECKING
+from typing import TypeVar, Type, Protocol, TYPE_CHECKING
 from src.PacMan.game_logic.gamemanager.gamelogicmng import (
                                                     GameLogicManager,
                                                     GLMSnapshot)
@@ -13,7 +13,7 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 GameOverPlayerLost)
 if TYPE_CHECKING:  # only required for parameter type assignment 
     from src.PacMan.renderer.drawer_engine import BoardDrawerEngine   
-    from src.PacMan.renderer.assets import ImgsAsset, AssetRegistry
+    from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
     from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
     from src.PacMan.renderer.event_handlers import EventMsg
     from src.PacMan.renderer.renderer_assembler import RendererAssembler
@@ -27,14 +27,14 @@ T = TypeVar("T", bound="IAction")
 class IAction(Protocol):
     def action(
             self,
-            obs: "Observer",
+            gloop: "GameLoop",
             tick: int
             ) -> None:
         ...
 
     def _init_state(
             self,
-            obs: "Observer"
+            gloop: "GameLoop"
     ) -> None:
         ...
 
@@ -42,34 +42,35 @@ class IAction(Protocol):
 class MainMenuAction(IAction):
     def action(
             self,
-            obs: Observer,
+            gloop: GameLoop,
             tick: int
     ) -> None:
         _ = tick
-        if obs._statechanged:
-            self._init_state(obs)
+        if gloop._statechanged:
+            self._init_state(gloop)
 
     def _init_state(
             self,
-            obs: Observer
+            gloop: GameLoop
     ) -> None:
         try:
-            background = obs._mlx.pygmlx_new_image(
-                obs._mlx.view_w,
-                obs._mlx.view_h
+            background = gloop._mlx.pygmlx_new_image(
+                gloop._mlx.view_w,
+                gloop._mlx.view_h
             )
-            obs._mlx.pygmlx_put_image_to_window(
+            gloop._mlx.pygmlx_put_image_to_window(
                 background,
                 0,
                 0
             )
-            buttons = list(obs._registry.mainmenustate.img_assets['main']
+            buttons = list(gloop._registry.mainmenustate.img_assets['main']
                            .sources.keys())
             for button in buttons:
-                b_ = obs._registry.mainmenustate.img_assets['main']\
+                b_ = gloop._registry.mainmenustate.img_assets['main']\
                     .get_source(button)
-                if b_.metadata and b_.metadata.x_pos_prop is not None and b_.metadata.y_pos_prop is not None:
-                    obs._mlx.pygmlx_put_image_to_window(
+                if (b_.metadata and b_.metadata.x_pos_prop is not None
+                        and b_.metadata.y_pos_prop is not None):
+                    gloop._mlx.pygmlx_put_image_to_window(
                         b_.img,
                         b_.metadata.x_pos_prop,
                         b_.metadata.y_pos_prop
@@ -81,103 +82,110 @@ class MainMenuAction(IAction):
 
 class PlayingAction(IAction):
     # def _init_start(self,
-    #                 obs: Observer) -> None:
+    #                 gloop: GameLoop) -> None:
     def action(
             self,
-            obs: Observer,
+            gloop: GameLoop,
             tick: int
     ) -> None:
-        if obs._levelchanged:
-            self._get_newlevel(obs)
-        if obs._statechanged:
-            self._init_state(obs)
+        if gloop._levelchanged:
+            self._get_newlevel(gloop)
+        if gloop._statechanged:
+            self._init_state(gloop)
         else:
-            self._update_state(obs, tick)
+            self._update_state(gloop, tick)
 
     def _get_newlevel(
             self,
-            obs: 'Observer'
+            gloop: 'GameLoop'
     ) -> None:
+        # # TODO update nb_cells config before drawer
+        # # NOTE I need to compute before loading, need those values
+        # self.drawer.compute(gloop._assembler._config)
+        # gloop._drawer.basic_calcs()
         ...
 
     def _init_state(
             self,
-            obs: "Observer"
+            gloop: "GameLoop"
     ) -> None:
-        bg_ = obs._registry.init.img_assets['background']\
+        bg_ = gloop._registry.init.img_assets['background']\
                                             .get_source('background')
-        obs._mlx.pygmlx_put_image_to_window(
+        gloop._mlx.pygmlx_put_image_to_window(
             bg_.img,
             0,
             0
         )
-        assets = obs._registry.ingamestate
-        # snapshot: GLMSnapshot = obs._glm.view()
+        assets = gloop._registry.ingamestate
+        # snapshot: GLMSnapshot = gloop._glm.view()
         # print(assets.img_assets["board"].sources)
         board_ = assets.img_assets["board"].get_source('board')
-        obs._drawer.draw(
+        gloop._drawer.draw(
                     board_.img,
-                    obs._glm.session.maze.grid,
+                    gloop._glm.session.maze.grid,
                     None)
-        if board_.metadata and board_.metadata.x_pos_prop is not None and board_.metadata.y_pos_prop is not None:
-            obs._mlx.pygmlx_put_image_to_window(
+        if (board_.metadata and board_.metadata.x_pos_prop is not None
+                and board_.metadata.y_pos_prop is not None):
+            gloop._mlx.pygmlx_put_image_to_window(
                 board_.img,
                 board_.metadata.x_pos_prop,
                 board_.metadata.y_pos_prop
                 )
-        level = obs._glm.scoremng.player.level
-        hub_bottom: ImgsAsset = obs._assembler.text_loader_dispatcher(
+        level = gloop._glm.scoremng.player.level
+        hub_bottom: ImgsAsset = gloop._assembler.text_loader_dispatcher(
             "bottom_hub",
             "Level: {:>3}".format(str(level)),
             )
         hb_ = hub_bottom.get_source("bottom_hub")
-        if hb_.metadata and hb_.metadata.x_pos_prop is not None and hb_.metadata.y_pos_prop is not None:
-            obs._mlx.pygmlx_put_image_to_window(
+        if (hb_.metadata and hb_.metadata.x_pos_prop is not None
+                and hb_.metadata.y_pos_prop is not None):
+            gloop._mlx.pygmlx_put_image_to_window(
                 hb_.img,
                 hb_.metadata.x_pos_prop,
                 hb_.metadata.y_pos_prop
             )
-
+        
     def _update_state(
             self,
-            obs: Observer,
+            gloop: GameLoop,
             tick: int
     ) -> None:
-        assets = obs._registry.ingamestate
-        snapshot: GLMSnapshot = obs._glm.view()
+        assets = gloop._registry.ingamestate
+        snapshot: GLMSnapshot = gloop._glm.view()
         # INTERIOR CELLS ###
         # -- pacman --
         board_ = assets.img_assets["board"].get_source('board')
-        obs._drawer.draw_cell_interior(
+        gloop._drawer.draw_cell_interior(
             board_.img,
-            obs._glm.session.pacman.new_position,
+            gloop._glm.session.pacman.new_position,
             0xff000000
         )
         # # -- ghosts --
-        # for g in obs._glm.session.ghost_mng.ghosts:
-        #     obs._drawer.draw_cell_interior(
+        # for g in gloop._glm.session.ghost_mng.ghosts:
+        #     gloop._drawer.draw_cell_interior(
         #         board_asset.img,
-        #         obs._glm.session.ghost_mng.ghosts[g].old_position,
+        #         gloop._glm.session.ghost_mng.ghosts[g].old_position,
         #         0xff000000
         #     )
-        for g in obs._glm.session.ghost_mng.ghosts:
-            obs._drawer.draw_cell_interior(
+        for g in gloop._glm.session.ghost_mng.ghosts:
+            gloop._drawer.draw_cell_interior(
                 board_.img,
-                obs._glm.session.ghost_mng.ghosts[g].new_position,
+                gloop._glm.session.ghost_mng.ghosts[g].new_position,
                 0xff000000
             )
-        if board_.metadata and board_.metadata.x_pos_prop is not None and board_.metadata.y_pos_prop is not None:
-            obs._mlx.pygmlx_put_image_to_window(
+        if (board_.metadata and board_.metadata.x_pos_prop is not None
+                and board_.metadata.y_pos_prop is not None):
+            gloop._mlx.pygmlx_put_image_to_window(
                 board_.img,
                 board_.metadata.x_pos_prop,
                 board_.metadata.y_pos_prop
             )
         # MENUS ###
         # # -- hub --
-        score = obs._glm.scoremng.player.score
-        snapshot = obs._glm.session.timemng.view()
+        score = gloop._glm.scoremng.player.score
+        snapshot = gloop._glm.session.timemng.view()
         if not tick % 60:
-            hub_top: ImgsAsset = obs._assembler.text_loader_dispatcher(
+            hub_top: ImgsAsset = gloop._assembler.text_loader_dispatcher(
                 "top_hub",
                 "Score: {:>8}    Remaining {:>4}secs".format(
                     str(score),
@@ -185,33 +193,35 @@ class PlayingAction(IAction):
             )
             ht_ = hub_top.get_source("top_hub")
             if ht_.metadata and ht_.metadata.x_pos_prop is not None and ht_.metadata.y_pos_prop is not None:
-                obs._mlx.pygmlx_put_image_to_window(
+                gloop._mlx.pygmlx_put_image_to_window(
                     ht_.img,
                     ht_.metadata.x_pos_prop,
                     ht_.metadata.y_pos_prop
                 )      
         # # PACMAN ###
         pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
-        if not obs._glm.session.pacman.new_direction:
+        if not gloop._glm.session.pacman.new_direction:
             pD = (-1, 0)
         else:
-            pD = obs._glm.session.pacman.new_direction
+            pD = gloop._glm.session.pacman.new_direction
         direction = [key.name
                      for key in pacman_steps if pacman_steps[key] == pD][0]
         print(direction)
         p_animations = assets.img_assets["pacman"].get_animation(direction)
         p_nextmove = p_animations.pop()
         # print(pm)
-        obs._mlx.pygmlx_put_image_to_window(
+        gloop._mlx.pygmlx_put_image_to_window(
             p_nextmove.img,
-            obs._drawer.next_char_coord(obs._glm
+            gloop._drawer.next_char_coord(
+                                        gloop._glm
                                         .session
                                         .pacman.new_position.cell_position_x),
-            obs._drawer.next_char_coord(obs._glm
+            gloop._drawer.next_char_coord(
+                                        gloop._glm
                                         .session
                                         .pacman
                                         .new_position
-                                        .cell_position_y) + obs._drawer.bottom_h
+                                        .cell_position_y) + gloop._drawer.bottom_h
         )
         if tick % 5:
             p_animations.append(p_nextmove)
@@ -219,33 +229,35 @@ class PlayingAction(IAction):
             p_animations.appendleft(p_nextmove)
 
         # # GHOSTS ###
-        for g in obs._glm.session.ghost_mng.ghosts:
+        for g in gloop._glm.session.ghost_mng.ghosts:
             g_ = assets.img_assets["ghosts"].get_source('ghosts')[g.name]
-            obs._mlx.pygmlx_put_image_to_window(
+            gloop._mlx.pygmlx_put_image_to_window(
                 g_.img,
-                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * obs._glm.session.ghost_mng.ghosts[g].interpolation[0]),
-                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * obs._glm.session.ghost_mng.ghosts[g].interpolation[1]) + obs._drawer.bottom_h
-                obs._drawer.next_char_coord(obs._glm
+                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
+                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._drawer.bottom_h
+                gloop._drawer.next_char_coord(
+                                            gloop._glm
                                             .session
                                             .ghost_mng
                                             .ghosts[g]
                                             .new_position
                                             .cell_position_x),
-                obs._drawer.next_char_coord(obs._glm
+                gloop._drawer.next_char_coord(
+                                            gloop._glm
                                             .session
                                             .ghost_mng
                                             .ghosts[g]
                                             .new_position
-                                            .cell_position_y) + obs._drawer.bottom_h
-                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * obs._glm.session.ghost_mng.ghosts[g].interpolation[0])),
-                # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * obs._glm.session.ghost_mng.ghosts[g].interpolation[1])) + obs._drawer.bottom_h
+                                            .cell_position_y) + gloop._drawer.bottom_h
+                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
+                # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1])) + gloop._drawer.bottom_h
             )
 
-        # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
-        #     obs._mlx.pygmlx_put_image_to_window(
-        #         obs._registry["menus"]["start"][img],
-        #         int(obs._drawer.margin / 2) + 200,
-        #         int(obs._drawer.margin / 2) + obs._drawer.bottom_h + i * 100
+        # for i, img in enumerate(gloop._registry["menus"]["start"].keys()):
+        #     gloop._mlx.pygmlx_put_image_to_window(
+        #         gloop._registry["menus"]["start"][img],
+        #         int(gloop._drawer.margin / 2) + 200,
+        #         int(gloop._drawer.margin / 2) + gloop._drawer.bottom_h + i * 100
         #         )
 
 
@@ -256,7 +268,7 @@ HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
 }
 
 
-class Observer:
+class GameLoop:
     def __init__(self,
                  mlx: PyGMiniLibXEmulator,
                  glm: GameLogicManager,
@@ -306,20 +318,24 @@ class Observer:
             tick: int
     ) -> bool:
         msgs: EventMsg = {}
-        current_assets = getattr(
+        current_assets: Assets = getattr(
             self._registry,
             self._currentstate
             if self._currentstate != "" else "mainmenustate")
         for event in self.event_queue:
             if event.type == pygame.QUIT:
                 return False
-            current_assets.event_handler(event, msgs)
+            img_assets = list(current_assets.img_assets)
+            for iass in img_assets:
+                handler = current_assets.img_assets[iass].event_handler
+                if handler is not None:
+                    handler(event, msgs)
         self._actions(msgs, tick)
         return True
 
     def _get_action(
             self,
             state: IGameState,
-            ) -> Type[T]:
+            ) -> type[IAction]:
         return HANDLER_REGISTRY[type(state)]
 

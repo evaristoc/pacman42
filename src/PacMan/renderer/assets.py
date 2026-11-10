@@ -9,6 +9,7 @@ from src.PacMan.renderer.renderer_engine import (
                             PyMLXPNGEmulator,
                             PyGMLXTextEmulator
 )
+from src.PacMan.renderer.event_handlers import EventMsg
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +43,12 @@ class TextMetadata(ImgMetadata):
 
 @dataclass
 class Source:
+    img: (PyGMLXTextEmulator
+          | PyMLXPNGEmulator
+          | PyGMLXImageEmulator)
     event_name: str = field(default='')
     type: str = field(default='runtime')
     path: Path = field(default_factory=Path)
-    img: (PyGMLXTextEmulator
-          | PyMLXPNGEmulator
-          | PyGMLXImageEmulator) = field(default=PyGMLXImageEmulator)
     metadata: (ImgMetadata | TextMetadata) = field(default_factory=ImgMetadata)
 
 
@@ -58,12 +59,14 @@ Sources: TypeAlias = Source | deque[Source]
 class ImgsAsset:
     asset_name: str = field(default='')
     sources: dict[str, Sources] = field(default_factory=dict)
+    event_handler: Callable[[pygame.event.Event, EventMsg], None] | None = None
 
-    def get_source(self, asset_name: str) -> Source:
-        if isinstance(self.sources[asset_name], Source):
-            return self.sources[asset_name]
-        logger.error(f"Returning wrong source type - {asset_name}")
-        raise SystemExit(1)
+    def get_source(self, event_name: str) -> Source:
+        source = self.sources[event_name]
+        if not isinstance(source, Source):
+            logger.error(f"Returning wrong source type - {event_name}")
+            raise SystemExit(1)
+        return source
 
     def get_animation(
         self,
@@ -80,7 +83,6 @@ class ImgsAsset:
 class Assets:
     state_name: str = field(default='')
     img_assets: dict[str, ImgsAsset] = field(default_factory=dict)
-    event_handler: Callable[[pygame.event.Event], None] | None = None
 
 
 @dataclass
