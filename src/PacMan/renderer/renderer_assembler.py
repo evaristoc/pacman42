@@ -1,141 +1,102 @@
 import logging
-from collections import deque
 from pathlib import Path
-from PIL import Image
-from src.PacMan.renderer.drawer_engine import DrawerEngine
-from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
-from src.PacMan.renderer.drawer_engine import DrawerEngine
-# from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
+from src.PacMan.renderer.assets import ImgsAsset
+from src.PacMan.database.db_mng import DatabaseManager
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
-from src.PacMan.renderer.renderer_engine import (PyGMiniLibXEmulator,
-                                                 PyGMLXImageEmulator,
-                                                 PyMLXPNGEmulator,
-                                                 PyGMLXTextEmulator)
+from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
+from src.PacMan.renderer.asset_factories.imgs_loading_factory import (
+                                            ConfiguratorT,
+                                            BackgroundLoader,
+                                            BoardLoader,
+                                            ImageLoader,
+                                            LivesLoader,
+                                            MenuLoader,
+                                            GhostsLoader,
+                                            PacManLoader)
+from src.PacMan.renderer.asset_factories.text_loading_factory import (
+                                            TextLoader,
+                                            HubTextLoader)
+from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
+
 
 logger = logging.getLogger(__name__)
-
-# REFWITHNOTSETVALUE = -1
-# BOTTOMPARTSCREEN = 5
 
 
 class RendererAssembler:
     def __init__(self, config: ValidBoardConfig) -> None:
         self._config = config
         self.cwd = Path(__file__).resolve().parent
+        self._imgasset_map: dict[str, ImageLoader] = {
+            "background": BackgroundLoader(),
+            "board": BoardLoader(),
+            "lives": LivesLoader(),
+            "menus": MenuLoader(),
+            "ghosts": GhostsLoader(),
+            "pacman": PacManLoader()
+        }
+        self._textasset_map: dict[str, TextLoader] = {
+            'hub': HubTextLoader()
+        }
 
-    # @property
-    # def ref_w(self) -> int:
-    #     return self._reference_w
-
-    # @ref_w.setter
-    # def ref_w(self, val: int) -> None:
-    #     self._reference_w = val
-
-    def init_glm(self) -> GameLogicManager:
+    def init_glm(
+            self,
+            databasemng: DatabaseManager,
+            cheat: bool = False,
+            state: type[IGameState] = InGameState) -> GameLogicManager:
         try:
-            return GameLogicManager(InGameState)
+            return GameLogicManager(databasemng=databasemng,
+                                    friendly_ghosts=cheat,
+                                    start_state=state)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")
-
-    def init_drawer(self) -> DrawerEngine:
-        return DrawerEngine(self._config)
-
-    def init_engine(
-            self,
-            w: int,
-            bottom_h: int
-            ) -> PyGMiniLibXEmulator:
-        return PyGMiniLibXEmulator(w,
-                                   w + bottom_h)        
-        # if self.ref_w == REFWITHNOTSETVALUE:
-        #     logger.exception("FATAL: we could not set ref size.")
-        #     raise SystemExit(1)
-        # return PyGMiniLibXEmulator(w,
-        #                            w + w / BOTTOMPARTSCREEN)
-
-    def init_board(self, w: int) -> PyGMLXImageEmulator:
-        # maze
-        return PyMLXPNGEmulator(
-                    w,
-                    w
-                )
-
-    def upload_imgs(
-            self,
-            folder: str,
-            rsize_w: int | None = None,
-            rsize_h: int | None = None) -> dict[str, PyMLXPNGEmulator]:
-        # assume ref size cannot be negative, but it could...
-        # if self.ref_w == REFWITHNOTSETVALUE:
-        #     logger.exception("FATAL: we could not set ref size.")
-        #     raise SystemExit(1)
-        _assets = self.cwd.parent / 'assets' / folder
-        _dict: dict[str, PyMLXPNGEmulator] = {}
-        try:
-            # this will sort the paths (they are Path types now)
-            sorted_files = sorted(_assets.rglob('*'))
-            print(sorted_files)
-            for file in sorted_files:
-                if not file.is_file():
-                    continue
-                with Image.open(_assets / file) as img:
-                    org_w, org_h = img.size
-                fname = Path(file).stem
-                # print(fname, org_w)
-                emu = PyMLXPNGEmulator(
-                            org_w,
-                            org_h
-                        )
-                emu.pygput_from_png(
-                            str(_assets / file)
-                        )
-                if rsize_w and rsize_h:
-                    emu.pygll_resize(
-                                rsize_w,
-                                rsize_h
-                            )
-                print(file.parts)
-                if "pacman" == file.parts[-2]:
-                    if "moves" not in _dict:
-                        _dict = {
-                            "moves": deque([]),
-                            "still": None
-                        }
-                    if fname == "1":
-                        _dict["still"] = emu
-                    _dict["moves"].append(emu)
-                else:
-                    if fname not in _dict:
-                        _dict[fname] = emu
-            print(_dict)
-            return _dict
-        except Exception as err:
-            logger.exception(f"FATAL: we could not load images : {err}")
             raise SystemExit(1)
 
-    def init_hub_text(
+    def init_drawer(self) -> BoardDrawerEngine:
+        return BoardDrawerEngine()
+
+    def init_engine(self) -> PyGMiniLibXEmulator:
+        if self._config and self._config.size and self._config.hub_panels_prop:
+            return PyGMiniLibXEmulator(self._config.size,
+                                       self._config.size + 2 * int(
+                                        self._config.size /
+                                        self._config.hub_panels_prop
+                                        ))
+        else:
+            logger.error("FATAL: we could not get the size to build "
+                         "the emulator (init_engine)")
+            raise SystemExit(1)
+
+    def img_loader_factdispatcher(
             self,
-            w: int,
-            h: int,
-            msg: str,
-            x: int,
-            y: int,
-            font_path: str = "CONSOLA.TTF",
-            font_size: int = 14,
-            color: int = 0xF6303F,
-            # color: int = 0xffffff
-            ) -> PyGMLXTextEmulator:
-        imgmlxtext = PyGMLXTextEmulator(
-            w,
-            h,
-            font_path,
-            font_size,
-            color)
-        imgmlxtext.pygput_from_text(
-            x,
-            y,
-            msg)
-        return imgmlxtext
+            folder: str,
+            event: ConfiguratorT | None = None
+    ) -> ImgsAsset:
+        if 'live' in folder:
+            return self._imgasset_map['lives'].load(folder, self)
+        if 'background' in folder:
+            return self._imgasset_map['background'].load(folder, self)
+        if 'board' in folder:
+            return self._imgasset_map['board'].load(folder, self, event)
+        if 'menus' in folder:
+            return self._imgasset_map['menus'].load(folder, self, event)
+        if 'ghosts' in folder:
+            return self._imgasset_map['ghosts'].load(folder, self, event)
+        if 'pacman' in folder:
+            return self._imgasset_map['pacman'].load(folder, self, event)
+        return ImgsAsset()
+
+    def text_loader_factdispatcher(
+            self,
+            folder: str,
+            msg: str
+            ) -> ImgsAsset:
+        if 'hub' in folder:
+            return self._textasset_map['hub'].upload_text(
+                folder,
+                msg,
+                self
+            )
+        return ImgsAsset()

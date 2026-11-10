@@ -14,6 +14,10 @@ class PacmanSnapshot:
     next_tile: Tile
 
 
+class PacManError(Exception):
+    pass
+
+
 class Pacman:
     """Represents Pac-Man, the player-controlled character in the game.
 
@@ -91,8 +95,10 @@ class Pacman:
     def _get_spawn_point(self) -> Tile:
         x_coordinate = (self.maze.width - 1) // 2
         y_coordinate = (self.maze.height - 1) - (self.maze.height // 5)
-        return self.maze.return_tile_from_position(position=(x_coordinate,
-                                                             y_coordinate))
+        pos_tuple = (x_coordinate, y_coordinate)
+        new_tile = self.maze.return_tile_from_pos_with_validation(
+            position=pos_tuple)
+        return new_tile
 
     def _move_interpolate(self, delta_ticks: int) -> None:
         if not self.old_position == self.new_position:
@@ -121,12 +127,13 @@ class Pacman:
             old_x = self.old_position.cell_position_x
             old_y = self.old_position.cell_position_y
             new_position = (old_x + dx, old_y + dy)
-            self.new_position = self.maze.return_tile_from_position(
+            self.new_position = self.maze.return_tile_from_pos_with_validation(
                 position=new_position)
         else:
             self.new_position = self.old_position
 
     def pacman_dies(self) -> None:
+        print("Pacman Dies!")
         self.new_position = self.spawn_point
         self.old_position = self.spawn_point
         self.interpolated_position = self.old_position.get_position_from_tile()

@@ -10,13 +10,14 @@ authors = [
 ]
 dependencies = [
     "numpy>=2.4.6",
+    "peewee>=4.5.3",
     "rich==13.0.0",
 ]
 
 [tool.mypy]
 files = ["src"]
 ignore_missing_imports = true
-warn_unused_ignore = true
+warn_unused_ignores = true
 check_untyped_defs = true
 disallow_untyped_defs = true
 strict = false
@@ -35,11 +36,10 @@ req = [
     "mlx",
     "pygame-ce==2.5.8",
     "rich==13.0.0",
-    "pydantic==2.5.0",
-    "fire==0.6.0",
+    "fire==0.7.0",
     "numpy==2.4.6",
-    "Pillow==12.3.0"
-
+    "Pillow==12.3.0",
+    "pydantic==2.14.3",
 ]
 
 dev = [
