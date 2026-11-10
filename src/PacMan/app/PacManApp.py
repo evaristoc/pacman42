@@ -170,4 +170,3 @@ class PacManApp:
                                 self.assembler,
                                 self.assetregistry)
             self.pygmlx.pygmlx_loop(observer)
-

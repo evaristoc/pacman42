@@ -40,26 +40,19 @@ class RendererAssembler:
             'hub': HubTextLoaderStrategy()
         }
 
-    # @property
-    # def ref_w(self) -> int:
-    #     return self._reference_w
-
-    # @ref_w.setter
-    # def ref_w(self, val: int) -> None:
-    #     self._reference_w = val
-
     def init_glm(
             self,
             databasemng: DatabaseManager,
             cheat: bool = False,
-            state: IGameState = InGameState) -> None:
+            state: type[IGameState] = InGameState) -> GameLogicManager:
         try:
-            return GameLogicManager(databasemng=databasemng, 
-                                    friendly_ghosts=cheat, 
+            return GameLogicManager(databasemng=databasemng,
+                                    friendly_ghosts=cheat,
                                     start_state=state)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")
+            raise SystemExit(1)
 
     def init_drawer(self) -> BoardDrawerEngine:
         return BoardDrawerEngine(self._config)
