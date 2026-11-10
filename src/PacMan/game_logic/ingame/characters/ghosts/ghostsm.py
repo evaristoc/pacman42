@@ -1,12 +1,10 @@
 from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
 from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import AIStrategy
+from src.PacMan.app_config.config import EATEN_GHOST_SPEED, CHASING_GHOST_TIME, FRIGHTENED_GHOST_TIME, SCATTER_GHOST_TIME
 from enum import Enum, auto
 import time
 from typing import Union
-
-CHASING_GHOST_TICK_SPEED: int = 1
-FRIGHTENED_GHOST_TICK_SPEED: int = 1
 
 if TYPE_CHECKING:
     from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import Ghost
@@ -45,7 +43,7 @@ class ChasingGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
         self.tick_speed: int = self.context.speed
-        self.frightened_timer: float = time.time() + 15
+        self.frightened_timer: float = time.time() + CHASING_GHOST_TIME
 
     def update(self, *,
                delta_ticks: int,
@@ -72,7 +70,7 @@ class ChasingGhostState(IGhostState):
 class FrightenedGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
-        self.frightened_timer: float = time.time() + 12
+        self.frightened_timer: float = time.time() + FRIGHTENED_GHOST_TIME
         self.tick_speed: int = self.context.speed
 
     def update(self, *,
@@ -99,7 +97,7 @@ class FrightenedGhostState(IGhostState):
 class EatenGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
-        self.tick_speed = 5
+        self.tick_speed = EATEN_GHOST_SPEED
 
     def update(self, *,
                delta_ticks: int,
@@ -123,7 +121,7 @@ class EatenGhostState(IGhostState):
 class ScatterGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
-        self.frightened_timer: float = time.time() + 5
+        self.frightened_timer: float = time.time() + SCATTER_GHOST_TIME
 
     def update(self, *,
                delta_ticks: int,
