@@ -52,7 +52,7 @@ class BackgroundLoaderStrategy(ImageLoaderStrategy):
         if (assembler is None or
                 assembler._config.hub_panels_prop is None or
                 assembler._config.size is None):
-            logger.error("Parameters of bg loader should have a value")
+            logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         else:
             w = assembler._config.size
@@ -98,7 +98,7 @@ class LivesLoaderStrategy(ImageLoaderStrategy):
         if (assembler is None or
                 assembler._config.hub_panels_prop is None or
                 assembler._config.size is None):
-            logger.error("Parameters of lives loader should have a value")
+            logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         _names = [folder.split('/')[-1].upper() for i in range(3)]
@@ -176,7 +176,7 @@ class BoardLoaderStrategy(ImageLoaderStrategy):
                 assembler._config.nb_cells is None and
                 assembler._config.size is None or
                 assembler._config.hub_panels_prop is None):
-            logger.error("Parameters of board loader should have a value")
+            logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         if (isinstance(configurator, BoardDrawerEngine)
                 and assembler._config.size is not None):
@@ -213,7 +213,7 @@ class MenuLoaderStrategy(ImageLoaderStrategy):
                 assembler._config.nb_cells is None and
                 assembler._config.size is None or
                 assembler._config.hub_panels_prop is None):
-            logger.error("Parameters of menu loader should have a value")
+            logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
@@ -245,8 +245,7 @@ class MenuLoaderStrategy(ImageLoaderStrategy):
                 rsize_w = int(org_w * metadata.resize_w_prop)
                 rsize_h = int(org_h * metadata.resize_h_prop)
                 if assembler._config.size is not None:
-                    metadata.x_pos_prop = ((assembler._config.size / 2)
-                                           - int(rsize_w / 2))
+                    metadata.x_pos_prop = (int(assembler._config.size / 2) - int(rsize_w / 2))
                     metadata.y_pos_prop = (int(assembler._config.size /
                                                assembler
                                                ._config.hub_panels_prop))
@@ -287,7 +286,7 @@ class GhostsLoaderStrategy(ImageLoaderStrategy):
                 assembler._config.nb_cells is None and
                 assembler._config.size is None or
                 assembler._config.hub_panels_prop is None):
-            logger.error("Parameters of menu loader should have a value")
+            logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
@@ -358,7 +357,7 @@ class PacManLoaderStrategy(ImageLoaderStrategy):
                 assembler._config.nb_cells is None and
                 assembler._config.size is None or
                 assembler._config.hub_panels_prop is None):
-            logger.error("Parameters of menu loader should have a value")
+            logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         print(folder, vars(configurator))

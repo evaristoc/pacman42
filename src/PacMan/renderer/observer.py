@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import pygame
 from pygame import Event
 from typing import TypeVar, Type, Any, Protocol, TYPE_CHECKING
@@ -17,6 +18,9 @@ if TYPE_CHECKING:  # only required for parameter type assignment
     from src.PacMan.renderer.event_handlers import EventMsg
     from src.PacMan.renderer.renderer_assembler import RendererAssembler
 
+logger = logging.getLogger(__name__)
+
+
 T = TypeVar("T", bound="IAction")
 
 
@@ -24,97 +28,16 @@ class IAction(Protocol):
     def action(
             self,
             obs: "Observer",
-            state: str,
             tick: int
             ) -> None:
         ...
 
     def _init_state(
             self,
-            obs: "Observer"             
+            obs: "Observer"
     ) -> None:
         ...
 
-
-# class PlayingActionPacman:
-#     def action(
-#             self,
-#             obs: "Observer"
-#             ) -> None:
-#         print(f"this is {self.__class__.__name__}")
-#         print(obs._registry)
-#         print(obs._glm.character_manager.pacman.position)
-#         print(obs._glm.character_manager.ghost_mng.ghosts)
-#         # # PACMAN ###
-#         pm = obs._registry["pacman"]["moves"].pop()
-#         obs._mlx.pygmlx_put_image_to_window(
-#             pm,
-#             obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[0]),
-#             obs._drawer.next_char_coord(obs._glm.character_manager.pacman.position[1]) + obs._drawer.bottom_h
-#         )
-#         obs._registry["pacman"]["moves"].append(pm)  # ALWAYS
-
-#         # # GHOSTS ###
-#         # for g in obs._glm.character_manager.ghost_mng.ghosts:
-#         #     obs._mlx.pygmlx_put_image_to_window(
-#         #         obs._registry["ghosts"][g.name],
-#         #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
-#         #         obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
-#         #     )
-
-
-# class PlayingActionGhosts:
-#     def action(
-#             self,
-#             obs: "Observer"
-#             ) -> None:
-#         # GHOSTS ###
-#         for g in obs._glm.character_manager.ghost_mng.ghosts:
-#             obs._mlx.pygmlx_put_image_to_window(
-#                 obs._registry["ghosts"][g.name],
-#                 obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[0]),
-#                 obs._drawer.next_char_coord(obs._glm.character_manager.ghost_mng.ghosts[g].position[1]) + obs._drawer.bottom_h
-#             )
-
-
-# class PlayingActionBoard:
-#     def action(
-#             self,
-#             obs: "Observer"
-#             ) -> None:
-#         # INTERIOR CELLS ###
-#         # -- pacman --
-#         obs._drawer.draw_cell_interior(
-#             obs._registry["board"],
-#             obs._glm.character_manager.pacman.old_position,
-#             0x000
-#         )
-#         # -- ghosts --
-#         for g in obs._glm.character_manager.ghost_mng.ghosts:
-#             obs._drawer.draw_cell_interior(
-#                 obs._registry["board"],
-#                 obs._glm.character_manager.ghost_mng.ghosts[g].old_position,
-#                 0x000
-#             )
-#         obs._mlx.pygmlx_put_image_to_window(
-#             obs._registry["board"],
-#             obs._drawer.margin / 2,
-#             obs._drawer.margin / 2 + obs._drawer.bottom_h
-#         )
-#         # MENUS ###
-#         # # -- hub --
-#         # obs._mlx.pygmlx_put_image_to_window(
-#         #     obs._registry["menus"]["hub"],
-#         #     obs._drawer.margin / 2,
-#         #     obs._drawer.margin / 2 + obs._mlx.height
-#         # )
-
-#         # for i, img in enumerate(obs._registry["menus"]["start"].keys()):
-#         #     obs._mlx.pygmlx_put_image_to_window(
-#         #         obs._registry["menus"]["start"][img],
-#         #         int(obs._drawer.margin / 2) + 200,
-#         #         int(obs._drawer.margin / 2) + obs._drawer.bottom_h + i * 100
-#         #         ) 
 
 class MainMenuAction(IAction):
     def action(
@@ -122,6 +45,7 @@ class MainMenuAction(IAction):
             obs: Observer,
             tick: int
     ) -> None:
+        _ = tick
         if obs._statechanged:
             self._init_state(obs)
 
@@ -129,22 +53,30 @@ class MainMenuAction(IAction):
             self,
             obs: Observer
     ) -> None:
-        background = obs._mlx.pygmlx_new_image(
-            obs._mlx.view_w,
-            obs._mlx.view_h
-        )
-        obs._mlx.pygmlx_put_image_to_window(
-            background,
-            0,
-            0
-        )
-        print(list(obs._registry.mainmenustate.img_assets['main'].sources.keys()))
-        for s in obs._registry.mainmenustate.img_assets['main'].sources.values():
-            obs._mlx.pygmlx_put_image_to_window(
-                s.img,
-                s.metadata.x_pos_prop,
-                s.metadata.y_pos_prop
+        try:
+            background = obs._mlx.pygmlx_new_image(
+                obs._mlx.view_w,
+                obs._mlx.view_h
             )
+            obs._mlx.pygmlx_put_image_to_window(
+                background,
+                0,
+                0
+            )
+            buttons = list(obs._registry.mainmenustate.img_assets['main']
+                           .sources.keys())
+            for button in buttons:
+                b_ = obs._registry.mainmenustate.img_assets['main']\
+                    .get_source(button)
+                if b_.metadata and b_.metadata.x_pos_prop is not None and b_.metadata.y_pos_prop is not None:
+                    obs._mlx.pygmlx_put_image_to_window(
+                        b_.img,
+                        b_.metadata.x_pos_prop,
+                        b_.metadata.y_pos_prop
+                    )
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
 
 
 class PlayingAction(IAction):
@@ -170,36 +102,41 @@ class PlayingAction(IAction):
 
     def _init_state(
             self,
-            obs: "Observer"  
+            obs: "Observer"
     ) -> None:
-        background = obs._registry.init.img_assets['background'].sources['background']
+        bg_ = obs._registry.init.img_assets['background']\
+                                            .get_source('background')
         obs._mlx.pygmlx_put_image_to_window(
-            background.img,
+            bg_.img,
             0,
             0
         )
         assets = obs._registry.ingamestate
         # snapshot: GLMSnapshot = obs._glm.view()
         # print(assets.img_assets["board"].sources)
-        board_asset = assets.img_assets["board"].sources["board"]
-        obs._drawer.draw(board_asset.img,
-                         obs._glm.session.maze.grid,
-                         None)
-        obs._mlx.pygmlx_put_image_to_window(
-            board_asset.img,
-            board_asset.metadata.x_pos_prop,
-            board_asset.metadata.y_pos_prop
-            )
+        board_ = assets.img_assets["board"].get_source('board')
+        obs._drawer.draw(
+                    board_.img,
+                    obs._glm.session.maze.grid,
+                    None)
+        if board_.metadata and board_.metadata.x_pos_prop is not None and board_.metadata.y_pos_prop is not None:
+            obs._mlx.pygmlx_put_image_to_window(
+                board_.img,
+                board_.metadata.x_pos_prop,
+                board_.metadata.y_pos_prop
+                )
         level = obs._glm.scoremng.player.level
         hub_bottom: ImgsAsset = obs._assembler.text_loader_dispatcher(
             "bottom_hub",
             "Level: {:>3}".format(str(level)),
             )
-        obs._mlx.pygmlx_put_image_to_window(
-            hub_bottom.sources['bottom_hub'].img,
-            hub_bottom.sources['bottom_hub'].metadata.x_pos_prop,
-            hub_bottom.sources['bottom_hub'].metadata.y_pos_prop
-        )
+        hb_ = hub_bottom.get_source("bottom_hub")
+        if hb_.metadata and hb_.metadata.x_pos_prop is not None and hb_.metadata.y_pos_prop is not None:
+            obs._mlx.pygmlx_put_image_to_window(
+                hb_.img,
+                hb_.metadata.x_pos_prop,
+                hb_.metadata.y_pos_prop
+            )
 
     def _update_state(
             self,
@@ -210,9 +147,9 @@ class PlayingAction(IAction):
         snapshot: GLMSnapshot = obs._glm.view()
         # INTERIOR CELLS ###
         # -- pacman --
-        board_asset = assets.img_assets["board"].sources["board"]
+        board_ = assets.img_assets["board"].get_source('board')
         obs._drawer.draw_cell_interior(
-            board_asset.img,
+            board_.img,
             obs._glm.session.pacman.new_position,
             0xff000000
         )
@@ -225,15 +162,16 @@ class PlayingAction(IAction):
         #     )
         for g in obs._glm.session.ghost_mng.ghosts:
             obs._drawer.draw_cell_interior(
-                board_asset.img,
+                board_.img,
                 obs._glm.session.ghost_mng.ghosts[g].new_position,
                 0xff000000
             )
-        obs._mlx.pygmlx_put_image_to_window(
-            board_asset.img,
-            board_asset.metadata.x_pos_prop,
-            board_asset.metadata.y_pos_prop
-        )
+        if board_.metadata and board_.metadata.x_pos_prop is not None and board_.metadata.y_pos_prop is not None:
+            obs._mlx.pygmlx_put_image_to_window(
+                board_.img,
+                board_.metadata.x_pos_prop,
+                board_.metadata.y_pos_prop
+            )
         # MENUS ###
         # # -- hub --
         score = obs._glm.scoremng.player.score
@@ -245,11 +183,13 @@ class PlayingAction(IAction):
                     str(score),
                     str(snapshot.countdown_time)),
             )
-            obs._mlx.pygmlx_put_image_to_window(
-                hub_top.sources['top_hub'].img,
-                hub_top.sources['top_hub'].metadata.x_pos_prop,
-                hub_top.sources['top_hub'].metadata.y_pos_prop
-            )      
+            ht_ = hub_top.get_source("top_hub")
+            if ht_.metadata and ht_.metadata.x_pos_prop is not None and ht_.metadata.y_pos_prop is not None:
+                obs._mlx.pygmlx_put_image_to_window(
+                    ht_.img,
+                    ht_.metadata.x_pos_prop,
+                    ht_.metadata.y_pos_prop
+                )      
         # # PACMAN ###
         pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
         if not obs._glm.session.pacman.new_direction:
@@ -259,26 +199,44 @@ class PlayingAction(IAction):
         direction = [key.name
                      for key in pacman_steps if pacman_steps[key] == pD][0]
         print(direction)
-        pm = assets.img_assets["pacman"].sources[direction].pop()
+        p_animations = assets.img_assets["pacman"].get_animation(direction)
+        p_nextmove = p_animations.pop()
         # print(pm)
         obs._mlx.pygmlx_put_image_to_window(
-            pm.img,
-            obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_x),
-            obs._drawer.next_char_coord(obs._glm.session.pacman.new_position.cell_position_y) + obs._drawer.bottom_h
+            p_nextmove.img,
+            obs._drawer.next_char_coord(obs._glm
+                                        .session
+                                        .pacman.new_position.cell_position_x),
+            obs._drawer.next_char_coord(obs._glm
+                                        .session
+                                        .pacman
+                                        .new_position
+                                        .cell_position_y) + obs._drawer.bottom_h
         )
         if tick % 5:
-            assets.img_assets["pacman"].sources[direction].append(pm)
+            p_animations.append(p_nextmove)
         else:
-            assets.img_assets["pacman"].sources[direction].appendleft(pm)
+            p_animations.appendleft(p_nextmove)
 
         # # GHOSTS ###
         for g in obs._glm.session.ghost_mng.ghosts:
+            g_ = assets.img_assets["ghosts"].get_source('ghosts')[g.name]
             obs._mlx.pygmlx_put_image_to_window(
-                assets.img_assets["ghosts"].sources[g.name].img,
+                g_.img,
                 # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * obs._glm.session.ghost_mng.ghosts[g].interpolation[0]),
                 # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * obs._glm.session.ghost_mng.ghosts[g].interpolation[1]) + obs._drawer.bottom_h
-                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x),
-                obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + obs._drawer.bottom_h
+                obs._drawer.next_char_coord(obs._glm
+                                            .session
+                                            .ghost_mng
+                                            .ghosts[g]
+                                            .new_position
+                                            .cell_position_x),
+                obs._drawer.next_char_coord(obs._glm
+                                            .session
+                                            .ghost_mng
+                                            .ghosts[g]
+                                            .new_position
+                                            .cell_position_y) + obs._drawer.bottom_h
                 # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * obs._glm.session.ghost_mng.ghosts[g].interpolation[0])),
                 # obs._drawer.next_char_coord(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(obs._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * obs._glm.session.ghost_mng.ghosts[g].interpolation[1])) + obs._drawer.bottom_h
             )
@@ -305,7 +263,7 @@ class Observer:
                  drawer: BoardDrawerEngine,
                  assembler: RendererAssembler,
                  assetregistry: AssetRegistry) -> None:
-        self._registry = assetregistry
+        self._registry: AssetRegistry = assetregistry
         self._mlx = mlx
         self._glm = glm
         self._drawer = drawer
@@ -315,12 +273,6 @@ class Observer:
         self._currentlevel: int = 0
         self._levelchanged: bool = False
         self.event_queue: list[Event] = []
-
-    def register_assets(self, key: str, asset: dict[str, Any]) -> None:
-        if not self._registry:
-            self._registry = {}
-        # print(asset)
-        self._registry[key] = asset
 
     def _actions(self,
                  msgs: EventMsg | None,

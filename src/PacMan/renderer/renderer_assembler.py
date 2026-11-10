@@ -1,13 +1,10 @@
 import logging
 from pathlib import Path
-from src.PacMan.validation_contracts.event_enums import (
-                                            IEventEnums)
 from src.PacMan.validation_contracts.valid_game_config import ValidBoardConfig
 from src.PacMan.renderer.assets import ImgsAsset
-# from src.PacMan.game_logic.maze.maze import Maze, MazeFactory
+from src.PacMan.renderer.strategies.imgs_loading_strategies import ConfiguratorT
 from src.PacMan.database.db_mng import DatabaseManager
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
-from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostName
 from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
 from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
 from src.PacMan.renderer.strategies.imgs_loading_strategies import (
@@ -77,7 +74,7 @@ class RendererAssembler:
     def img_loader_dispatcher(
             self,
             folder: str,
-            event: GhostName | IEventEnums | None
+            event: ConfiguratorT | None = None
     ) -> ImgsAsset:
         if 'live' in folder:
             return self._imgstrategies['lives'].load(folder, self)
