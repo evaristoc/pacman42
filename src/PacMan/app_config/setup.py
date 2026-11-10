@@ -4,7 +4,7 @@ from rich.logging import RichHandler
 
 def setup() -> None:
     logging.basicConfig(
-        level=getattr(logging, 'DEBUG', logging.DEBUG),
+        level=getattr(logging, 'ERROR', logging.DEBUG),
         # stream=sys.stdout,
         handlers=[RichHandler(rich_tracebacks=True,
                               markup=False)],

@@ -72,21 +72,6 @@ class AIStrategy(ABC):
         start: tuple[int, int],
         target: tuple[int, int]
     ) -> tuple[int, int]:
-        """Calculate the next move toward a target position using pathfinding.
-
-        Uses A* or BFS to find the shortest path, accounting for maze walls and
-        obstacles. This shared utility is used by multiple ghost strategies and
-        by the spawn-return behavior.
-
-        Args:
-            start: The starting (x, y) position.
-            target: The target (x, y) position to pathfind toward.
-
-        Returns:
-            A direction vector (dx, dy) representing the first step of the 
-            path.
-        """
-
         return AStar_next_move(position=start, target=target, maze=self.maze)
 
 
@@ -148,12 +133,15 @@ class InkyAI(AIStrategy):
         """Inky-specific chase logic."""
         pos_x, pos_y = pacman_pos
         dir_x, dir_y = pacman_direction
+        temp_tile: Tile | None = None
         for x in range(3, -1, -1):
-            temp_tile: Tile | None = self.maze.return_tile_from_position(
+            temp_tile = self.maze.return_tile_from_position(
                 position=((pos_x + (dir_x * x)), (pos_y + (dir_y * x))))
             if temp_tile:
-                origin = temp_tile.get_position_from_tile()
                 break
+        if not temp_tile:
+            raise RuntimeError("Problem while getting origin for triangulation.")
+        origin: tuple[int, int] = temp_tile.get_position_from_tile()
         blinky_pos = self.blinky.new_position.get_position_from_tile()
         vector_O_to_blinky = (
             (blinky_pos[0] - origin[0]), (blinky_pos[1] - origin[1]))
@@ -186,7 +174,7 @@ class ClydeAI(AIStrategy):
         pacman_direction: tuple[int, int]
     ) -> tuple[int, int]:
         distance = self._distance(ghost_pos, pacman_pos)
-        if distance < 3:
+        if distance < 4:
             return self.return_to_spawn(ghost_pos=ghost_pos)
         else:
             return AStar_next_move(position=ghost_pos,

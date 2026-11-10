@@ -1,4 +1,5 @@
 {
-    "size": 500,
-    "nb_cells": 10
+    "size": 550,
+    "hub_panels_prop": 5,
+    "cheat": 1
 }
