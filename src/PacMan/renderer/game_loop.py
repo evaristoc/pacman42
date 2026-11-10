@@ -11,8 +11,8 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 MainMenuState,
                                                 InGameState,
                                                 GameOverPlayerLost)
-if TYPE_CHECKING:  # only required for parameter type assignment 
-    from src.PacMan.renderer.drawer_engine import BoardDrawerEngine   
+if TYPE_CHECKING:  # only required for parameter type assignment
+    from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
     from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
     from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
     from src.PacMan.renderer.event_handlers import EventMsg
@@ -144,7 +144,7 @@ class PlayingAction(IAction):
                 hb_.metadata.x_pos_prop,
                 hb_.metadata.y_pos_prop
             )
-        
+
     def _update_state(
             self,
             gloop: GameLoop,
@@ -192,12 +192,13 @@ class PlayingAction(IAction):
                     str(snapshot.countdown_time)),
             )
             ht_ = hub_top.get_source("top_hub")
-            if ht_.metadata and ht_.metadata.x_pos_prop is not None and ht_.metadata.y_pos_prop is not None:
+            if (ht_.metadata and ht_.metadata.x_pos_prop is not None
+                    and ht_.metadata.y_pos_prop is not None):
                 gloop._mlx.pygmlx_put_image_to_window(
                     ht_.img,
                     ht_.metadata.x_pos_prop,
                     ht_.metadata.y_pos_prop
-                )      
+                )
         # # PACMAN ###
         pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
         if not gloop._glm.session.pacman.new_direction:
@@ -213,15 +214,15 @@ class PlayingAction(IAction):
         gloop._mlx.pygmlx_put_image_to_window(
             p_nextmove.img,
             gloop._drawer.next_char_coord(
-                                        gloop._glm
-                                        .session
-                                        .pacman.new_position.cell_position_x),
+                            gloop._glm
+                            .session
+                            .pacman.new_position.cell_position_x),
             gloop._drawer.next_char_coord(
-                                        gloop._glm
-                                        .session
-                                        .pacman
-                                        .new_position
-                                        .cell_position_y) + gloop._drawer.bottom_h
+                            gloop._glm
+                            .session
+                            .pacman
+                            .new_position
+                            .cell_position_y) + gloop._drawer.bottom_h
         )
         if tick % 5:
             p_animations.append(p_nextmove)
@@ -233,32 +234,24 @@ class PlayingAction(IAction):
             g_ = assets.img_assets["ghosts"].get_source('ghosts')[g.name]
             gloop._mlx.pygmlx_put_image_to_window(
                 g_.img,
+                gloop._drawer.next_char_coord(
+                            gloop._glm
+                            .session
+                            .ghost_mng
+                            .ghosts[g]
+                            .new_position
+                            .cell_position_x),
+                gloop._drawer.next_char_coord(
+                            gloop._glm
+                            .session
+                            .ghost_mng
+                            .ghosts[g]
+                            .new_position
+                            .cell_position_y) + gloop._drawer.bottom_h)
                 # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
                 # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._drawer.bottom_h
-                gloop._drawer.next_char_coord(
-                                            gloop._glm
-                                            .session
-                                            .ghost_mng
-                                            .ghosts[g]
-                                            .new_position
-                                            .cell_position_x),
-                gloop._drawer.next_char_coord(
-                                            gloop._glm
-                                            .session
-                                            .ghost_mng
-                                            .ghosts[g]
-                                            .new_position
-                                            .cell_position_y) + gloop._drawer.bottom_h
                 # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
                 # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1])) + gloop._drawer.bottom_h
-            )
-
-        # for i, img in enumerate(gloop._registry["menus"]["start"].keys()):
-        #     gloop._mlx.pygmlx_put_image_to_window(
-        #         gloop._registry["menus"]["start"][img],
-        #         int(gloop._drawer.margin / 2) + 200,
-        #         int(gloop._drawer.margin / 2) + gloop._drawer.bottom_h + i * 100
-        #         )
 
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
@@ -294,18 +287,14 @@ class GameLoop:
         snapshot = self._glm.view()
         # print(snapshot.session.timemng)
         if isinstance(self._glm.state, IGameState):
-            if self._glm.state.__class__.__name__.lower() != self._currentstate:
+            if (self._glm.state.__class__.__name__.lower()
+                    != self._currentstate):
                 self._currentstate = self._glm.state.__class__.__name__.lower()
                 self._statechanged = True
             if snapshot.player.level != self._currentlevel:
                 self._currentlevel = snapshot.player.level
                 self._levelchanged = True
             print(self._statechanged)
-            # if self._glm.state.__class__.__name__.lower() == 'gameoverplayerlost':
-            #     self._currentlevel = 1
-            #     self._currentstate = 'ingamestate'
-            #     self._levelchanged = False
-            #     self._statechanged = False
             self._get_action(state=self._glm.state)().action(
                                             self,
                                             tick
@@ -338,4 +327,3 @@ class GameLoop:
             state: IGameState,
             ) -> type[IAction]:
         return HANDLER_REGISTRY[type(state)]
-

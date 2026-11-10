@@ -1,4 +1,3 @@
-import sys
 import logging
 from collections import deque
 from abc import ABC, abstractmethod
@@ -245,7 +244,8 @@ class MenuLoaderStrategy(ImageLoaderStrategy):
                 rsize_w = int(org_w * metadata.resize_w_prop)
                 rsize_h = int(org_h * metadata.resize_h_prop)
                 if assembler._config.size is not None:
-                    metadata.x_pos_prop = (int(assembler._config.size / 2) - int(rsize_w / 2))
+                    metadata.x_pos_prop = (
+                        int(assembler._config.size / 2) - int(rsize_w / 2))
                     metadata.y_pos_prop = (int(assembler._config.size /
                                                assembler
                                                ._config.hub_panels_prop))
@@ -297,7 +297,8 @@ class GhostsLoaderStrategy(ImageLoaderStrategy):
             else:
                 raise
         except Exception as err:
-            logger.exception(f"FATAL: a specific configurator type is required : {err}")
+            logger.exception("FATAL: a specific configurator type is required"
+                             f" : {err}")
             raise SystemExit(1)
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         try:
@@ -305,7 +306,8 @@ class GhostsLoaderStrategy(ImageLoaderStrategy):
                 print(folder, stem)
                 path = _assets / Path(stem + '.png')
                 if not path.is_file():
-                    logger.exception(f"FATAL: we could not load image : {path}")
+                    logger.exception("FATAL: we could not load image"
+                                     f" : {path}")
                     raise SystemExit(1)
                 with Image.open(path) as imgf:
                     org_w, org_h = imgf.size

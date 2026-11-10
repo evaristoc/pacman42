@@ -76,7 +76,7 @@ class PyGMiniLibXEmulator:
     #                       text: str,
     #                       ttf: str = 'CONSOLA.TTF') -> None:
     #     """
-    #     Renders text directly onto the image buffer using Pillow, 
+    #     Renders text directly onto the image buffer using Pillow,
     #     matching your existing image manipulation workflow.
     #     """
     #     # Convert integer color (0xRRGGBB) to an RGBA tuple
@@ -225,7 +225,8 @@ class PyGMLXTextEmulator(PyGMLXImageEmulator):
         color: int = 0xFFFFFF
     ) -> None:
         super().__init__(width, height)
-        self.font_path = "src/PacMan/assets/fonts/" + font_path  # as it runs from root...
+        # as it runs from root...
+        self.font_path = "src/PacMan/assets/fonts/" + font_path
         self.font_size = font_size
         self.color = color
         self.font: ImageFont.FreeTypeFont | ImageFont.ImageFont

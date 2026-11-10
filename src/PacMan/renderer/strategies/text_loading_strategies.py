@@ -8,7 +8,8 @@ from src.PacMan.renderer.assets import (
                                 )
 from src.PacMan.renderer.renderer_engine import (
                                     PyGMLXTextEmulator)
-if TYPE_CHECKING:  # only required for parameter type assignment 
+# only required for parameter type assignment
+if TYPE_CHECKING:
     from src.PacMan.renderer.renderer_assembler import RendererAssembler
 
 

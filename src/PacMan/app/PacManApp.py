@@ -10,8 +10,6 @@ from src.PacMan.renderer.renderer_assembler import RendererAssembler
 from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
 from src.PacMan.renderer.assets import (
                                 ImgsAsset,
-                                ImgMetadata,
-                                TextMetadata,
                                 Assets,
                                 AssetRegistry)
 from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager

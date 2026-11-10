@@ -13,6 +13,7 @@ from src.PacMan.renderer.event_handlers import EventMsg
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ImgMetadata:
     x_pos_prop:  int | None = field(default=None)

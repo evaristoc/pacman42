@@ -1,6 +1,5 @@
 import logging
 from typing import cast, Any
-from pydantic import ValidationError
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidBoardConfig)
 from src.PacMan.renderer.renderer_engine import PyGMLXImageEmulator
@@ -91,7 +90,7 @@ class BoardDrawerEngine:
         #     logger.error(f"FATAL: this nb of cells: {val} is not "
         #                  "in the accepted range (check contracts)")
         #     raise SystemExit(1)
-    
+
     @property
     def tot_cell_size(self) -> tuple[int, str]:
         return (
@@ -129,7 +128,7 @@ class BoardDrawerEngine:
 
     @property
     def margin(self) -> int:
-        return int(self.corrected_size[1] / 2 )
+        return int(self.corrected_size[1] / 2)
 
     @property
     def resized(self) -> int:
@@ -191,7 +190,8 @@ class BoardDrawerEngine:
         y_area = inter
         for dy in range(y_area):
             for dx in range(x_area):
-                if start_x + dx < self.__corrected_size and start_y + dy < self.__corrected_size:
+                if (start_x + dx < self.__corrected_size
+                        and start_y + dy < self.__corrected_size):
                     target_img.pygput_pixel(start_x + dx, start_y + dy, color)
         if cell.has_pellet():
             self.__draw_pellet(target_img, cell, color=0xffffff)
@@ -218,7 +218,7 @@ class BoardDrawerEngine:
         for dx in range(total):
             for dy in range(total):
                 if ((dx - center_x)**2 + (dy - center_y)**2) < radius:
-                    target_img.pygput_pixel(start_x + dx, start_y + dy, color) 
+                    target_img.pygput_pixel(start_x + dx, start_y + dy, color)
 
     def __draw_cell_walls(
         self,
@@ -241,14 +241,16 @@ class BoardDrawerEngine:
         if cell.wall_north.value != 1:
             for dx in range(total):
                 for dy in range(wall):
-                    if start_x + dx < self.__corrected_size and start_y + dy < self.__corrected_size:
+                    if (start_x + dx < self.__corrected_size
+                            and start_y + dy < self.__corrected_size):
                         target_img.pygput_pixel(start_x + dx,
                                                 start_y + dy,
                                                 color)
         if cell.wall_west.value != 1:
             for dx in range(wall):
                 for dy in range(total):
-                    if start_x + dx < self.__corrected_size and start_y + dy < self.__corrected_size:
+                    if (start_x + dx < self.__corrected_size
+                            and start_y + dy < self.__corrected_size):
                         target_img.pygput_pixel(start_x + dx,
                                                 start_y + dy,
                                                 color)
@@ -256,7 +258,8 @@ class BoardDrawerEngine:
             wall_x = start_x + inter + wall
             for dx in range(wall):
                 for dy in range(total):
-                    if wall_x + dx < self.__corrected_size and start_y + dy < self.__corrected_size:
+                    if (wall_x + dx < self.__corrected_size
+                            and start_y + dy < self.__corrected_size):
                         target_img.pygput_pixel(wall_x + dx,
                                                 start_y + dy,
                                                 color)
@@ -264,8 +267,8 @@ class BoardDrawerEngine:
             wall_y = start_y + inter + wall
             for dy in range(wall):
                 for dx in range(total):
-                    if start_x + dx < self.__corrected_size and wall_y + dy < self.__corrected_size:
+                    if (start_x + dx < self.__corrected_size
+                            and wall_y + dy < self.__corrected_size):
                         target_img.pygput_pixel(start_x + dx,
                                                 wall_y + dy,
                                                 color)
-
