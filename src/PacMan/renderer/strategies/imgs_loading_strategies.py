@@ -257,6 +257,7 @@ class MenuLoaderStrategy(ImageLoaderStrategy):
                             rsize_h
                         )
                 source = Source(
+                    event_name=stem,
                     path=path,
                     img=img,
                     metadata=metadata,

@@ -1,20 +1,21 @@
 import pygame
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, TYPE_CHECKING
 from src.PacMan.validation_contracts.event_enums import (
                                         IEventEnums,
                                         InGameEvents,
                                         MainMenuEvents,
                                         PauseMenuEvents)
-from src.PacMan.renderer.assets import (
-                                    ImgsAsset
-)
+if TYPE_CHECKING:
+    from src.PacMan.renderer.assets import (
+                                        ImgsAsset
+    )
 
 EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 
 
 EVENT_REGISTRY: dict[str, type[IEventEnums]] = {
-    "main": MainMenuEvents,
-    "pause": PauseMenuEvents
+    "START": MainMenuEvents,
+    "PAUSE": PauseMenuEvents
 }
 
 
@@ -60,7 +61,7 @@ def menuwithexit_eh(
                                    start_x,
                                    start_y):
                     if sk.event_name == 'EXIT':
-                        SystemExit(0)
+                        raise SystemExit(0)
                     msgs[getattr(EVENT_REGISTRY[sk.event_name],
                                  sk.event_name)] = None
                     break

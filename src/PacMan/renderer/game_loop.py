@@ -231,7 +231,7 @@ class PlayingAction(IAction):
 
         # # GHOSTS ###
         for g in gloop._glm.session.ghost_mng.ghosts:
-            g_ = assets.img_assets["ghosts"].get_source('ghosts')[g.name]
+            g_ = assets.img_assets["ghosts"].get_source(g.name)
             gloop._mlx.pygmlx_put_image_to_window(
                 g_.img,
                 gloop._drawer.next_char_coord(
