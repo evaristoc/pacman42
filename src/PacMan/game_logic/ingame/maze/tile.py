@@ -86,10 +86,10 @@ class Tile:
         self._tilebyte = tilebyte
 
     def view(self) -> TileSnapshot:
-        walls = {'N': self.wall_north.name,
-                 'E': self.wall_east.name,
-                 'S': self.wall_south.name,
-                 'W': self.wall_west.name}
+        walls = {'N': self.wall_north.value,
+                 'E': self.wall_east.value,
+                 'S': self.wall_south.value,
+                 'W': self.wall_west.value}
         return TileSnapshot(open_walls=walls, pellet_state=self.pellet_state.name)
 
     def get_open_walls(self) -> list[tuple[int, int]]:

@@ -99,17 +99,17 @@ class InstructionsMenuState(IGameState):
             if event == InstructionMenuEvents.RETURN:
                 return MainMenuState(self.context)
 
-#         return None
+        return None
 
     @staticmethod
     def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums | None:
         priority_order = [InstructionMenuEvents.RETURN]
 
-#         for event in priority_order:
-#             if event in events:
-#                 return event
-#         return list(events.keys())[0]
+        for event in priority_order:
+            if event in events:
+                return event
+        return list(events.keys())[0]
 
 
 class HighScoreMenuState(IGameState):
@@ -205,12 +205,12 @@ class InGameState(IGameState):
     @staticmethod
     def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums | None:
-        priority_order = [InGameEvents.PAUSE,
+        priority_order = [InGameEvents.LEVEL_SKIP,
+                          InGameEvents.PAUSE,
                           InGameEvents.PACMAN_NORTH,
                           InGameEvents.PACMAN_EAST,
                           InGameEvents.PACMAN_SOUTH,
                           InGameEvents.PACMAN_WEST]
-
         for event in priority_order:
             if event in events:
                 return event
@@ -225,6 +225,15 @@ class InGameState(IGameState):
                                               pacman_move=self.PACMAN_STEPS.get(event))
         elif event == InGameEvents.PAUSE:
             return PauseMenuState(self.context)
+
+        elif event == InGameEvents.LEVEL_SKIP:
+            if self.context.level_skip:
+                if not self.context.final_level():
+                    return self._increment_level()
+                else:
+                    return GameOverPlayerWon(self.context)
+            else:
+                return None
         else:
             raise ValueError(f"Passed invalid event: {event} to"
                              " InGameState._process_event_enums.")
@@ -264,6 +273,7 @@ class GameOverPlayerLost(IGameState):
     def __init__(self, context: "GameLogicManager"):
         super().__init__(context=context)
         self._timer: float = time.time() + GAME_OVER_CD_TIME
+
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
                      delta_ticks: int

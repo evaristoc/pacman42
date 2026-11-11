@@ -383,6 +383,7 @@ class PacManLoader(ImageLoader):
         try:
             _names = getattr(configurator, '_member_names_')[:]
             _names.remove('PAUSE')
+            _names.remove('LEVEL_SKIP')
             _temp_sources: list[Source] = []
             _files = [f'{n}-{str(v)}' for v in range(1, 4, 1) for n in _names]
         except Exception as err:

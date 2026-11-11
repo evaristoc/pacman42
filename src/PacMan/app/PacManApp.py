@@ -71,6 +71,7 @@ class PacManApp:
             self.dbm = create_database_mng()
             self.glm = self.assembler.init_glm(self.dbm,
                                                self.assembler._config.cheat,
+                                               self.assembler._config.level_skip,
                                                MainMenuState)
             nb_cells = MAZE_NR_CELLS
             self.assembler._config = self.assembler._config.model_copy(

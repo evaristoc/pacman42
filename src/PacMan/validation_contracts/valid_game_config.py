@@ -6,6 +6,7 @@ class ValidBoardConfig(BaseModel):
     nb_cells: int = Field(default=5, ge=5, le=30)
     hub_panels_prop: int = Field(default=5, ge=0, le=5)
     size: int = Field(default=500, ge=500, le=1000)
+    level_skip: bool = Field(default=False)
 
 
 class ValidAppEntriesConfig(BaseModel):
@@ -19,6 +20,7 @@ class ValidAppEntriesConfig(BaseModel):
                 "cheat": data.get("cheat"),
                 "size": data.get("size"),
                 # "nb_cells": data.get("nb_cells"),
-                "hub_panels_prop": data.get("hub_panels_prop")
+                "hub_panels_prop": data.get("hub_panels_prop"),
+                "level_skip": data.get("level_skip")
             }
         return data

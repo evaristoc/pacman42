@@ -44,10 +44,12 @@ class RendererAssembler:
             self,
             databasemng: DatabaseManager,
             cheat: bool = False,
+            level_skip: bool = False,
             state: type[IGameState] = InGameState) -> GameLogicManager:
         try:
             return GameLogicManager(databasemng=databasemng,
                                     friendly_ghosts=cheat,
+                                    level_skip=level_skip,
                                     start_state=state)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "

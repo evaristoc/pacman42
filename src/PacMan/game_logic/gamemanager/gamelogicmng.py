@@ -23,11 +23,13 @@ class GameLogicManager:
     def __init__(self, *,
                  databasemng: DatabaseManager,
                  friendly_ghosts: bool = False,
+                 level_skip: bool = False,
                  start_state: Callable[["GameLogicManager"],
                                        IGameState] = InGameState,
                  ) -> None:
         self.ticks: int = 0
         self.friendly_ghosts: bool = friendly_ghosts
+        self.level_skip: bool = level_skip
         self.player = Player()
         self.scoremng = ScoreManager(self.player)
         self.dbm: DatabaseManager = databasemng

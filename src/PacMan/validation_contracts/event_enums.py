@@ -31,6 +31,7 @@ class InGameEvents(IEventEnums):
     PACMAN_SOUTH = auto()
     PACMAN_WEST = auto()
     PAUSE = auto()
+    LEVEL_SKIP = auto()
 
 
 class HighScoreRegisterEvents(IEventEnums):
