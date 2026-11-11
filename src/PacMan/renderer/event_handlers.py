@@ -15,7 +15,7 @@ EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 
 EVENT_REGISTRY: dict[str, type[IEventEnums]] = {
     "START": MainMenuEvents,
-    "PAUSE": PauseMenuEvents
+    "CONTINUE": PauseMenuEvents,
 }
 
 
@@ -41,7 +41,7 @@ def pacman_eh(
             None
 
 
-def menuwithexit_eh(
+def mainmenu_eh(
         self: "ImgsAsset",
         event: pygame.event.Event,
         msgs: EventMsg) -> None:
@@ -65,6 +65,34 @@ def menuwithexit_eh(
                     msgs[getattr(EVENT_REGISTRY[sk.event_name],
                                  sk.event_name)] = None
                     break
+
+
+def pausemenu_eh(
+        self: "ImgsAsset",
+        event: pygame.event.Event,
+        msgs: EventMsg) -> None:
+    if msgs is None:
+        return
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        x, y = event.pos
+        buttons = list(self.sources.keys())
+        for b_ in buttons:
+            sk = self.get_source(b_)
+            if (sk.metadata.x_pos_prop is not None
+                    and sk.metadata.y_pos_prop is not None):
+                start_x = sk.metadata.x_pos_prop
+                start_y = sk.metadata.y_pos_prop
+                if sk.img.contains(x,
+                                   y,
+                                   start_x,
+                                   start_y):
+                    if sk.event_name == 'EXIT':
+                        raise SystemExit(0)
+                    msgs[getattr(EVENT_REGISTRY[sk.event_name],
+                                 sk.event_name)] = None
+                    break
+
+
 
 
 # def pausemenu_eh(

@@ -50,9 +50,9 @@ class PacManApp:
                                             HighScoreRegisterEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
-                                                menuwithexit_eh,
-                                                # mainmenu_eh,
-                                                # pausemenu_eh
+                                                # menuwithexit_eh,
+                                                mainmenu_eh,
+                                                pausemenu_eh
                                                 )
         from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState,
@@ -103,12 +103,12 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "menus/main",
                                         MainMenuEvents)
-            main_menu.event_handler = MethodType(menuwithexit_eh, main_menu)
+            main_menu.event_handler = MethodType(mainmenu_eh, main_menu)
             pause_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/pause",
                                         PauseMenuEvents)
-            pause_menu.event_handler = MethodType(menuwithexit_eh, pause_menu)
+            pause_menu.event_handler = MethodType(pausemenu_eh, pause_menu)
             register_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/register",
