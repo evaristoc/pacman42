@@ -77,8 +77,6 @@ def pausemenu_eh(
         x, y = event.pos
         buttons = list(self.sources.keys())
         for b_ in buttons:
-            if b_ == "PAUSED":
-                continue
             sk = self.get_source(b_)
             if (sk.metadata.x_pos_prop is not None
                     and sk.metadata.y_pos_prop is not None):
