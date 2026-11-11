@@ -20,7 +20,7 @@ EVENT_REGISTRY: dict[str, type[IEventEnums]] = {
 
 
 def pacman_eh(
-        self: ImgsAsset,
+        self: "ImgsAsset",
         event: pygame.event.Event,
         msgs: EventMsg) -> None:
     _ = self
@@ -42,7 +42,7 @@ def pacman_eh(
 
 
 def menuwithexit_eh(
-        self: ImgsAsset,
+        self: "ImgsAsset",
         event: pygame.event.Event,
         msgs: EventMsg) -> None:
     if msgs is None:
