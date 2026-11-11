@@ -39,6 +39,8 @@ class TileError(Exception):
 class TileSnapshot:
     open_walls: dict
     pellet_state: str
+    cell_position_x: int
+    cell_position_y: int
 
 
 class Tile:
@@ -90,7 +92,10 @@ class Tile:
                  'E': self.wall_east.name,
                  'S': self.wall_south.name,
                  'W': self.wall_west.name}
-        return TileSnapshot(open_walls=walls, pellet_state=self.pellet_state.name)
+        return TileSnapshot(open_walls=walls,
+                            pellet_state=self.pellet_state.name,
+                            cell_position_x=self.cell_position_x,
+                            cell_position_y=self.cell_position_y)
 
     def get_open_walls(self) -> list[tuple[int, int]]:
         open_walls = []

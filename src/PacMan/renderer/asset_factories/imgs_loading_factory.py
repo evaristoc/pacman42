@@ -236,6 +236,7 @@ class MenuLoader(ImageLoader):
         max_wpb: int = int(max_w / len(_names))
         try:
             for i, stem in enumerate(_names):
+                print(folder, stem)
                 path = _assets / Path(stem + '.png')
                 if not path.is_file():
                     logger.exception("FATAL: we could not load image"
