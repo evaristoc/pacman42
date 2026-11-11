@@ -21,6 +21,7 @@ class HighScoreMenuEvents(IEventEnums):
 
 
 class PauseMenuEvents(IEventEnums):
+    PAUSED = auto()
     CONTINUE = auto()
     EXIT = auto()
 
