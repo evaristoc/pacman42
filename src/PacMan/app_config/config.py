@@ -28,7 +28,7 @@ SCATTER_GHOST_TIME = 5
 ########
 MAZE_SEED = {1: 30, 2: 28, 3: 26, 4: 24, 5: 22,
              6: 20, 7: 18, 8: 16, 9: 14, 10: 12}
-MAZE_NR_CELLS = 5
+MAZE_NR_CELLS = 8
 
 ########
 # Time #

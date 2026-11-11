@@ -232,6 +232,8 @@ class MenuLoader(ImageLoader):
                              f" : {err}")
             raise SystemExit(1)
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
+        max_w: float = assembler._config.size * .7
+        max_wpb: int = int(max_w / len(_names))
         try:
             for i, stem in enumerate(_names):
                 path = _assets / Path(stem + '.png')
@@ -241,6 +243,8 @@ class MenuLoader(ImageLoader):
                     raise SystemExit(1)
                 with Image.open(path) as imgf:
                     org_w, org_h = imgf.size
+                    max_wpb = max(min(org_w, max_wpb), int(assembler._config.size * .3))
+                    max_hpb: int = int(max_wpb / max_w * org_h)
                 metadata: ImgMetadata = ImgMetadata()
                 img = PyMLXPNGEmulator(
                             org_w,
@@ -249,10 +253,12 @@ class MenuLoader(ImageLoader):
                 img.pygput_from_png(
                             str(path)
                         )
-                metadata.resize_w_prop = 1/3
-                metadata.resize_h_prop = 1/4
-                rsize_w = int(org_w * metadata.resize_w_prop)
-                rsize_h = int(org_h * metadata.resize_h_prop)
+                # metadata.resize_w_prop = 1/3
+                # metadata.resize_h_prop = 1/4
+                # rsize_w = int(org_w * metadata.resize_w_prop)
+                # rsize_h = int(org_h * metadata.resize_h_prop)
+                rsize_w = max_wpb
+                rsize_h = max_hpb
                 if assembler._config.size is not None:
                     metadata.x_pos_prop = (
                         int(assembler._config.size / 2) - int(rsize_w / 2))
