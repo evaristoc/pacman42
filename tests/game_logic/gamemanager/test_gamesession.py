@@ -204,6 +204,7 @@ def test_factory_builds_session_with_level_configuration(
         level,
         score_manager,
         player,
+        False
     )
 
     assert result is session
@@ -235,4 +236,5 @@ def test_factory_rejects_unsupported_levels(level: Any) -> None:
             cast(Any, level),
             Mock(),
             Mock(),
+            False
         )
