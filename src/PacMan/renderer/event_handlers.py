@@ -37,6 +37,8 @@ def pacman_eh(
             msgs[InGameEvents.PACMAN_EAST] = None
         if event.key == pygame.K_SPACE:
             msgs[InGameEvents.PAUSE] = None
+        if event.key == pygame.K_c:
+            msgs[InGameEvents.LEVEL_SKIP] = None
         else:
             None
 
