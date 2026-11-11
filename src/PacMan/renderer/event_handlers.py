@@ -16,6 +16,7 @@ EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 EVENT_REGISTRY: dict[str, type[IEventEnums]] = {
     "START": MainMenuEvents,
     "CONTINUE": PauseMenuEvents,
+    "CONTINUE": PauseMenuEvents,
 }
 
 
