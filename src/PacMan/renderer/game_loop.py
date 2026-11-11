@@ -2,15 +2,23 @@ from __future__ import annotations
 import logging
 import pygame
 from pygame import Event
+from types import MethodType
 from typing import TypeVar, Type, Protocol, TYPE_CHECKING
 from src.PacMan.game_logic.gamemanager.gamelogicmng import (
                                                     GameLogicManager,
                                                     GLMSnapshot)
+from src.PacMan.validation_contracts.event_enums import (
+                                                InGameEvents)
+from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
+                                                GhostName)
 from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 IGameState,
                                                 MainMenuState,
                                                 InGameState,
-                                                GameOverPlayerLost)
+                                                GameOverPlayerLost,
+                                                GameOverPlayerWon,
+                                                HighScoreRegisterState)
+from src.PacMan.renderer.event_handlers import pacman_eh
 if TYPE_CHECKING:  # only required for parameter type assignment
     from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
     from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
@@ -80,6 +88,88 @@ class MainMenuAction(IAction):
             raise SystemExit(1)
 
 
+class RegisterMenuAction(IAction):
+    def action(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        if gloop._statechanged:
+            self._init_state(gloop)
+
+    def _init_state(
+            self,
+            gloop: GameLoop
+    ) -> None:
+        try:
+            background = gloop._mlx.pygmlx_new_image(
+                gloop._mlx.view_w,
+                gloop._mlx.view_h
+            )
+            gloop._mlx.pygmlx_put_image_to_window(
+                background,
+                0,
+                0
+            )
+            buttons = list(
+                gloop._registry
+                .highscoreregisterstate.img_assets['register']
+                .sources.keys())
+            for button in buttons:
+                b_ = gloop._registry\
+                    .highscoreregisterstate.img_assets['register']\
+                    .get_source(button)
+                if (b_.metadata and b_.metadata.x_pos_prop is not None
+                        and b_.metadata.y_pos_prop is not None):
+                    gloop._mlx.pygmlx_put_image_to_window(
+                        b_.img,
+                        b_.metadata.x_pos_prop,
+                        b_.metadata.y_pos_prop
+                    )
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
+
+
+class GameOverLostAction(IAction):
+    def action(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        gol_ = gloop._registry\
+            .gameoverplayerlost.img_assets['gameoverlost']\
+                    .get_source('LOST')
+        if (gol_.metadata and gol_.metadata.x_pos_prop is not None
+                and gol_.metadata.y_pos_prop is not None):
+            gloop._mlx.pygmlx_put_image_to_window(
+                gol_.img,
+                gol_.metadata.x_pos_prop,
+                gol_.metadata.y_pos_prop
+                )
+
+
+class GameOverWonAction(IAction):
+    def action(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        gow_ = gloop._registry\
+            .gameoverplayerwon.img_assets['gameoverwon']\
+                    .get_source('WON')
+        if (gow_.metadata and gow_.metadata.x_pos_prop is not None
+                and gow_.metadata.y_pos_prop is not None):
+            gloop._mlx.pygmlx_put_image_to_window(
+                gow_.img,
+                gow_.metadata.x_pos_prop,
+                gow_.metadata.y_pos_prop
+                )
+
+
 class PlayingAction(IAction):
     # def _init_start(self,
     #                 gloop: GameLoop) -> None:
@@ -92,8 +182,7 @@ class PlayingAction(IAction):
             self._get_newlevel(gloop)
         if gloop._statechanged:
             self._init_state(gloop)
-        else:
-            self._update_state(gloop, tick)
+        self._update_state(gloop, tick)
 
     def _get_newlevel(
             self,
@@ -104,9 +193,28 @@ class PlayingAction(IAction):
         # self.drawer.compute(gloop._assembler._config)
         # gloop._drawer.basic_calcs()
         # nb_cells = self.glm.session.maze.nb_cells
-        # self.assewmber._config = self.assewmber._config.model_copy(
-        #     update={"nb_cells": nb_cells})       
-        ...
+        nb_cells = gloop._glm.session.maze.nb_cells
+        gloop._assembler._config = gloop._assembler._config.model_copy(
+            update={"nb_cells": nb_cells})
+        gloop._drawer.compute(gloop._assembler._config)
+        board_: ImgsAsset = gloop._assembler\
+            .img_loader_factdispatcher(
+                                    "board",
+                                    gloop._drawer)
+        ghosts_: ImgsAsset = gloop._assembler\
+            .img_loader_factdispatcher(
+                                    "ghosts",
+                                    GhostName)
+        pacman_: ImgsAsset = gloop._assembler\
+            .img_loader_factdispatcher(
+                                    "pacman",
+                                    InGameEvents)
+        pacman_.event_handler = MethodType(pacman_eh, pacman_)
+        assets = gloop._registry.ingamestate
+        assets.img_assets['board'] = board_
+        assets.img_assets['ghosts'] = ghosts_
+        assets.img_assets['pacman'] = pacman_
+        self._init_state(gloop)
 
     def _init_state(
             self,
@@ -135,6 +243,7 @@ class PlayingAction(IAction):
                 board_.metadata.y_pos_prop
                 )
         level = gloop._glm.scoremng.player.level
+        print(level)
         hub_bottom: ImgsAsset = gloop._assembler.text_loader_factdispatcher(
             "bottom_hub",
             "Level: {:>3}".format(str(level)),
@@ -155,13 +264,7 @@ class PlayingAction(IAction):
     ) -> None:
         assets = gloop._registry.ingamestate
         snapshot: GLMSnapshot = gloop._glm.view()       
-        # # snapshot = gloop._glm.session.timemng.view()
-        # # str(gloop._glm.session.timemng._countdown_time_remaining)),
-        # print(111, gloop._glm.session.timemng._discrete_cd_time)
-        # print(111, gloop._glm.session.timemng._countdown_time_remaining)
-        # print(111, gloop._glm.session.timemng._countdown_time_remaining)
-        # print(111, gloop._glm.view().session.timemng.level_time)
-        if gloop._glm.view().session.timemng.level_time is None:
+        if snapshot.session.timemng.level_time is None:
             hub_top: ImgsAsset = gloop._assembler.text_loader_factdispatcher(
                 "top_hub",
                 "     STARTING AT {:>4}secs!!!! ".format(
@@ -231,7 +334,7 @@ class PlayingAction(IAction):
                 pD = gloop._glm.session.pacman.new_direction
             direction = [key.name
                          for key in pacman_steps if pacman_steps[key] == pD][0]
-            print(direction)
+            # print(direction)
             p_animations = assets.img_assets["pacman"].get_animation(direction)
             p_nextmove = p_animations.pop()
             # print(pm)
@@ -281,7 +384,9 @@ class PlayingAction(IAction):
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     MainMenuState: MainMenuAction,
     InGameState: PlayingAction,
-    GameOverPlayerLost: MainMenuAction
+    GameOverPlayerLost: GameOverLostAction,
+    GameOverPlayerWon: GameOverWonAction,
+    HighScoreRegisterState: RegisterMenuAction
 }
 
 
@@ -318,7 +423,7 @@ class GameLoop:
             if snapshot.player.level != self._currentlevel:
                 self._currentlevel = snapshot.player.level
                 self._levelchanged = True
-            print(self._statechanged)
+            # print(self._statechanged)
             self._get_action(state=self._glm.state)().action(
                                             self,
                                             tick

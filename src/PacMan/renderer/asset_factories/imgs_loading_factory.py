@@ -179,18 +179,28 @@ class BoardLoader(ImageLoader):
             raise SystemExit(1)
         if (isinstance(configurator, BoardDrawerEngine)
                 and assembler._config.size is not None):
+            metadata: ImgMetadata = ImgMetadata(
+                    x_pos_prop=int(configurator.margin / 2),
+                    y_pos_prop=(int(configurator.margin / 2)
+                                + int(assembler._config.size /
+                                      assembler._config.hub_panels_prop)),
+                    bg_color=0xFF000000
+                )
             source = Source(
                 img=PyGMLXImageEmulator(
                         configurator.corrected_size[0],
                         configurator.corrected_size[0]
                     ),
-                metadata=ImgMetadata(
-                    x_pos_prop=int(configurator.margin / 2),
-                    y_pos_prop=(int(configurator.margin / 2)
-                                + int(assembler._config.size /
-                                      assembler._config.hub_panels_prop)),
-                )
+                metadata=metadata
             )
+            for y in range(configurator.corrected_size[0]):
+                for x in range(configurator.corrected_size[0]):
+                    if metadata.bg_color is not None:
+                        source.img.pygput_pixel(
+                            x,
+                            y,
+                            metadata.bg_color
+                        )
         return ImgsAsset(
             asset_name=folder,
             sources={
@@ -216,7 +226,7 @@ class MenuLoader(ImageLoader):
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
-            _names = getattr(configurator, '_member_names_')
+            _names = getattr(configurator, '_member_names_')[:]
         except Exception as err:
             logger.exception("FATAL: a specific configurator type is required"
                              f" : {err}")
@@ -291,8 +301,8 @@ class GhostsLoader(ImageLoader):
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
-            print(folder, vars(configurator))
-            _names = getattr(configurator, '_member_names_')
+            # print(folder, vars(configurator))
+            _names = getattr(configurator, '_member_names_')[:]
             if configurator is GhostName:
                 _names = _names + ['DEAD', 'POWERUP']
             else:
@@ -304,7 +314,7 @@ class GhostsLoader(ImageLoader):
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         try:
             for stem in _names:
-                print(folder, stem)
+                # print(folder, stem)
                 path = _assets / Path(stem + '.png')
                 if not path.is_file():
                     logger.exception("FATAL: we could not load image"
@@ -363,9 +373,9 @@ class PacManLoader(ImageLoader):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
-        print(folder, vars(configurator))
+        # folder, vars(configurator))
         try:
-            _names = getattr(configurator, '_member_names_')
+            _names = getattr(configurator, '_member_names_')[:]
             _names.remove('PAUSE')
             _temp_sources: list[Source] = []
             _files = [f'{n}-{str(v)}' for v in range(1, 4, 1) for n in _names]

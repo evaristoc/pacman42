@@ -45,6 +45,8 @@ class PacManApp:
                                             InGameEvents,
                                             MainMenuEvents,
                                             PauseMenuEvents,
+                                            GameOverPlayerLostEvents,
+                                            GameOverPlayerWonEvents,
                                             HighScoreRegisterEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
@@ -56,6 +58,8 @@ class PacManApp:
                                                 InGameState,
                                                 MainMenuState,
                                                 PauseMenuState,
+                                                GameOverPlayerLost,
+                                                GameOverPlayerWon,
                                                 HighScoreRegisterState)
         from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
                                                 GhostName)
@@ -108,6 +112,14 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "menus/register",
                                         HighScoreRegisterEvents)
+            gameoverlost_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
+                                        "menus/gameoverlost",
+                                        GameOverPlayerLostEvents)
+            gameoverwon_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
+                                        "menus/gameoverwon",
+                                        GameOverPlayerWonEvents)
             # three lives
             hub_bottom_img: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
@@ -152,6 +164,18 @@ class PacManApp:
                     pause_menu.asset_name: pause_menu
                 }
             )
+            gameoverlost_assets: Assets = Assets(
+                state_name=GameOverPlayerLost.__name__,
+                img_assets={
+                    gameoverlost_menu.asset_name: gameoverlost_menu
+                }
+            )
+            gameoverwon_assets: Assets = Assets(
+                state_name=GameOverPlayerWon.__name__,
+                img_assets={
+                    gameoverwon_menu.asset_name: gameoverwon_menu
+                }
+            )
             register_assets: Assets = Assets(
                 state_name=HighScoreRegisterState.__name__,
                 img_assets={
@@ -163,6 +187,8 @@ class PacManApp:
                ingamestate=ingame_assets,
                mainmenustate=main_assets,
                pausemenustate=pause_assets,
+               gameoverplayerlost=gameoverlost_assets,
+               gameoverplayerwon=gameoverwon_assets,
                highscoreregisterstate=register_assets
             )
         except Exception as err:

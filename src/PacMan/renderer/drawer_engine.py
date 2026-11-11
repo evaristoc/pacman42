@@ -237,7 +237,7 @@ class BoardDrawerEngine:
         # start_y = y_cell * inter + (2 * wall - wall) * y_cell
         start_x = x_cell * (total - wall)
         start_y = y_cell * (total - wall)
-        print(start_x)
+        # print(start_x)
         if cell.wall_north.value != 1:
             for dx in range(total):
                 for dy in range(wall):
