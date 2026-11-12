@@ -16,7 +16,6 @@ EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 EVENT_REGISTRY: dict[str, type[IEventEnums]] = {
     "START": MainMenuEvents,
     "CONTINUE": PauseMenuEvents,
-    "CONTINUE": PauseMenuEvents,
 }
 
 
@@ -80,6 +79,11 @@ def pausemenu_eh(
         x, y = event.pos
         buttons = list(self.sources.keys())
         for b_ in buttons:
+<<<<<<< HEAD
+=======
+            if b_ == "PAUSED":
+                continue
+>>>>>>> 49f6a2f5e5efe2f94d0d6606a8589e146406496a
             sk = self.get_source(b_)
             if (sk.metadata.x_pos_prop is not None
                     and sk.metadata.y_pos_prop is not None):
