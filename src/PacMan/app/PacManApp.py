@@ -1,3 +1,4 @@
+import sys
 import logging
 from types import MethodType
 from src.PacMan.app_config.config import MAZE_NR_CELLS
@@ -88,10 +89,14 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "board",
                                         None)
+            print(board)
             ghosts: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "ghosts",
                                         GhostName)
+            print(ghosts)
+        # finally:
+        #     sys.exit(1)
             pacman: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "pacman",

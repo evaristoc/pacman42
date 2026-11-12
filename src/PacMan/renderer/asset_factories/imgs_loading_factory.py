@@ -126,8 +126,10 @@ class LivesLoader(ImageLoader):
                                                  .interior_cell_size[0] * .8)
                     metadata.resize_h_prop = int(assembler.drawer
                                                  .interior_cell_size[0] * .8)
-                    rsize_w = int(org_w * metadata.resize_w_prop)
-                    rsize_h = int(org_h * metadata.resize_h_prop)
+                    rsize_w = metadata.resize_w_prop
+                    rsize_h = metadata.resize_h_prop
+                    if rsize_w > assembler._config.size or rsize_h > assembler._config.size:
+                        raise
                     metadata.x_pos_prop = int(assembler._config.size / 2)
                     num_slots = len(_names) + 4
                     metadata.x_pos_prop += int(i * 2 *
@@ -166,7 +168,7 @@ class BoardLoader(ImageLoader):
             assembler: 'RendererAssembler',
             configurator: ConfiguratorT | None = None
     ) -> ImgsAsset:
-        assert configurator is None
+        # assert configurator is not None
         if (assembler is None or
                 assembler.drawer is None or
                 assembler._config is None or
@@ -299,7 +301,6 @@ class GhostsLoader(ImageLoader):
             assembler: 'RendererAssembler',
             configurator: ConfiguratorT | None = None
     ) -> ImgsAsset:
-        assert configurator is not None
         if (assembler is None or
                 assembler.drawer is None):
             logger.error(f"Parameters of {folder} loader should have a value")
@@ -318,6 +319,7 @@ class GhostsLoader(ImageLoader):
             raise SystemExit(1)
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         try:
+            print(assembler.drawer.interior_cell_size)
             for stem in _names:
                 # print(folder, stem)
                 path = _assets / Path(stem + '.png')
@@ -340,8 +342,10 @@ class GhostsLoader(ImageLoader):
                                              .interior_cell_size[0] * .8)
                 metadata.resize_h_prop = int(assembler.drawer
                                              .interior_cell_size[0] * .8)
-                rsize_w = int(org_w * metadata.resize_w_prop)
-                rsize_h = int(org_h * metadata.resize_h_prop)
+                rsize_w = metadata.resize_w_prop
+                rsize_h = metadata.resize_h_prop
+                if rsize_w > assembler._config.size or rsize_h > assembler._config.size:
+                    raise
                 img.pygll_resize(
                             rsize_w,
                             rsize_h
@@ -410,13 +414,14 @@ class PacManLoader(ImageLoader):
                                 str(path)
                             )
                     metadata: ImgMetadata = ImgMetadata()
-                    print(111)
                     metadata.resize_w_prop = int(assembler.drawer
                                                  .interior_cell_size[0] * .8)
                     metadata.resize_h_prop = int(assembler.drawer
                                                  .interior_cell_size[0] * .8)
-                    rsize_w = int(org_w * metadata.resize_w_prop)
-                    rsize_h = int(org_h * metadata.resize_h_prop)
+                    rsize_w = metadata.resize_w_prop
+                    rsize_h = metadata.resize_h_prop
+                    if rsize_w > assembler._config.size or rsize_h > assembler._config.size:
+                        raise
                     img.pygll_resize(
                                 rsize_w,
                                 rsize_h
