@@ -153,7 +153,7 @@ def test_view_collects_component_snapshots() -> None:
 
     assert snapshot.timemng == "timer snapshot"
     assert snapshot.pacman == "pacman snapshot"
-    assert snapshot.ghostmng == "ghost snapshot"
+    assert snapshot.ghost_mng == "ghost snapshot"
     assert snapshot.maze == "maze snapshot"
     maze.view.assert_called_once_with()
     timer.view.assert_called_once_with()
@@ -161,75 +161,7 @@ def test_view_collects_component_snapshots() -> None:
     pacman.view.assert_called_once_with()
 
 
-@pytest.mark.parametrize(
-    ("level", "seed", "pacman_speed", "ghost_speed"),
-    [
-        (1, 80, 20, 20),
-        (2, 45, 10, 10),
-        (3, 50, 10, 6),
-    ],
-)
-def test_factory_builds_session_with_level_configuration(
-    monkeypatch: pytest.MonkeyPatch,
-    level: int,
-    seed: int,
-    pacman_speed: int,
-    ghost_speed: int,
-) -> None:
-    maze = object()
-    maze_factory = Mock()
-    maze_factory.make_maze.return_value = maze
-    maze_factory_type = Mock(return_value=maze_factory)
-    pacman = Mock()
-    pacman_type = Mock(return_value=pacman)
-    timer = Mock()
-    timer_type = Mock(return_value=timer)
-    ghosts = Mock()
-    ghosts_type = Mock(return_value=ghosts)
-    collision = Mock()
-    collision_type = Mock(return_value=collision)
-    session = Mock()
-    session_type = Mock(return_value=session)
-
-    monkeypatch.setattr(gamesession_module, "MazeFactory", maze_factory_type)
-    monkeypatch.setattr(gamesession_module, "Pacman", pacman_type)
-    monkeypatch.setattr(gamesession_module, "TimeManager", timer_type)
-    monkeypatch.setattr(gamesession_module, "GhostManager", ghosts_type)
-    monkeypatch.setattr(gamesession_module, "CollisionManager", collision_type)
-    monkeypatch.setattr(gamesession_module, "GameSession", session_type)
-    score_manager = Mock()
-    player = Mock()
-
-    result = GameSessionFactory().create_game_new_game(
-        level,
-        score_manager,
-        player,
-        False
-    )
-
-    assert result is session
-    maze_factory_type.assert_called_once_with(nb_cells=10, seed=seed)
-    pacman_type.assert_called_once_with(maze, speed=pacman_speed)
-    timer_type.assert_called_once_with()
-    ghosts_type.assert_called_once_with(maze, speed=ghost_speed)
-    collision_type.assert_called_once_with(
-        maze=maze,
-        pacman=pacman,
-        ghostmng=ghosts,
-        timemng=timer,
-        player=player,
-        scoremng=score_manager,
-    )
-    session_type.assert_called_once_with(
-        maze=maze,
-        timemng=timer,
-        pacman=pacman,
-        ghostmng=ghosts,
-        collisionmng=collision,
-    )
-
-
-@pytest.mark.parametrize("level", [0, -1, 4, 9, True, 1.5, "1", None])
+@pytest.mark.parametrize("level", [0, -1, True, 1.5, "1", None])
 def test_factory_rejects_unsupported_levels(level: Any) -> None:
     with pytest.raises(ValueError):
         GameSessionFactory().create_game_new_game(

@@ -213,6 +213,7 @@ def test_menu_to_game_pause_resume_game_over_and_registration() -> None:
     session = make_session()
     context = make_context()
     context.create_game_session.return_value = session
+    db = Mock()
 
     state = MainMenuState(context).update_logic(
         {MainMenuEvents.START: None}, 1
@@ -227,14 +228,23 @@ def test_menu_to_game_pause_resume_game_over_and_registration() -> None:
 
     session.update.return_value = UpdateOutcome.ALL_LIVES_LOST
     state = state.update_logic(None, 4)
-    assert isinstance(state, HighScoreRegisterState)
+    assert isinstance(state, GameOverPlayerLost)
 
-    state = state.update_logic(
-        {HighScoreRegisterEvents.REGISTER: {"name": "Ada"}},
-        5,
-    )
+    import time
+    time.sleep(7)
+
+    state = state.update_logic(None, 5)
+
+    context.dbm.__enter__.return_value = db
+    db.player_exists.return_value = False
+
+    if state:
+        state = state.update_logic(
+            {HighScoreRegisterEvents.REGISTER: {"name": "Ada"}},
+            6,
+        )
     assert isinstance(state, MainMenuState)
-    context.player.set_name.assert_called_once_with("Ada")
+    db.add_player.assert_called_once_with("Ada", 300)
 
 
 def test_high_score_cancel_returns_to_menu_without_setting_name() -> None:
