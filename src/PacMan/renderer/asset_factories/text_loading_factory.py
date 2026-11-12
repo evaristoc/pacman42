@@ -45,7 +45,7 @@ class HubTextLoader(TextLoader):
         metadata: TextMetadata = TextMetadata()
         metadata.text_template = msg
         metadata.text = msg
-        metadata.font_path = 'CONSOLA.ttf'
+        metadata.font_path = 'CONSOLA.TTF'
         metadata.font_size_prop = 20.8
         metadata.color = 0xF6303F
         metadata.text_x_prop = 5
