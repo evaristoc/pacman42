@@ -1,27 +1,34 @@
-from src.PacMan.database.db_path import get_db_path
-from peewee import (SqliteDatabase, Database, Model,
-                    CharField, IntegerField, DateTimeField,
-                    DoesNotExist)
 from datetime import datetime
-from typing import List
+from peewee import (SqliteDatabase, Model, CharField, IntegerField,
+                    DateTimeField, DatabaseProxy, DoesNotExist)
+from src.PacMan.database.db_path import get_db_path
+
+db_proxy = DatabaseProxy()
 
 
 class Player(Model):
-    name = CharField(max_length=100, unique=True)
+    name: CharField = CharField(max_length=100, unique=True)
     score = IntegerField(default=0)
     last_played = DateTimeField(default=datetime.now)
 
     class Meta:
-        database: Database | None = None
-        table_name: str = 'players'
+        database = db_proxy
+        table_name = 'players'
 
 
 class DatabaseManager:
-    """Manages player scores database"""
-
     def __init__(self, path: str) -> None:
-        self._path: str = path
-        self._db: None | SqliteDatabase = None
+        self._db = SqliteDatabase(path)
+        db_proxy.initialize(self._db)
+
+    def __enter__(self) -> "DatabaseManager":
+        self._db.connect(reuse_if_open=True)
+        self._db.create_tables([Player])  # safe=True is the default
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        if not self._db.is_closed():
+            self._db.close()
 
     def add_player(self, name: str, score: int = 0) -> Player:
         """Create a new player"""
@@ -71,17 +78,6 @@ class DatabaseManager:
         if score >= player.score:
             return self.update_score(name, score)
         return player
-
-    def __enter__(self) -> "DatabaseManager":
-        self._db = SqliteDatabase(self._path)
-        Player._meta.database = self._db
-        self._db.create_tables([Player])
-        return self
-
-    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
-        """Context manager exit"""
-        if self._db:
-            self._db.close()
 
 
 def create_database_mng() -> DatabaseManager:
