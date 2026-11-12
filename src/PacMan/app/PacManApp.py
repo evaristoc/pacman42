@@ -76,9 +76,8 @@ class PacManApp:
             nb_cells = MAZE_NR_CELLS
             self.assembler._config = self.assembler._config.model_copy(
                 update={"nb_cells": nb_cells})
-            self.drawer = self.assembler.init_drawer()
-            # NOTE I need to compute before loading, need those values
-            self.drawer.compute(self.assembler._config)
+            # NOTE: now assembler is also a drawer (strongly related)
+            self.assembler.init_drawer()
             self.pygmlx = self.assembler.init_engine()
             # self.maze = self.glm.session.maze
             background: ImgsAsset = self.assembler\
@@ -88,8 +87,7 @@ class PacManApp:
             board: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "board",
-                                        self.drawer)
-            # rsized = self.drawer.resized
+                                        None)
             ghosts: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "ghosts",
@@ -203,13 +201,11 @@ class PacManApp:
         if (
             self.pygmlx is not None
             and self.glm is not None
-            and self.drawer is not None
             and self.assembler is not None
             and self.assetregistry is not None
         ):
             gameloop = GameLoop(self.pygmlx,
                                 self.glm,
-                                self.drawer,
                                 self.assembler,
                                 self.assetregistry)
             self.pygmlx.pygmlx_loop(gameloop)

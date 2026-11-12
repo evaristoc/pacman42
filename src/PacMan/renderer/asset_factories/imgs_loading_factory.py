@@ -95,6 +95,7 @@ class LivesLoader(ImageLoader):
                          "strategy")
             raise SystemExit(1)
         if (assembler is None or
+                assembler.drawer is None or
                 assembler._config.hub_panels_prop is None or
                 assembler._config.size is None):
             logger.error(f"Parameters of {folder} loader should have a value")
@@ -120,17 +121,13 @@ class LivesLoader(ImageLoader):
                             str(path)
                         )
                 if (assembler is not None or
-                        assembler._config is not None or
-                        assembler._config.nb_cells is not None and
-                        assembler._config.size is not None or
-                        assembler._config.hub_panels_prop is not None):
-                    if assembler._config.nb_cells is not None:
-                        metadata.resize_w_prop = 1/(2 * assembler
-                                                    ._config.nb_cells)
-                        metadata.resize_h_prop = 1/(2 * assembler
-                                                    ._config.nb_cells)
-                        rsize_w = int(org_w * metadata.resize_w_prop)
-                        rsize_h = int(org_h * metadata.resize_h_prop)
+                        assembler.drawer is not None):
+                    metadata.resize_w_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .8)
+                    metadata.resize_h_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .8)
+                    rsize_w = int(org_w * metadata.resize_w_prop)
+                    rsize_h = int(org_h * metadata.resize_h_prop)
                     metadata.x_pos_prop = int(assembler._config.size / 2)
                     num_slots = len(_names) + 4
                     metadata.x_pos_prop += int(i * 2 *
@@ -169,32 +166,32 @@ class BoardLoader(ImageLoader):
             assembler: 'RendererAssembler',
             configurator: ConfiguratorT | None = None
     ) -> ImgsAsset:
-        assert configurator is not None
+        assert configurator is None
         if (assembler is None or
+                assembler.drawer is None or
                 assembler._config is None or
                 assembler._config.nb_cells is None and
                 assembler._config.size is None or
                 assembler._config.hub_panels_prop is None):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
-        if (isinstance(configurator, BoardDrawerEngine)
-                and assembler._config.size is not None):
+        if assembler._config.size is not None:
             metadata: ImgMetadata = ImgMetadata(
-                    x_pos_prop=int(configurator.margin / 2),
-                    y_pos_prop=(int(configurator.margin / 2)
+                    x_pos_prop=int(assembler.drawer.margin / 2),
+                    y_pos_prop=(int(assembler.drawer.margin / 2)
                                 + int(assembler._config.size /
                                       assembler._config.hub_panels_prop)),
                     bg_color=0xFF000000
                 )
             source = Source(
                 img=PyGMLXImageEmulator(
-                        configurator.corrected_size[0],
-                        configurator.corrected_size[0]
+                        assembler.drawer.corrected_size[0],
+                        assembler.drawer.corrected_size[0]
                     ),
                 metadata=metadata
             )
-            for y in range(configurator.corrected_size[0]):
-                for x in range(configurator.corrected_size[0]):
+            for y in range(assembler.drawer.corrected_size[0]):
+                for x in range(assembler.drawer.corrected_size[0]):
                     if metadata.bg_color is not None:
                         source.img.pygput_pixel(
                             x,
@@ -304,10 +301,7 @@ class GhostsLoader(ImageLoader):
     ) -> ImgsAsset:
         assert configurator is not None
         if (assembler is None or
-                assembler._config is None or
-                assembler._config.nb_cells is None and
-                assembler._config.size is None or
-                assembler._config.hub_panels_prop is None):
+                assembler.drawer is None):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
@@ -342,11 +336,12 @@ class GhostsLoader(ImageLoader):
                             str(path)
                         )
                 metadata: ImgMetadata = ImgMetadata()
-                if assembler._config.nb_cells is not None:
-                    metadata.resize_w_prop = 1/(2 * assembler._config.nb_cells)
-                    metadata.resize_h_prop = 1/(2 * assembler._config.nb_cells)
-                    rsize_w = int(org_w * metadata.resize_w_prop)
-                    rsize_h = int(org_h * metadata.resize_h_prop)
+                metadata.resize_w_prop = int(assembler.drawer
+                                             .interior_cell_size[0] * .8)
+                metadata.resize_h_prop = int(assembler.drawer
+                                             .interior_cell_size[0] * .8)
+                rsize_w = int(org_w * metadata.resize_w_prop)
+                rsize_h = int(org_h * metadata.resize_h_prop)
                 img.pygll_resize(
                             rsize_w,
                             rsize_h
@@ -377,10 +372,7 @@ class PacManLoader(ImageLoader):
     ) -> ImgsAsset:
         assert configurator is not None
         if (assembler is None or
-                assembler._config is None or
-                assembler._config.nb_cells is None and
-                assembler._config.size is None or
-                assembler._config.hub_panels_prop is None):
+                assembler.drawer is None):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
@@ -418,13 +410,13 @@ class PacManLoader(ImageLoader):
                                 str(path)
                             )
                     metadata: ImgMetadata = ImgMetadata()
-                    if assembler._config.nb_cells is not None:
-                        metadata.resize_w_prop = 1/(2 *
-                                                    assembler._config.nb_cells)
-                        metadata.resize_h_prop = 1/(2 *
-                                                    assembler._config.nb_cells)
-                        rsize_w = int(org_w * metadata.resize_w_prop)
-                        rsize_h = int(org_h * metadata.resize_h_prop)
+                    print(111)
+                    metadata.resize_w_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .8)
+                    metadata.resize_h_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .8)
+                    rsize_w = int(org_w * metadata.resize_w_prop)
+                    rsize_h = int(org_h * metadata.resize_h_prop)
                     img.pygll_resize(
                                 rsize_w,
                                 rsize_h

@@ -231,16 +231,16 @@ class PlayingAction(IAction):
         # # TODO update nb_cells config before drawer
         # # NOTE I need to compute before loading, need those values
         # self.drawer.compute(gloop._assembler._config)
-        # gloop._drawer.basic_calcs()
+        # gloop._assembler.drawer.basic_calcs()
         # nb_cells = self.glm.session.maze.nb_cells
         nb_cells = gloop._glm.session.maze.nb_cells
         gloop._assembler._config = gloop._assembler._config.model_copy(
             update={"nb_cells": nb_cells})
-        gloop._drawer.compute(gloop._assembler._config)
+        gloop._assembler.init_drawer()
         board_: ImgsAsset = gloop._assembler\
             .img_loader_factdispatcher(
                                     "board",
-                                    gloop._drawer)
+                                    gloop._assembler.drawer)
         ghosts_: ImgsAsset = gloop._assembler\
             .img_loader_factdispatcher(
                                     "ghosts",
@@ -272,7 +272,7 @@ class PlayingAction(IAction):
         # print(assets.img_assets["board"].sources)
         board_ = assets.img_assets["board"].get_source('board')
         if snapshot.session:
-            gloop._drawer.draw(
+            gloop._assembler.drawer.draw(
                         board_.img,
                         gloop._glm.session.maze.grid,
                         None)
@@ -331,20 +331,20 @@ class PlayingAction(IAction):
                 # INTERIOR CELLS ###
                 # -- pacman --
                 board_ = assets.img_assets["board"].get_source('board')
-                gloop._drawer.draw_cell_interior(
+                gloop._assembler.drawer.draw_cell_interior(
                     board_.img,
                     snapshot.session.pacman.next_tile,
                     0xff000000
                 )
                 # # -- ghosts --
                 # for g in gloop._glm.session.ghost_mng.ghosts:
-                #     gloop._drawer.draw_cell_interior(
+                #     gloop._assembler.drawer.draw_cell_interior(
                 #         board_asset.img,
                 #         gloop._glm.session.ghost_mng.ghosts[g].old_position,
                 #         0xff000000
                 #     )
                 for g in snapshot.session.ghost_mng.ghost_snapshots:
-                    gloop._drawer.draw_cell_interior(
+                    gloop._assembler.drawer.draw_cell_interior(
                         board_.img,
                         snapshot.session.ghost_mng
                         .ghost_snapshots[g].next_tile,
@@ -391,18 +391,18 @@ class PlayingAction(IAction):
                 # print(pm)
                 gloop._mlx.pygmlx_put_image_to_window(
                     p_nextmove.img,
-                    gloop._drawer.next_char_coord(
+                    gloop._assembler.drawer.next_char_coord(
                                     snapshot
                                     .session
                                     .pacman
                                     .next_tile
                                     .cell_position_x),
-                    gloop._drawer.next_char_coord(
+                    gloop._assembler.drawer.next_char_coord(
                                     snapshot
                                     .session
                                     .pacman
                                     .next_tile
-                                    .cell_position_y) + gloop._drawer.bottom_h
+                                    .cell_position_y) + gloop._assembler.drawer.bottom_h
                 )
                 if tick % 5 % snapshot.session.maze.nb_cells:
                     p_animations.append(p_nextmove)
@@ -414,24 +414,24 @@ class PlayingAction(IAction):
                     g_ = assets.img_assets["ghosts"].get_source(g)
                     gloop._mlx.pygmlx_put_image_to_window(
                         g_.img,
-                        gloop._drawer.next_char_coord(
+                        gloop._assembler.drawer.next_char_coord(
                                     snapshot
                                     .session
                                     .ghost_mng
                                     .ghost_snapshots[g]
                                     .next_tile
                                     .cell_position_x),
-                        gloop._drawer.next_char_coord(
+                        gloop._assembler.drawer.next_char_coord(
                                     snapshot
                                     .session
                                     .ghost_mng
                                     .ghost_snapshots[g]
                                     .next_tile
-                                    .cell_position_y) + gloop._drawer.bottom_h)
-                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
-                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._drawer.bottom_h
-                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
-                    # gloop._drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1])) + gloop._drawer.bottom_h
+                                    .cell_position_y) + gloop._assembler.drawer.bottom_h)
+                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
+                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._assembler.drawer.bottom_h
+                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
+                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1])) + gloop._assembler.drawer.bottom_h
 
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
@@ -448,13 +448,11 @@ class GameLoop:
     def __init__(self,
                  mlx: PyGMiniLibXEmulator,
                  glm: GameLogicManager,
-                 drawer: BoardDrawerEngine,
                  assembler: RendererAssembler,
                  assetregistry: AssetRegistry) -> None:
         self._registry: AssetRegistry = assetregistry
         self._mlx = mlx
         self._glm = glm
-        self._drawer = drawer
         self._assembler = assembler
         self._currentstate: str = ""
         self._statechanged: bool = False

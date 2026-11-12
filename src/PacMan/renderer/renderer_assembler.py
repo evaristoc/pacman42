@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 class RendererAssembler:
     def __init__(self, config: ValidBoardConfig) -> None:
         self._config = config
+        self.drawer: BoardDrawerEngine = BoardDrawerEngine()
         self.cwd = Path(__file__).resolve().parent
         self._imgasset_map: dict[str, ImageLoader] = {
             "background": BackgroundLoader(),
@@ -56,8 +57,8 @@ class RendererAssembler:
                          f"perfect True, seed 42, config: {self._config}")
             raise SystemExit(1)
 
-    def init_drawer(self) -> BoardDrawerEngine:
-        return BoardDrawerEngine()
+    def init_drawer(self) -> None:
+        self.drawer.compute(self._config)
 
     def init_engine(self) -> PyGMiniLibXEmulator:
         if self._config and self._config.size and self._config.hub_panels_prop:
@@ -81,7 +82,7 @@ class RendererAssembler:
         if 'background' in folder:
             return self._imgasset_map['background'].load(folder, self)
         if 'board' in folder:
-            return self._imgasset_map['board'].load(folder, self, event)
+            return self._imgasset_map['board'].load(folder, self)
         if 'menus' in folder:
             return self._imgasset_map['menus'].load(folder, self, event)
         if 'ghosts' in folder:
