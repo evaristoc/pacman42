@@ -74,6 +74,7 @@ class GameLogicManager:
 
     def reset_player(self) -> None:
         self.player = Player()
+        self.scoremng = ScoreManager(self.player)
 
     def toggle_friendly_ghosts(self) -> None:
         return
