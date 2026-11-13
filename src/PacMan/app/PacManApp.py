@@ -139,6 +139,8 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "menus/register",
                                         HighScoreRegisterEvents)
+            register_menu.event_handler = MethodType(menugeneral_eh,
+                                                     register_menu)
             gameoverlost_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/gameoverlost",

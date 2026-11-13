@@ -233,7 +233,7 @@ class MenuLoader(ImageLoader):
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         # max_w: float = assembler._config.size * .7
         # max_wpb: int = int(max_w / len(_names))
-        max_h: int = int(assembler._config.size / 15)
+        max_h: int = int(assembler._config.size / (10 + len(_names)))
         try:
             for i, stem in enumerate(_names):
                 print(folder, stem)
@@ -269,7 +269,7 @@ class MenuLoader(ImageLoader):
                     metadata.y_pos_prop = (int(assembler._config.size /
                                                assembler
                                                ._config.hub_panels_prop))
-                    num_slots = len(_names) + 11
+                    num_slots = 2 * len(_names) + 3
                     metadata.y_pos_prop += (int((i + 1) * 2 * assembler
                                                 ._config.size / num_slots))
                 img.pygll_resize(
