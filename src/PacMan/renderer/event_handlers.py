@@ -69,7 +69,7 @@ def mainmenu_eh(
                     break
 
 
-def pausemenu_eh(
+def menuwithexit_eh(
         self: "ImgsAsset",
         event: pygame.event.Event,
         msgs: EventMsg) -> None:
@@ -95,21 +95,3 @@ def pausemenu_eh(
                     msgs[getattr(EVENT_REGISTRY[sk.event_name],
                                  sk.event_name)] = None
                     break
-
-
-
-
-# def pausemenu_eh(
-#         self: ImgsAsset,
-#         event: pygame.event.Event,
-#         msgs: EventMsg) -> None:
-#     if msgs is None:
-#         return
-#     if event.type == pygame.MOUSEBUTTONDOWN:
-#         x, y = event.pos
-#         if self.get_source('CONTINUE').img.contains(x, y):
-#             msgs[PauseMenuEvents.CONTINUE] = None
-#         if self.get_source('EXIT').img.contains(x, y):
-#             SystemExit(0)
-#         else:
-#             None
