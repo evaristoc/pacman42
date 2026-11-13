@@ -13,6 +13,7 @@ from src.PacMan.renderer.asset_factories.imgs_loading_factory import (
                                             ImageLoader,
                                             LivesLoader,
                                             MenuLoader,
+                                            GameOverLoader,
                                             GhostsLoader,
                                             PacManLoader)
 from src.PacMan.renderer.asset_factories.text_loading_factory import (
@@ -35,7 +36,9 @@ class RendererAssembler:
             "lives": LivesLoader(),
             "menus": MenuLoader(),
             "ghosts": GhostsLoader(),
-            "pacman": PacManLoader()
+            "pacman": PacManLoader(),
+            "gameoverlost": GameOverLoader(),
+            "gameoverwon": GameOverLoader()
         }
         self._textasset_map: dict[str, TextLoader] = {
             'hub': HubTextLoader()
@@ -79,12 +82,17 @@ class RendererAssembler:
     ) -> ImgsAsset:
         if 'live' in folder:
             return self._imgasset_map['lives'].load(folder, self)
+        if 'gameoverlost' in folder:
+            return self._imgasset_map['gameoverlost'].load(folder, self, event)
+        if 'gameoverwon' in folder:
+            return self._imgasset_map['gameoverwon'].load(folder, self, event)
+        # above the ones that ALSO might contain 'menus' word in folder
+        if 'menus' in folder:
+            return self._imgasset_map['menus'].load(folder, self, event)
         if 'background' in folder:
             return self._imgasset_map['background'].load(folder, self)
         if 'board' in folder:
             return self._imgasset_map['board'].load(folder, self)
-        if 'menus' in folder:
-            return self._imgasset_map['menus'].load(folder, self, event)
         if 'ghosts' in folder:
             return self._imgasset_map['ghosts'].load(folder, self, event)
         if 'pacman' in folder:
