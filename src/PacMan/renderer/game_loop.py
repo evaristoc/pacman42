@@ -412,6 +412,8 @@ class PlayingAction(IAction):
                 # # GHOSTS ###
                 for g in snapshot.session.ghost_mng.ghost_snapshots:
                     g_ = assets.img_assets["ghosts"].get_source(g)
+                    # next_pos = gloop._glm.session.ghost_mng.ghost_snapshots[g].previous_tile
+                    # prev_pos = gloop._glm.session.ghost_mng.ghost_snapshots[g].next_tile
                     gloop._mlx.pygmlx_put_image_to_window(
                         g_.img,
                         gloop._assembler.drawer.next_char_coord(
@@ -419,15 +421,44 @@ class PlayingAction(IAction):
                                     .session
                                     .ghost_mng
                                     .ghost_snapshots[g]
-                                    .next_tile
-                                    .cell_position_x),
+                                    .previous_tile
+                                    .cell_position_x,
+                                    True,
+                                    snapshot
+                                    .session
+                                    .ghost_mng
+                                    .ghost_snapshots[g]
+                                    .interpolation[0]
+                                    ),
                         gloop._assembler.drawer.next_char_coord(
                                     snapshot
                                     .session
                                     .ghost_mng
                                     .ghost_snapshots[g]
-                                    .next_tile
-                                    .cell_position_y) + gloop._assembler.drawer.bottom_h)
+                                    .previous_tile
+                                    .cell_position_y,
+                                    True,
+                                    snapshot
+                                    .session
+                                    .ghost_mng
+                                    .ghost_snapshots[g]
+                                    .interpolation[1]
+                                    ) + gloop._assembler.drawer.bottom_h)
+                        # gloop._assembler.drawer.next_char_coord(
+                        #             snapshot
+                        #             .session
+                        #             .ghost_mng
+                        #             .ghost_snapshots[g]
+                        #             .next_tile
+                        #             .cell_position_x),
+                        # gloop._assembler.drawer.next_char_coord(
+                        #             snapshot
+                        #             .session
+                        #             .ghost_mng
+                        #             .ghost_snapshots[g]
+                        #             .next_tile
+                        #             .cell_position_y) + gloop._assembler.drawer.bottom_h)
+                      
                     # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
                     # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._assembler.drawer.bottom_h
                     # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
