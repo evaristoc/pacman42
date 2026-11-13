@@ -328,7 +328,7 @@ class PlayingAction(IAction):
                     )
             else:
                 score = snapshot.player.score
-                # ======> LAST STATES <=========
+                # ======> LAST STATES : NOT CHARACTERS!! <=========
                 # INTERIOR CELLS ###
                 # -- last STATE of the board -- #
                 board_ = assets.img_assets["board"].get_source('board')
