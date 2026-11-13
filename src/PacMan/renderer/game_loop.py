@@ -328,28 +328,30 @@ class PlayingAction(IAction):
                     )
             else:
                 score = snapshot.player.score
+                # ======> LAST STATES <=========
                 # INTERIOR CELLS ###
-                # -- pacman --
+                # -- last STATE of the board -- #
                 board_ = assets.img_assets["board"].get_source('board')
+                # -- pacman: last state of the pellets --
                 gloop._assembler.drawer.draw_cell_interior(
                     board_.img,
                     snapshot.session.pacman.next_tile,
                     0xff000000
                 )
-                # # -- ghosts --
-                # for g in gloop._glm.session.ghost_mng.ghosts:
+                # # -- ghosts?? --
+                # for g in snapshot.session.ghost_mng.ghost_snapshots:
+                #     # gloop._assembler.drawer.draw_cell_interior(
+                #     #     board_.img,
+                #     #     snapshot.session.ghost_mng
+                #     #     .ghost_snapshots[g].previous_tile,
+                #     #     0xff000000
+                #     # )
                 #     gloop._assembler.drawer.draw_cell_interior(
-                #         board_asset.img,
-                #         gloop._glm.session.ghost_mng.ghosts[g].old_position,
+                #         board_.img,
+                #         snapshot.session.ghost_mng
+                #         .ghost_snapshots[g].next_tile,
                 #         0xff000000
                 #     )
-                for g in snapshot.session.ghost_mng.ghost_snapshots:
-                    gloop._assembler.drawer.draw_cell_interior(
-                        board_.img,
-                        snapshot.session.ghost_mng
-                        .ghost_snapshots[g].next_tile,
-                        0xff000000
-                    )
                 if (board_.metadata and board_.metadata.x_pos_prop is not None
                         and board_.metadata.y_pos_prop is not None):
                     gloop._mlx.pygmlx_put_image_to_window(
