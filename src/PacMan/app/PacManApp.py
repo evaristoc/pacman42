@@ -46,12 +46,15 @@ class PacManApp:
                                             InGameEvents,
                                             MainMenuEvents,
                                             PauseMenuEvents,
+                                            InstructionMenuEvents,
                                             GameOverPlayerLostEvents,
                                             GameOverPlayerWonEvents,
                                             HighScoreRegisterEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
-                                                menuwithexit_eh,
+                                                returns_eh,
+                                                menugeneral_eh
+                                                #menuwithexit_eh,
                                                 # mainmenu_eh,
                                                 # pausemenu_eh
                                                 )
@@ -61,6 +64,7 @@ class PacManApp:
                                                 PauseMenuState,
                                                 GameOverPlayerLost,
                                                 GameOverPlayerWon,
+                                                InstructionsMenuState,
                                                 HighScoreRegisterState)
         from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
                                                 GhostName)
@@ -106,12 +110,31 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "menus/main",
                                         MainMenuEvents)
-            main_menu.event_handler = MethodType(menuwithexit_eh, main_menu)
+            main_menu.event_handler = MethodType(menugeneral_eh, main_menu)
             pause_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/pause",
                                         PauseMenuEvents)
-            pause_menu.event_handler = MethodType(menuwithexit_eh, pause_menu)
+            pause_menu.event_handler = MethodType(menugeneral_eh, pause_menu)
+            instructions: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
+                                        "instructions_text",
+                                        """      --- INSTRUCTIONS ---
+                                        --> right arrow == move right
+                                        <-- left arrow == move left
+                                        ^   up arrow == move up
+                                        v   down arrow == move down
+                                        
+                                        'p' pause game
+                                        'c' cheat the level
+                                        """
+                                        )
+            instructions_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
+                                        "menus/instructions",
+                                        InstructionMenuEvents)
+            instructions_menu.event_handler = MethodType(returns_eh,
+                                                         instructions_menu)
             register_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/register",
@@ -168,6 +191,13 @@ class PacManApp:
                     pause_menu.asset_name: pause_menu
                 }
             )
+            instructions_assets: Assets = Assets(
+                state_name=InstructionsMenuState.__name__,
+                img_assets={
+                    "text": instructions,
+                    "return": instructions_menu
+                }
+            )
             gameoverlost_assets: Assets = Assets(
                 state_name=GameOverPlayerLost.__name__,
                 img_assets={
@@ -191,6 +221,7 @@ class PacManApp:
                ingamestate=ingame_assets,
                mainmenustate=main_assets,
                pausemenustate=pause_assets,
+               instructionsmenustate=instructions_assets,
                gameoverplayerlost=gameoverlost_assets,
                gameoverplayerwon=gameoverwon_assets,
                highscoreregisterstate=register_assets

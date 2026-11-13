@@ -341,7 +341,7 @@ class GameOverLoader(ImageLoader):
                         )
                 rsize_w = int(max_w)
                 wh_ratio: float = org_w / org_h
-                rsize_h: int = int(wh_ratio * max_w)
+                rsize_h: int = int(wh_ratio * max_w * .7)
                 if assembler._config.size is not None:
                     metadata.resize_w_prop = rsize_w
                     metadata.resize_h_prop = rsize_h
@@ -349,6 +349,82 @@ class GameOverLoader(ImageLoader):
                         assembler._config.size / 2 - rsize_w / 2)
                     metadata.y_pos_prop = int(
                         total_h / 2 - rsize_h / 2)
+                img.pygll_resize(
+                            rsize_w,
+                            rsize_h
+                        )
+                source = Source(
+                    event_name=stem,
+                    path=path,
+                    img=img,
+                    metadata=metadata,
+                    type='png'
+                )
+                imgassets.sources.update(
+                    {
+                        stem: source
+                    }
+                )
+            return imgassets
+        except Exception as err:
+            logger.exception(f"FATAL: we could not load images : {err}")
+            raise SystemExit(1)
+
+
+class ReturnLoader(ImageLoader):
+    def load(
+            self,
+            folder: str,
+            assembler: 'RendererAssembler',
+            configurator: ConfiguratorT | None = None
+    ) -> ImgsAsset:
+        assert configurator is not None
+        if (assembler is None or
+                assembler._config is None or
+                assembler._config.size is None):
+            logger.error(f"Parameters of {folder} loader should have a value")
+            raise SystemExit(1)
+        _assets = assembler.cwd.parent / 'assets' / folder
+        try:
+            _names = getattr(configurator, '_member_names_')[:]
+        except Exception as err:
+            logger.exception("FATAL: a specific configurator type is required"
+                             f" : {err}")
+            raise SystemExit(1)
+        imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
+        if (assembler._config.size is not None
+                and assembler._config.hub_panels_prop is not None):
+            max_w: float = assembler._config.size / 5
+            total_h = assembler._config.size + int(
+                2 * assembler._config.size / assembler._config.hub_panels_prop)
+        try:
+            for i, stem in enumerate(_names):
+                print(folder, stem)
+                path = _assets / Path(stem + '.png')
+                if not path.is_file():
+                    logger.exception("FATAL: we could not load image"
+                                     f" : {path}")
+                    raise SystemExit(1)
+                with Image.open(path) as imgf:
+                    org_w, org_h = imgf.size
+                metadata: ImgMetadata = ImgMetadata()
+                img = PyMLXPNGEmulator(
+                            org_w,
+                            org_h
+                        )
+                img.pygput_from_png(
+                            str(path)
+                        )
+                rsize_w = int(max_w)
+                hw_ratio: float = org_h / org_w
+                rsize_h: int = int(hw_ratio * max_w)
+                if assembler._config.size is not None:
+                    metadata.resize_w_prop = rsize_w
+                    metadata.resize_h_prop = rsize_h
+                    metadata.x_pos_prop = int(
+                        assembler._config.size / 10 * 7)
+                    metadata.y_pos_prop = int(
+                        total_h / 10 * 7)
                 img.pygll_resize(
                             rsize_w,
                             rsize_h

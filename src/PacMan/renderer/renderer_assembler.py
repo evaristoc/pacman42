@@ -11,6 +11,7 @@ from src.PacMan.renderer.asset_factories.imgs_loading_factory import (
                                             BackgroundLoader,
                                             BoardLoader,
                                             ImageLoader,
+                                            ReturnLoader,
                                             LivesLoader,
                                             MenuLoader,
                                             GameOverLoader,
@@ -18,7 +19,8 @@ from src.PacMan.renderer.asset_factories.imgs_loading_factory import (
                                             PacManLoader)
 from src.PacMan.renderer.asset_factories.text_loading_factory import (
                                             TextLoader,
-                                            HubTextLoader)
+                                            HubTextLoader,
+                                            InstructionsTextLoader)
 from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
 
 
@@ -34,6 +36,7 @@ class RendererAssembler:
             "background": BackgroundLoader(),
             "board": BoardLoader(),
             "lives": LivesLoader(),
+            "instructions": ReturnLoader(),
             "menus": MenuLoader(),
             "ghosts": GhostsLoader(),
             "pacman": PacManLoader(),
@@ -41,7 +44,8 @@ class RendererAssembler:
             "gameoverwon": GameOverLoader()
         }
         self._textasset_map: dict[str, TextLoader] = {
-            'hub': HubTextLoader()
+            'hub': HubTextLoader(),
+            'instructions': InstructionsTextLoader()
         }
 
     def init_glm(
@@ -86,6 +90,8 @@ class RendererAssembler:
             return self._imgasset_map['gameoverlost'].load(folder, self, event)
         if 'gameoverwon' in folder:
             return self._imgasset_map['gameoverwon'].load(folder, self, event)
+        if 'instructions' in folder:
+            return self._imgasset_map['instructions'].load(folder, self, event)
         # above the ones that ALSO might contain 'menus' word in folder
         if 'menus' in folder:
             return self._imgasset_map['menus'].load(folder, self, event)
@@ -106,6 +112,12 @@ class RendererAssembler:
             ) -> ImgsAsset:
         if 'hub' in folder:
             return self._textasset_map['hub'].upload_text(
+                folder,
+                msg,
+                self
+            )
+        if 'instructions' in folder:
+            return self._textasset_map['instructions'].upload_text(
                 folder,
                 msg,
                 self

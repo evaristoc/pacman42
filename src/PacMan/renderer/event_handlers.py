@@ -4,6 +4,9 @@ from src.PacMan.validation_contracts.event_enums import (
                                         IEventEnums,
                                         InGameEvents,
                                         MainMenuEvents,
+                                        InstructionMenuEvents,
+                                        HighScoreMenuEvents,
+                                        HighScoreRegisterEvents,
                                         PauseMenuEvents)
 if TYPE_CHECKING:
     from src.PacMan.renderer.assets import (
@@ -14,8 +17,15 @@ EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 
 
 EVENT_REGISTRY: dict[str, type[IEventEnums]] = {
-    "START": MainMenuEvents,
-    "CONTINUE": PauseMenuEvents,
+    "START": MainMenuEvents.START,
+    "CONTINUE": PauseMenuEvents.CONTINUE,
+    "INSTRUCTIONS": MainMenuEvents.INSTRUCTIONS,
+    "HIGHSCORES": MainMenuEvents.HIGHSCORES,
+    "REGISTER": HighScoreRegisterEvents.REGISTER,
+    "RETURN": InstructionMenuEvents.RETURN,
+    "CANCEL": HighScoreRegisterEvents.CANCEL,
+    # "RETURN-HIGHSCORE": ??
+    # "RETURN-REGISTERED": ??
 }
 
 
@@ -43,33 +53,33 @@ def pacman_eh(
             None
 
 
-def mainmenu_eh(
-        self: "ImgsAsset",
-        event: pygame.event.Event,
-        msgs: EventMsg) -> None:
-    if msgs is None:
-        return
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        x, y = event.pos
-        buttons = list(self.sources.keys())
-        for b_ in buttons:
-            sk = self.get_source(b_)
-            if (sk.metadata.x_pos_prop is not None
-                    and sk.metadata.y_pos_prop is not None):
-                start_x = sk.metadata.x_pos_prop
-                start_y = sk.metadata.y_pos_prop
-                if sk.img.contains(x,
-                                   y,
-                                   start_x,
-                                   start_y):
-                    if sk.event_name == 'EXIT':
-                        raise SystemExit(0)
-                    msgs[getattr(EVENT_REGISTRY[sk.event_name],
-                                 sk.event_name)] = None
-                    break
+# def mainmenu_eh(
+#         self: "ImgsAsset",
+#         event: pygame.event.Event,
+#         msgs: EventMsg) -> None:
+#     if msgs is None:
+#         return
+#     if event.type == pygame.MOUSEBUTTONDOWN:
+#         x, y = event.pos
+#         buttons = list(self.sources.keys())
+#         for b_ in buttons:
+#             sk = self.get_source(b_)
+#             if (sk.metadata.x_pos_prop is not None
+#                     and sk.metadata.y_pos_prop is not None):
+#                 start_x = sk.metadata.x_pos_prop
+#                 start_y = sk.metadata.y_pos_prop
+#                 if sk.img.contains(x,
+#                                    y,
+#                                    start_x,
+#                                    start_y):
+#                     if sk.event_name == 'EXIT':
+#                         raise SystemExit(0)
+#                     msgs[getattr(EVENT_REGISTRY[sk.event_name],
+#                                  sk.event_name)] = None
+#                     break
 
 
-def menuwithexit_eh(
+def menugeneral_eh(
         self: "ImgsAsset",
         event: pygame.event.Event,
         msgs: EventMsg) -> None:
@@ -92,6 +102,30 @@ def menuwithexit_eh(
                                    start_y):
                     if sk.event_name == 'EXIT':
                         raise SystemExit(0)
+                    msgs[getattr(EVENT_REGISTRY[sk.event_name],
+                                 sk.event_name)] = None
+                    break
+
+
+def returns_eh(
+        self: "ImgsAsset",
+        event: pygame.event.Event,
+        msgs: EventMsg) -> None:
+    if msgs is None:
+        return
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        x, y = event.pos
+        buttons = list(self.sources.keys())
+        for b_ in buttons:
+            sk = self.get_source(b_)
+            if (sk.metadata.x_pos_prop is not None
+                    and sk.metadata.y_pos_prop is not None):
+                start_x = sk.metadata.x_pos_prop
+                start_y = sk.metadata.y_pos_prop
+                if sk.img.contains(x,
+                                   y,
+                                   start_x,
+                                   start_y):
                     msgs[getattr(EVENT_REGISTRY[sk.event_name],
                                  sk.event_name)] = None
                     break

@@ -18,10 +18,10 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 GameOverPlayerLost,
                                                 GameOverPlayerWon,
                                                 PauseMenuState,
+                                                InstructionsMenuState,
                                                 HighScoreRegisterState)
 from src.PacMan.renderer.event_handlers import pacman_eh
 if TYPE_CHECKING:  # only required for parameter type assignment
-    from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
     from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
     from src.PacMan.renderer.renderer_engine import PyGMiniLibXEmulator
     from src.PacMan.renderer.event_handlers import EventMsg
@@ -63,12 +63,10 @@ class MainMenuAction(IAction):
             gloop: GameLoop
     ) -> None:
         try:
-            background = gloop._mlx.pygmlx_new_image(
-                gloop._mlx.view_w,
-                gloop._mlx.view_h
-            )
+            bg_ = gloop._registry.init.img_assets['background']\
+                                                .get_source('background')
             gloop._mlx.pygmlx_put_image_to_window(
-                background,
+                bg_.img,
                 0,
                 0
             )
@@ -84,6 +82,49 @@ class MainMenuAction(IAction):
                         b_.metadata.x_pos_prop,
                         b_.metadata.y_pos_prop
                     )
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
+
+
+class InstructionMenuAction(IAction):
+    def action(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        if gloop._statechanged:
+            self._init_state(gloop)
+
+    def _init_state(
+            self,
+            gloop: GameLoop
+    ) -> None:
+        try:
+            bg_ = gloop._registry.init.img_assets['background']\
+                                                .get_source('background')
+            gloop._mlx.pygmlx_put_image_to_window(
+                bg_.img,
+                0,
+                0
+            )
+            txt_ = gloop._registry.instructionsmenustate.img_assets["text"].get_source("instructions_text")
+            if (txt_.metadata and txt_.metadata.x_pos_prop is not None
+                    and txt_.metadata.y_pos_prop is not None):
+                gloop._mlx.pygmlx_put_image_to_window(
+                    txt_.img,
+                    txt_.metadata.x_pos_prop,
+                    txt_.metadata.y_pos_prop
+                )
+            b_ = gloop._registry.instructionsmenustate.img_assets["return"].get_source("RETURN")
+            if (b_.metadata and b_.metadata.x_pos_prop is not None
+                    and b_.metadata.y_pos_prop is not None):
+                gloop._mlx.pygmlx_put_image_to_window(
+                    b_.img,
+                    b_.metadata.x_pos_prop,
+                    b_.metadata.y_pos_prop
+                )
         except Exception as err:
             logger.error(f"FATAL: Exception trying to load menus: {err}")
             raise SystemExit(1)
@@ -473,7 +514,8 @@ HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     GameOverPlayerLost: GameOverLostAction,
     GameOverPlayerWon: GameOverWonAction,
     HighScoreRegisterState: RegisterMenuAction,
-    PauseMenuState: PauseMenuAction
+    PauseMenuState: PauseMenuAction,
+    InstructionsMenuState: InstructionMenuAction
 }
 
 
