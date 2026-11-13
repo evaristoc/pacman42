@@ -338,6 +338,13 @@ class PlayingAction(IAction):
                 hb_.metadata.x_pos_prop,
                 hb_.metadata.y_pos_prop
             )
+        for i in range(gloop._assembler._config.lives):
+            l_ = assets.img_assets["live"].get_source(f"LIVE_{i}")
+            gloop._mlx.pygmlx_put_image_to_window(
+                l_.img,
+                l_.metadata.x_pos_prop,
+                l_.metadata.y_pos_prop
+            )
 
     def _update_state(
             self,
@@ -356,7 +363,7 @@ class PlayingAction(IAction):
                 hub_top: ImgsAsset = gloop._assembler\
                     .text_loader_factdispatcher(
                         "top_hub",
-                        "     STARTING AT {:>4}secs!!!! ".format(
+                        "     STARTING AT {:>4}    !!!! ".format(
                             str(snapshot.session.timemng.countdown_time))
                     )
                 ht_ = hub_top.get_source("top_hub")
@@ -379,20 +386,6 @@ class PlayingAction(IAction):
                     snapshot.session.pacman.next_tile,
                     0xff000000
                 )
-                # # -- ghosts?? --
-                # for g in snapshot.session.ghost_mng.ghost_snapshots:
-                #     # gloop._assembler.drawer.draw_cell_interior(
-                #     #     board_.img,
-                #     #     snapshot.session.ghost_mng
-                #     #     .ghost_snapshots[g].previous_tile,
-                #     #     0xff000000
-                #     # )
-                #     gloop._assembler.drawer.draw_cell_interior(
-                #         board_.img,
-                #         snapshot.session.ghost_mng
-                #         .ghost_snapshots[g].next_tile,
-                #         0xff000000
-                #     )
                 if (board_.metadata and board_.metadata.x_pos_prop is not None
                         and board_.metadata.y_pos_prop is not None):
                     gloop._mlx.pygmlx_put_image_to_window(
@@ -406,7 +399,7 @@ class PlayingAction(IAction):
                     hub_top: ImgsAsset = gloop._assembler\
                         .text_loader_factdispatcher(
                             "top_hub",
-                            "Score: {:>8}    Remaining{:>4}secs".format(
+                            "Score: {:>8}   Remaining{:>4}secs".format(
                                 str(score),
                                 str(snapshot.session.timemng.level_time))
                         )
@@ -418,6 +411,15 @@ class PlayingAction(IAction):
                             ht_.metadata.x_pos_prop,
                             ht_.metadata.y_pos_prop
                         )
+                if snapshot.player.lives < gloop._assembler._config.lives:
+                    blacking = snapshot.player.lives
+                    l_ = assets.img_assets["live"].get_source(f"LIVE_{str(blacking)}")
+                    blck_ = assets.img_assets["live"].get_source("blacking")
+                    gloop._mlx.pygmlx_put_image_to_window(
+                        blck_.img,
+                        l_.metadata.x_pos_prop,
+                        l_.metadata.y_pos_prop
+                    )
                 # # PACMAN ###
                 pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
                 if not snapshot.session.pacman.direction:
@@ -455,8 +457,6 @@ class PlayingAction(IAction):
                 # # GHOSTS ###
                 for g in snapshot.session.ghost_mng.ghost_snapshots:
                     g_ = assets.img_assets["ghosts"].get_source(g)
-                    # next_pos = gloop._glm.session.ghost_mng.ghost_snapshots[g].previous_tile
-                    # prev_pos = gloop._glm.session.ghost_mng.ghost_snapshots[g].next_tile
                     gloop._mlx.pygmlx_put_image_to_window(
                         g_.img,
                         gloop._assembler.drawer.next_char_coord(
@@ -487,25 +487,6 @@ class PlayingAction(IAction):
                                     .ghost_snapshots[g]
                                     .interpolation[1]
                                     ) + gloop._assembler.drawer.bottom_h)
-                        # gloop._assembler.drawer.next_char_coord(
-                        #             snapshot
-                        #             .session
-                        #             .ghost_mng
-                        #             .ghost_snapshots[g]
-                        #             .next_tile
-                        #             .cell_position_x),
-                        # gloop._assembler.drawer.next_char_coord(
-                        #             snapshot
-                        #             .session
-                        #             .ghost_mng
-                        #             .ghost_snapshots[g]
-                        #             .next_tile
-                        #             .cell_position_y) + gloop._assembler.drawer.bottom_h)
-                      
-                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) + int(gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0]),
-                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) + int(gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y) * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1]) + gloop._assembler.drawer.bottom_h
-                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_x * gloop._glm.session.ghost_mng.ghosts[g].interpolation[0])),
-                    # gloop._assembler.drawer.next_char_coord(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y + int(gloop._glm.session.ghost_mng.ghosts[g].new_position.cell_position_y * gloop._glm.session.ghost_mng.ghosts[g].interpolation[1])) + gloop._assembler.drawer.bottom_h
 
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {

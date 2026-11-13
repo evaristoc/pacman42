@@ -66,6 +66,7 @@ class BackgroundLoader(ImageLoader):
         source = Source(
             img=PyGMLXImageEmulator(w, h),
             metadata=metadata,
+            type='computed'
         )
         for y in range(h):
             for x in range(w):
@@ -101,9 +102,11 @@ class LivesLoader(ImageLoader):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
-        _names = [folder.split('/')[-1].upper() for i in range(3)]
+        _names = [folder.split('/')[-1].upper()
+                  for _ in range(assembler._config.lives)]
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         try:
+            init_x_pos = int(assembler._config.size / 3 * 2)
             for i, stem in enumerate(_names):
                 path = _assets / Path(stem + '.png')
                 if not path.is_file():
@@ -123,23 +126,19 @@ class LivesLoader(ImageLoader):
                 if (assembler is not None or
                         assembler.drawer is not None):
                     metadata.resize_w_prop = int(assembler.drawer
-                                                 .interior_cell_size[0] * .8)
+                                                 .interior_cell_size[0] * .4)
                     metadata.resize_h_prop = int(assembler.drawer
-                                                 .interior_cell_size[0] * .8)
+                                                 .interior_cell_size[0] * .4)
                     rsize_w = metadata.resize_w_prop
                     rsize_h = metadata.resize_h_prop
                     if rsize_w > assembler._config.size or rsize_h > assembler._config.size:
                         raise
-                    metadata.x_pos_prop = int(assembler._config.size / 2)
-                    num_slots = len(_names) + 4
-                    metadata.x_pos_prop += int(i * 2 *
-                                               assembler
-                                               ._config.size / num_slots)
+                    metadata.x_pos_prop = init_x_pos + (metadata.resize_w_prop + int(metadata.resize_w_prop / 2)) * i
                     metadata.y_pos_prop = (
                         assembler
                             ._config.size + int(assembler._config.size /
                                                 assembler
-                                                ._config.hub_panels_prop))
+                                                ._config.hub_panels_prop) + 5)
                 img.pygll_resize(
                             rsize_w,
                             rsize_h
@@ -152,9 +151,33 @@ class LivesLoader(ImageLoader):
                 )
                 imgassets.sources.update(
                     {
-                        stem: source
+                        str(stem + '_' + str(i)): source
                     }
                 )
+            imgblack = PyMLXPNGEmulator(
+                        int(assembler.drawer.interior_cell_size[0] * .4),
+                        int(assembler.drawer.interior_cell_size[0] * .4)
+                    )
+            metadata: ImgMetadata = ImgMetadata()
+            metadata.bg_color = 0xFF000000
+            for y in range(int(assembler.drawer.interior_cell_size[0] * .4)):
+                for x in range(int(assembler.drawer.interior_cell_size[0] * .4)):
+                    if metadata.bg_color is not None:
+                        imgblack.pygput_pixel(
+                            x,
+                            y,
+                            metadata.bg_color
+                        )
+            blacksource = Source(
+                img=imgblack,
+                metadata=metadata,
+                type='computed'
+            )
+            imgassets.sources.update(
+                {
+                    "blacking": blacksource
+                }
+            )
             return imgassets
         except Exception as err:
             logger.exception(f"FATAL: we could not load images : {err}")
@@ -190,7 +213,8 @@ class BoardLoader(ImageLoader):
                         assembler.drawer.corrected_size[0],
                         assembler.drawer.corrected_size[0]
                     ),
-                metadata=metadata
+                metadata=metadata,
+                type='computed'
             )
             for y in range(assembler.drawer.corrected_size[0]):
                 for x in range(assembler.drawer.corrected_size[0]):

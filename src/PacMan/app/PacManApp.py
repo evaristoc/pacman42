@@ -1,7 +1,7 @@
 import sys
 import logging
 from types import MethodType
-from src.PacMan.app_config.config import MAZE_NR_CELLS
+from src.PacMan.app_config.config import MAZE_NR_CELLS, PLAYER_LIVES
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
@@ -78,9 +78,9 @@ class PacManApp:
                                                self.assembler._config.cheat,
                                                self.assembler._config.level_skip,
                                                MainMenuState)
-            nb_cells = MAZE_NR_CELLS
             self.assembler._config = self.assembler._config.model_copy(
-                update={"nb_cells": nb_cells})
+                update={"nb_cells": MAZE_NR_CELLS,
+                        "lives": PLAYER_LIVES})
             # NOTE: now assembler is also a drawer (strongly related)
             self.assembler.init_drawer()
             self.pygmlx = self.assembler.init_engine()
@@ -119,14 +119,16 @@ class PacManApp:
             instructions: ImgsAsset = self.assembler\
                 .text_loader_factdispatcher(
                                         "instructions_text",
-                                        """      --- INSTRUCTIONS ---
-                                        --> right arrow == move right
-                                        <-- left arrow == move left
-                                        ^   up arrow == move up
-                                        v   down arrow == move down
-                                        
-                                        'p' pause game
-                                        'c' cheat the level
+                                        """
+      --- INSTRUCTIONS ---
+
+    --> right arrow == move right
+    <-- left arrow == move left
+    ^   up arrow == move up
+    v   down arrow == move down
+
+    'p' pause game
+    'c' cheat the level
                                         """
                                         )
             instructions_menu: ImgsAsset = self.assembler\
