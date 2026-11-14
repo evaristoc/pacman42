@@ -5,7 +5,7 @@ class ValidBoardConfig(BaseModel):
     cheat: bool = Field(default=False)
     nb_cells: int = Field(default=5, ge=5, le=30)
     hub_panels_prop: int = Field(default=5, ge=0, le=5)
-    size: int = Field(default=500, ge=500, le=1000)
+    size: int = Field(default=500, ge=500, le=750)
     level_skip: bool = Field(default=False)
     lives: int = Field(default=1)
 

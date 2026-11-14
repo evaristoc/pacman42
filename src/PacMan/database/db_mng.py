@@ -48,7 +48,7 @@ class DatabaseManager:
         player.save()
         return player
 
-    def get_high_scores(self, limit: int = 10) -> List[Player]:
+    def get_high_scores(self, limit: int = 10) -> list[Player]:
         """Retrieve high scores in descending order"""
         return list(
             Player.select()
