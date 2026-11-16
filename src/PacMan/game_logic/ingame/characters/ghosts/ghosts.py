@@ -5,6 +5,7 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import (AIStrategy,
                                                                      InkyAI)
 from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
                                                                     ChasingGhostState,
+                                                                    FrightenedGhostState,
                                                                     GhostCollision)
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
@@ -43,6 +44,7 @@ class Ghost:
                  maze: Maze,
                  speed: int,
                  ai_strategy: AIStrategy,
+                 start_state: type[IGhostState] = ChasingGhostState,
                  spawn_point: tuple[int, int]) -> None:
         """Initializes a Ghost with a name, default state, and AI strategy.
 
@@ -62,7 +64,7 @@ class Ghost:
                                           float] = self.old_position.get_position_from_tile()
         self.interpolation: tuple[float, float] = (0, 0)
         self.speed: int = speed
-        self.state: IGhostState = ChasingGhostState(self)
+        self.state: IGhostState = start_state(self)
         self.first_run = True
 
     def update(self, *, delta_ticks: int, pacman_position: tuple[int, int], pacman_direction: tuple[int, int]) -> None:
@@ -182,6 +184,7 @@ class GhostFactory:
                                   maze=self.maze,
                                   speed=self.speed,
                                   ai_strategy=new_ghost_ai,
+                                  start_state=FrightenedGhostState,
                                   spawn_point=new_ghost_spawn)
         return ghosts
 
@@ -218,8 +221,19 @@ class GhostManager:
             ghost.pacman_dies_reset()
 
 
-if __name__ == '__main__':
+def test() -> None:
     from src.PacMan.game_logic.ingame.maze.maze import MazeFactory
     mf = MazeFactory(nb_cells=12)
     gm = GhostManager(maze=mf.make_maze(), speed=10)
-    print(gm.view())
+    ghost = gm.ghosts[GhostName.BLINKY]
+    for i in range(100):
+        ghost.update(delta_ticks=i,
+                     pacman_position=(5, 5),
+                     pacman_direction=(1, 0))
+    ghost.collide_with_pacman_and_does_ghost_die()
+    for i in range(70):
+        ghost.update(delta_ticks=i,
+                     pacman_position=(5, 5),
+                     pacman_direction=(1, 0))
+        print(ghost.view())
+        print(ghost.view().previous_tile.get_position_from_tile())

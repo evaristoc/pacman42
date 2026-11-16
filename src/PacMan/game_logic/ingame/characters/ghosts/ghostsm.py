@@ -97,7 +97,7 @@ class FrightenedGhostState(IGhostState):
 class EatenGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
-        self.tick_speed = EATEN_GHOST_SPEED
+        self.context.speed = EATEN_GHOST_SPEED
         self.at_spawn: int = 0
 
     def update(self, *,

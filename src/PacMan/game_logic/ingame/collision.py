@@ -18,9 +18,9 @@ class CollisionDetector:
         pos2: tuple[float, float]
     ) -> bool:
         """Detect if two entities collide based on position."""
-        if ((abs(pos1[0] - pos2[0]) < 0.5) and pos1[1] == pos2[1]):
+        if ((abs(pos1[0] - pos2[0]) < 0.8) and pos1[1] == pos2[1]):
             return True
-        if ((abs(pos1[1] - pos2[1]) < 0.5) and pos1[0] == pos2[0]):
+        if ((abs(pos1[1] - pos2[1]) < 0.8) and pos1[0] == pos2[0]):
             return True
         return False
 

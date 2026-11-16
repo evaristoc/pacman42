@@ -530,6 +530,11 @@ class GameLoop:
         self._glm.update_logic(msgs)
         # ### introducing the game logic manager .view() function ###
         snapshot = self._glm.view()
+        if snapshot.session:
+            ghosts = snapshot.session.ghost_mng.ghost_snapshots
+            for name, ghost in ghosts.items():
+                if ghost.state == 'EatenGhostState':
+                    print(f"{name} : {ghost.previous_tile.get_position_from_tile()}, {ghost.interpolation}")
         if isinstance(self._glm.state, IGameState):
             if (self._glm.state.__class__.__name__.lower()
                     != self._currentstate):
