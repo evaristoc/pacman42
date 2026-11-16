@@ -34,8 +34,8 @@ class ITimeState(ABC):
 
 
 class CountDownState(ITimeState):
-    def __init__(self, 
-                 context: "TimeManager", 
+    def __init__(self,
+                 context: "TimeManager",
                  restart: bool = False,
                  from_pause: bool = False):
         self.context: "TimeManager" = context
@@ -86,7 +86,8 @@ class CountDownState(ITimeState):
             self.context._discrete_cd_time = new_time_int
 
     def pause(self) -> None:
-        self.context.state = LevelPauseState(level_active=False,
+        self.context.state = LevelPauseState(restart=self.restart,
+                                             level_active=False,
                                              context=self.context)
 
     def start_from_pause(self) -> None:
@@ -98,8 +99,8 @@ class CountDownState(ITimeState):
 
 
 class LevelActiveState(ITimeState):
-    def __init__(self, 
-                 context: "TimeManager", 
+    def __init__(self,
+                 context: "TimeManager",
                  restart: bool = False,
                  from_pause: bool = False):
         self.context: "TimeManager" = context
@@ -156,9 +157,13 @@ class LevelActiveState(ITimeState):
 
 
 class LevelPauseState(ITimeState):
-    def __init__(self, *, level_active: bool, context: "TimeManager"):
+    def __init__(self, *,
+                 restart: bool = False,
+                 level_active: bool,
+                 context: "TimeManager"):
         super().__init__(context=context)
         self.level_active = level_active
+        self.restart = restart
 
     def update(self) -> UpdateOutcome:
         return UpdateOutcome.GAME_STILL_GOING
@@ -175,7 +180,8 @@ class LevelPauseState(ITimeState):
             else:
                 self.context._level_end_time = (time.time() +
                                                 time_remaining)
-                self.context.state = LevelActiveState(self.context, from_pause=True)
+                self.context.state = LevelActiveState(
+                    self.context, from_pause=True)
         else:
             time_remaining_cd: float | None = self.context._countdown_time_remaining
             if not time_remaining_cd:
@@ -184,7 +190,9 @@ class LevelPauseState(ITimeState):
             else:
                 self.context._countdown_end_time = (time.time() +
                                                     time_remaining_cd)
-                self.context.state = CountDownState(self.context, from_pause=True)
+                self.context.state = CountDownState(self.context,
+                                                    restart=self.restart,
+                                                    from_pause=True)
 
     def restart_countdown(self) -> None:
         return

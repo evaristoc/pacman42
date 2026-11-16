@@ -320,6 +320,7 @@ class HighScoreRegisterState(InGameState):
         if events:
             event = self._validate_events(events, HighScoreRegisterEvents)
             if event == HighScoreRegisterEvents.CANCEL:
+                self.context.session = None
                 return MainMenuState(self.context)
             elif event == HighScoreRegisterEvents.REGISTER:
                 payload = events.get(HighScoreRegisterEvents.REGISTER)

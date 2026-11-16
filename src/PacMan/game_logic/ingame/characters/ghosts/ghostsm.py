@@ -98,6 +98,7 @@ class EatenGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
         self.tick_speed = EATEN_GHOST_SPEED
+        self.at_spawn: int = 0
 
     def update(self, *,
                delta_ticks: int,
@@ -106,9 +107,15 @@ class EatenGhostState(IGhostState):
                ghost_position: tuple[int, int]
                ) -> tuple[tuple[int, int] | None, Union[IGhostState, None]]:
         move = None
-        if ghost_position == self.context.spawn_point:
+
+        if delta_ticks % self.tick_speed == 0:
+            if ghost_position == self.context.spawn_point:
+                self.at_spawn += 1
+            move = self.strategy.return_to_spawn(ghost_position)
+
+        if self.at_spawn >= 2:
             return (None, ChasingGhostState(self.context))
-        move = self.strategy.return_to_spawn(ghost_position)
+
         return move, None
 
     def big_pellet_activated(self) -> IGhostState:

@@ -8,7 +8,7 @@ DATABASE_NAME = 'score.db'
 ########
 # Game #
 ########
-PLAYER_LIVES = 6
+PLAYER_LIVES = 1
 LEVELS = 10
 PACMAN_SPEED_PER_LVL = {1: 10, 2: 28, 3: 26, 4: 24, 5: 22,
                         6: 20, 7: 18, 8: 16, 9: 14, 10: 12}
@@ -18,7 +18,7 @@ PACMAN_SPEED_PER_LVL = {1: 10, 2: 28, 3: 26, 4: 24, 5: 22,
 ##########
 GHOST_SPEED_PER_LVL = {1: 35, 2: 28, 3: 26, 4: 24, 5: 22,
                        6: 20, 7: 18, 8: 16, 9: 14, 10: 12}
-EATEN_GHOST_SPEED = 10
+EATEN_GHOST_SPEED = 5
 CHASING_GHOST_TIME = 14
 FRIGHTENED_GHOST_TIME = 12
 SCATTER_GHOST_TIME = 5

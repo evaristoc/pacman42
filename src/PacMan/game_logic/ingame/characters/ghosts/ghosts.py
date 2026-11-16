@@ -82,8 +82,6 @@ class Ghost:
         if new_state:
             self.state = new_state
         if move or self.first_run:
-            if move == (0, 0):
-                move = random.choice(self.new_position.get_open_walls())
             self.old_position = self.new_position
             self.first_run = False
             self._process_move(move)
@@ -113,6 +111,8 @@ class Ghost:
             position=self.spawn_point)
         self.old_position = self.maze.return_tile_from_pos_with_validation(
             position=self.spawn_point)
+        self.interpolated_position = self.old_position.get_position_from_tile()
+        self.interpolation = (0, 0)
 
     def _process_move(self, move: tuple[int, int] | None) -> None:
         if not move:

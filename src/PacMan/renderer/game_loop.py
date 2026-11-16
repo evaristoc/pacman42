@@ -5,21 +5,21 @@ from pygame import Event
 from types import MethodType
 from typing import TypeVar, Type, Protocol, TYPE_CHECKING
 from src.PacMan.game_logic.gamemanager.gamelogicmng import (
-                                                    GameLogicManager,
-                                                    GLMSnapshot)
+    GameLogicManager,
+    GLMSnapshot)
 from src.PacMan.validation_contracts.event_enums import (
-                                                InGameEvents)
+    InGameEvents)
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
-                                                GhostName)
+    GhostName)
 from src.PacMan.game_logic.gamemanager.game_sm import (
-                                                IGameState,
-                                                MainMenuState,
-                                                InGameState,
-                                                GameOverPlayerLost,
-                                                GameOverPlayerWon,
-                                                PauseMenuState,
-                                                InstructionsMenuState,
-                                                HighScoreRegisterState)
+    IGameState,
+    MainMenuState,
+    InGameState,
+    GameOverPlayerLost,
+    GameOverPlayerWon,
+    PauseMenuState,
+    InstructionsMenuState,
+    HighScoreRegisterState)
 from src.PacMan.renderer.event_handlers import pacman_eh
 if TYPE_CHECKING:  # only required for parameter type assignment
     from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
@@ -38,7 +38,7 @@ class IAction(Protocol):
             self,
             gloop: "GameLoop",
             tick: int
-            ) -> None:
+    ) -> None:
         ...
 
     # def _init_state(
@@ -64,7 +64,7 @@ class MainMenuAction(IAction):
     ) -> None:
         try:
             bg_ = gloop._registry.init.img_assets['background']\
-                                                .get_source('background')
+                .get_source('background')
             gloop._mlx.pygmlx_put_image_to_window(
                 bg_.img,
                 0,
@@ -103,13 +103,14 @@ class InstructionMenuAction(IAction):
     ) -> None:
         try:
             bg_ = gloop._registry.init.img_assets['background']\
-                                                .get_source('background')
+                .get_source('background')
             gloop._mlx.pygmlx_put_image_to_window(
                 bg_.img,
                 0,
                 0
             )
-            txt_ = gloop._registry.instructionsmenustate.img_assets["text"].get_source("instructions_text")
+            txt_ = gloop._registry.instructionsmenustate.img_assets["text"].get_source(
+                "instructions_text")
             if (txt_.metadata and txt_.metadata.x_pos_prop is not None
                     and txt_.metadata.y_pos_prop is not None):
                 gloop._mlx.pygmlx_put_image_to_window(
@@ -117,7 +118,8 @@ class InstructionMenuAction(IAction):
                     txt_.metadata.x_pos_prop,
                     txt_.metadata.y_pos_prop
                 )
-            b_ = gloop._registry.instructionsmenustate.img_assets["return"].get_source("RETURN")
+            b_ = gloop._registry.instructionsmenustate.img_assets["return"].get_source(
+                "RETURN")
             if (b_.metadata and b_.metadata.x_pos_prop is not None
                     and b_.metadata.y_pos_prop is not None):
                 gloop._mlx.pygmlx_put_image_to_window(
@@ -146,7 +148,7 @@ class PauseMenuAction(IAction):
     ) -> None:
         try:
             bg_ = gloop._registry.init.img_assets['background']\
-                                                .get_source('background')
+                .get_source('background')
             gloop._mlx.pygmlx_put_image_to_window(
                 bg_.img,
                 0,
@@ -229,7 +231,7 @@ class GameOverLostAction(IAction):
                 gol_.img,
                 gol_.metadata.x_pos_prop,
                 gol_.metadata.y_pos_prop
-                )
+            )
 
 
 class GameOverWonAction(IAction):
@@ -248,7 +250,7 @@ class GameOverWonAction(IAction):
                 gow_.img,
                 gow_.metadata.x_pos_prop,
                 gow_.metadata.y_pos_prop
-                )
+            )
 
 
 class PlayingAction(IAction):
@@ -280,16 +282,16 @@ class PlayingAction(IAction):
         gloop._assembler.init_drawer()
         board_: ImgsAsset = gloop._assembler\
             .img_loader_factdispatcher(
-                                    "board",
-                                    gloop._assembler.drawer)
+                "board",
+                gloop._assembler.drawer)
         ghosts_: ImgsAsset = gloop._assembler\
             .img_loader_factdispatcher(
-                                    "ghosts",
-                                    GhostName)
+                "ghosts",
+                GhostName)
         pacman_: ImgsAsset = gloop._assembler\
             .img_loader_factdispatcher(
-                                    "pacman",
-                                    InGameEvents)
+                "pacman",
+                InGameEvents)
         pacman_.event_handler = MethodType(pacman_eh, pacman_)
         assets = gloop._registry.ingamestate
         assets.img_assets['board'] = board_
@@ -302,7 +304,7 @@ class PlayingAction(IAction):
             gloop: "GameLoop"
     ) -> None:
         bg_ = gloop._registry.init.img_assets['background']\
-                                            .get_source('background')
+            .get_source('background')
         gloop._mlx.pygmlx_put_image_to_window(
             bg_.img,
             0,
@@ -314,22 +316,22 @@ class PlayingAction(IAction):
         board_ = assets.img_assets["board"].get_source('board')
         if snapshot.session:
             gloop._assembler.drawer.draw(
-                        board_.img,
-                        gloop._glm.session.maze.grid,
-                        None)
+                board_.img,
+                gloop._glm.session.maze.grid,
+                None)
         if (board_.metadata and board_.metadata.x_pos_prop is not None
                 and board_.metadata.y_pos_prop is not None):
             gloop._mlx.pygmlx_put_image_to_window(
                 board_.img,
                 board_.metadata.x_pos_prop,
                 board_.metadata.y_pos_prop
-                )
+            )
         level = gloop._glm.scoremng.player.level
         print(level)
         hub_bottom: ImgsAsset = gloop._assembler.text_loader_factdispatcher(
             "bottom_hub",
             "Level: {:>3}".format(str(level)),
-            )
+        )
         hb_ = hub_bottom.get_source("bottom_hub")
         if (hb_.metadata and hb_.metadata.x_pos_prop is not None
                 and hb_.metadata.y_pos_prop is not None):
@@ -358,7 +360,7 @@ class PlayingAction(IAction):
             snapshot.session is not None and
             snapshot.session.timemng is not None and
             snapshot.session.pacman is not None
-                ):
+        ):
             if snapshot.session.timemng.level_time is None:
                 hub_top: ImgsAsset = gloop._assembler\
                     .text_loader_factdispatcher(
@@ -413,7 +415,8 @@ class PlayingAction(IAction):
                         )
                 if snapshot.player.lives < gloop._assembler._config.lives:
                     blacking = snapshot.player.lives
-                    l_ = assets.img_assets["live"].get_source(f"LIVE_{str(blacking)}")
+                    l_ = assets.img_assets["live"].get_source(
+                        f"LIVE_{str(blacking)}")
                     blck_ = assets.img_assets["live"].get_source("blacking")
                     gloop._mlx.pygmlx_put_image_to_window(
                         blck_.img,
@@ -437,13 +440,13 @@ class PlayingAction(IAction):
                 gloop._mlx.pygmlx_put_image_to_window(
                     p_nextmove.img,
                     gloop._assembler.drawer.next_char_coord(
-                                    snapshot
+                        snapshot
                                     .session
                                     .pacman
                                     .next_tile
                                     .cell_position_x),
                     gloop._assembler.drawer.next_char_coord(
-                                    snapshot
+                        snapshot
                                     .session
                                     .pacman
                                     .next_tile
@@ -455,38 +458,43 @@ class PlayingAction(IAction):
                     p_animations.appendleft(p_nextmove)
 
                 # # GHOSTS ###
-                for g in snapshot.session.ghost_mng.ghost_snapshots:
-                    g_ = assets.img_assets["ghosts"].get_source(g)
+                for g, ss in snapshot.session.ghost_mng.ghost_snapshots.items():
+                    if ss.state == 'FrightenedGhostState':
+                        g_ = assets.img_assets["ghosts"].get_source('POWERUP')
+                    elif ss.state == 'EatenGhostState':
+                        g_ = assets.img_assets["ghosts"].get_source('DEAD')
+                    else:
+                        g_ = assets.img_assets["ghosts"].get_source(g)
                     gloop._mlx.pygmlx_put_image_to_window(
                         g_.img,
                         gloop._assembler.drawer.next_char_coord(
-                                    snapshot
-                                    .session
-                                    .ghost_mng
-                                    .ghost_snapshots[g]
-                                    .previous_tile
-                                    .cell_position_x,
-                                    True,
-                                    snapshot
-                                    .session
-                                    .ghost_mng
-                                    .ghost_snapshots[g]
-                                    .interpolation[0]
-                                    ),
+                            snapshot
+                            .session
+                            .ghost_mng
+                            .ghost_snapshots[g]
+                            .previous_tile
+                            .cell_position_x,
+                            True,
+                            snapshot
+                            .session
+                            .ghost_mng
+                            .ghost_snapshots[g]
+                            .interpolation[0]
+                        ),
                         gloop._assembler.drawer.next_char_coord(
-                                    snapshot
-                                    .session
-                                    .ghost_mng
-                                    .ghost_snapshots[g]
-                                    .previous_tile
-                                    .cell_position_y,
-                                    True,
-                                    snapshot
-                                    .session
-                                    .ghost_mng
-                                    .ghost_snapshots[g]
-                                    .interpolation[1]
-                                    ) + gloop._assembler.drawer.bottom_h)
+                            snapshot
+                            .session
+                            .ghost_mng
+                            .ghost_snapshots[g]
+                            .previous_tile
+                            .cell_position_y,
+                            True,
+                            snapshot
+                            .session
+                            .ghost_mng
+                            .ghost_snapshots[g]
+                            .interpolation[1]
+                        ) + gloop._assembler.drawer.bottom_h)
 
 
 HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
@@ -522,7 +530,6 @@ class GameLoop:
         self._glm.update_logic(msgs)
         # ### introducing the game logic manager .view() function ###
         snapshot = self._glm.view()
-        # print(snapshot.session.timemng)
         if isinstance(self._glm.state, IGameState):
             if (self._glm.state.__class__.__name__.lower()
                     != self._currentstate):
@@ -533,9 +540,9 @@ class GameLoop:
                 self._levelchanged = True
             # print(self._statechanged)
             self._get_action(state=self._glm.state)().action(
-                                            self,
-                                            tick
-                                            )
+                self,
+                tick
+            )
             self._statechanged = False
             self._levelchanged = False
 
@@ -562,5 +569,5 @@ class GameLoop:
     def _get_action(
             self,
             state: IGameState,
-            ) -> type[IAction]:
+    ) -> type[IAction]:
         return HANDLER_REGISTRY[type(state)]
