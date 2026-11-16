@@ -42,7 +42,7 @@ class HighScoreRegisterEvents(IEventEnums):
 
 class GameOverPlayerLostEvents(IEventEnums):
     LOST = auto()
-    
+
 
 class GameOverPlayerWonEvents(IEventEnums):
     WON = auto()

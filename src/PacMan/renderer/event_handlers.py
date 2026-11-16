@@ -5,7 +5,6 @@ from src.PacMan.validation_contracts.event_enums import (
                                         InGameEvents,
                                         MainMenuEvents,
                                         InstructionMenuEvents,
-                                        HighScoreMenuEvents,
                                         HighScoreRegisterEvents,
                                         PauseMenuEvents)
 if TYPE_CHECKING:
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 
 
-EVENT_REGISTRY: dict[str, type[IEventEnums]] = {
+EVENT_REGISTRY: dict[str, IEventEnums] = {
     "START": MainMenuEvents.START,
     "CONTINUE": PauseMenuEvents.CONTINUE,
     "INSTRUCTIONS": MainMenuEvents.INSTRUCTIONS,

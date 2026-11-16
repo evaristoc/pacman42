@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from enum import IntEnum
 from typing import Any, Callable, TypeAlias
@@ -228,8 +227,6 @@ class PyGMLXTextEmulator(PyGMLXImageEmulator):
         super().__init__(width, height)
         # # as it runs from root...
         self.font_path = "src/PacMan/assets/fonts/" + font_path
-        # project_root = Path(__file__).resolve().parents[2]
-        # self.font_path = str(project_root / "src/PacMan/assets/fonts" / font_path)
         self.font_size = font_size
         self.color = color
         self.font: ImageFont.FreeTypeFont | ImageFont.ImageFont

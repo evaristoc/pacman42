@@ -131,9 +131,12 @@ class LivesLoader(ImageLoader):
                                                  .interior_cell_size[0] * .4)
                     rsize_w = metadata.resize_w_prop
                     rsize_h = metadata.resize_h_prop
-                    if rsize_w > assembler._config.size or rsize_h > assembler._config.size:
+                    if (rsize_w > assembler._config.size
+                            or rsize_h > assembler._config.size):
                         raise
-                    metadata.x_pos_prop = init_x_pos + (metadata.resize_w_prop + int(metadata.resize_w_prop / 2)) * i
+                    metadata.x_pos_prop = init_x_pos +\
+                        (metadata.resize_w_prop +
+                         int(metadata.resize_w_prop / 2)) * i
                     metadata.y_pos_prop = (
                         assembler
                             ._config.size + int(assembler._config.size /
@@ -158,19 +161,20 @@ class LivesLoader(ImageLoader):
                         int(assembler.drawer.interior_cell_size[0] * .4),
                         int(assembler.drawer.interior_cell_size[0] * .4)
                     )
-            metadata: ImgMetadata = ImgMetadata()
-            metadata.bg_color = 0xFF000000
+            bmetadata: ImgMetadata = ImgMetadata()
+            bmetadata.bg_color = 0xFF000000
             for y in range(int(assembler.drawer.interior_cell_size[0] * .4)):
-                for x in range(int(assembler.drawer.interior_cell_size[0] * .4)):
-                    if metadata.bg_color is not None:
+                for x in range(
+                        int(assembler.drawer.interior_cell_size[0] * .4)):
+                    if bmetadata.bg_color is not None:
                         imgblack.pygput_pixel(
                             x,
                             y,
-                            metadata.bg_color
+                            bmetadata.bg_color
                         )
             blacksource = Source(
                 img=imgblack,
-                metadata=metadata,
+                metadata=bmetadata,
                 type='computed'
             )
             imgassets.sources.update(
@@ -268,8 +272,6 @@ class MenuLoader(ImageLoader):
                     raise SystemExit(1)
                 with Image.open(path) as imgf:
                     org_w, org_h = imgf.size
-                    # max_wpb = max(min(org_w, max_wpb), int(assembler._config.size * .3))
-                    # max_hpb: int = int(max_wpb / max_w * org_h)
                 metadata: ImgMetadata = ImgMetadata()
                 img = PyMLXPNGEmulator(
                             org_w,
@@ -278,12 +280,6 @@ class MenuLoader(ImageLoader):
                 img.pygput_from_png(
                             str(path)
                         )
-                # metadata.resize_w_prop = 1/3
-                # metadata.resize_h_prop = 1/4
-                # rsize_w = int(org_w * metadata.resize_w_prop)
-                # rsize_h = int(org_h * metadata.resize_h_prop)
-                # rsize_w = max_wpb
-                # rsize_h = max_hpb
                 rsize_h = int(sum([max_h, org_h]) / 2)
                 wh_ratio: float = org_w / org_h
                 rsize_w: int = int(wh_ratio * max_h)
@@ -521,7 +517,8 @@ class GhostsLoader(ImageLoader):
                                              .interior_cell_size[0] * .8)
                 rsize_w = metadata.resize_w_prop
                 rsize_h = metadata.resize_h_prop
-                if rsize_w > assembler._config.size or rsize_h > assembler._config.size:
+                if (rsize_w > assembler._config.size
+                        or rsize_h > assembler._config.size):
                     raise
                 img.pygll_resize(
                             rsize_w,
@@ -597,7 +594,8 @@ class PacManLoader(ImageLoader):
                                                  .interior_cell_size[0] * .8)
                     rsize_w = metadata.resize_w_prop
                     rsize_h = metadata.resize_h_prop
-                    if rsize_w > assembler._config.size or rsize_h > assembler._config.size:
+                    if (rsize_w > assembler._config.size
+                            or rsize_h > assembler._config.size):
                         raise
                     img.pygll_resize(
                                 rsize_w,

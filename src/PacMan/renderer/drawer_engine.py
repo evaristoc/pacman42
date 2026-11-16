@@ -144,7 +144,10 @@ class BoardDrawerEngine:
     #     margin = self.margin
     #     return refpos + unit_step * v * inter + margin
 
-    def next_char_coord(self, v: int, isinterp: bool = False, interp: float = 1.0) -> int:
+    def next_char_coord(self,
+                        v: int,
+                        isinterp: bool = False,
+                        interp: float = 1.0) -> int:
         img_size = self.resized
         tot_cell_size = self.tot_cell_size[0]
         # internal placing of the image on the cell

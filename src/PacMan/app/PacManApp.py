@@ -1,4 +1,3 @@
-import sys
 import logging
 from types import MethodType
 from src.PacMan.app_config.config import MAZE_NR_CELLS, PLAYER_LIVES
@@ -54,9 +53,6 @@ class PacManApp:
                                                 pacman_eh,
                                                 returns_eh,
                                                 menugeneral_eh
-                                                #menuwithexit_eh,
-                                                # mainmenu_eh,
-                                                # pausemenu_eh
                                                 )
         from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState,
@@ -75,8 +71,12 @@ class PacManApp:
             # it will also paint the canvas
             self.dbm = create_database_mng()
             self.glm = self.assembler.init_glm(self.dbm,
-                                               self.assembler._config.cheat,
-                                               self.assembler._config.level_skip,
+                                               self
+                                               .assembler
+                                               ._config.cheat,
+                                               self
+                                               .assembler
+                                               ._config.level_skip,
                                                MainMenuState)
             self.assembler._config = self.assembler._config.model_copy(
                 update={"nb_cells": MAZE_NR_CELLS,

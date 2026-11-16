@@ -26,7 +26,10 @@ class DatabaseManager:
         self._db.create_tables([Player])  # safe=True is the default
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self,
+                 exc_type,
+                 exc_val,
+                 exc_tb) -> None:
         if not self._db.is_closed():
             self._db.close()
 
