@@ -208,7 +208,7 @@ class BoardDrawerEngine:
                 if (start_x + dx < self.__corrected_size
                         and start_y + dy < self.__corrected_size):
                     target_img.pygput_pixel(start_x + dx, start_y + dy, color)
-        if cell.has_pellet():
+        if cell.pellet_state.value == 1 or cell.pellet_state.value == 2:
             self.__draw_pellet(target_img, cell, color=0xffffff)
 
     def __draw_pellet(
