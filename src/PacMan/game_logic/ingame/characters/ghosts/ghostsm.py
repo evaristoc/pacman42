@@ -42,7 +42,7 @@ class IGhostState(ABC):
 class ChasingGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
-        self.tick_speed: int = self.context.speed
+        self.context.speed = self.context.normal_speed
         self.frightened_timer: float = time.time() + CHASING_GHOST_TIME
 
     def update(self, *,
@@ -54,7 +54,7 @@ class ChasingGhostState(IGhostState):
         move = None
         if time.time() > self.frightened_timer:
             return None, ScatterGhostState(self.context)
-        if delta_ticks % self.tick_speed == 0:
+        if delta_ticks % self.context.speed == 0:
             move = self.strategy.decide_move(ghost_pos=ghost_position,
                                              pacman_direction=pacman_direction,
                                              pacman_pos=pacman_position)
@@ -71,7 +71,7 @@ class FrightenedGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
         self.frightened_timer: float = time.time() + FRIGHTENED_GHOST_TIME
-        self.tick_speed: int = self.context.speed
+        self.context.speed: int = self.context.normal_speed
 
     def update(self, *,
                delta_ticks: int,
@@ -82,7 +82,7 @@ class FrightenedGhostState(IGhostState):
         move = None
         if time.time() > self.frightened_timer:
             return None, ChasingGhostState(self.context)
-        if delta_ticks % self.tick_speed == 0:
+        if delta_ticks % self.context.speed == 0:
             move = self.strategy.random_move(ghost_position)
         return (move, None)
 
@@ -108,7 +108,7 @@ class EatenGhostState(IGhostState):
                ) -> tuple[tuple[int, int] | None, Union[IGhostState, None]]:
         move = None
 
-        if delta_ticks % self.tick_speed == 0:
+        if delta_ticks % self.context.speed == 0:
             if ghost_position == self.context.spawn_point:
                 self.at_spawn += 1
             move = self.strategy.return_to_spawn(ghost_position)

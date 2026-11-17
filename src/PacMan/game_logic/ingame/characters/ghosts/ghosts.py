@@ -10,7 +10,6 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
 from dataclasses import dataclass
-import random
 from enum import Enum
 
 
@@ -63,7 +62,8 @@ class Ghost:
         self.interpolated_position: tuple[float,
                                           float] = self.old_position.get_position_from_tile()
         self.interpolation: tuple[float, float] = (0, 0)
-        self.speed: int = speed
+        self.normal_speed: int = speed
+        self.speed: int = self.normal_speed
         self.state: IGhostState = start_state(self)
         self.first_run = True
 
@@ -153,10 +153,9 @@ class GhostFactory:
               GhostName.INKY,
               GhostName.PINKY]
 
-    GHOST_AI = {GhostName.BLINKY: BlinkyAI,
-                GhostName.CLYDE: ClydeAI,
-                GhostName.INKY: InkyAI,
-                GhostName.PINKY: PinkyAI}
+    GHOST_AI: dict[GhostName, type[AIStrategy]] = {GhostName.BLINKY: BlinkyAI,
+                                             GhostName.CLYDE: ClydeAI,
+                                             GhostName.PINKY: PinkyAI}
 
     def __init__(self, maze: Maze, speed: int):
         self.maze: Maze = maze
@@ -170,22 +169,22 @@ class GhostFactory:
     def create_ghosts(self) -> dict[GhostName, Ghost]:
         ghosts: dict[GhostName, Ghost] = {}
         for ghost in self.GHOSTS:
+            new_ghost_spawn = self.ghost_spawn[ghost]
             if ghost == GhostName.INKY:
-
-                new_ghost_spawn = self.ghost_spawn[ghost]
-                new_ghost_ai = self.GHOST_AI[ghost](maze=self.maze,
-                                                    spawn_pos=new_ghost_spawn,
-                                                    blinky=ghosts[GhostName.BLINKY])
+                inky_strat = InkyAI(spawn_pos=new_ghost_spawn, 
+                                    maze=self.maze, 
+                                    blinky=ghosts[GhostName.BLINKY])
+                new_ghost_ai: AIStrategy = inky_strat
             else:
-                new_ghost_spawn = self.ghost_spawn[ghost]
                 new_ghost_ai = self.GHOST_AI[ghost](spawn_pos=new_ghost_spawn,
-                                                    maze=self.maze)
+                                                maze=self.maze)
             ghosts[ghost] = Ghost(name=ghost,
                                   maze=self.maze,
                                   speed=self.speed,
                                   ai_strategy=new_ghost_ai,
                                   start_state=FrightenedGhostState,
                                   spawn_point=new_ghost_spawn)
+
         return ghosts
 
 
