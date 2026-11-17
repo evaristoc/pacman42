@@ -239,21 +239,3 @@ class GhostManager:
     def reset(self) -> None:
         for ghost in self.ghosts.values():
             ghost.pacman_dies_reset()
-
-
-def test() -> None:
-    from src.PacMan.game_logic.ingame.maze.maze import MazeFactory
-    mf = MazeFactory(nb_cells=12)
-    gm = GhostManager(maze=mf.make_maze(), speed=10)
-    ghost = gm.ghosts[GhostName.BLINKY]
-    for i in range(100):
-        ghost.update(delta_ticks=i,
-                     pacman_position=(5, 5),
-                     pacman_direction=(1, 0))
-    ghost.collide_with_pacman_and_does_ghost_die()
-    for i in range(70):
-        ghost.update(delta_ticks=i,
-                     pacman_position=(5, 5),
-                     pacman_direction=(1, 0))
-        print(ghost.view())
-        print(ghost.view().previous_tile.get_position_from_tile())
