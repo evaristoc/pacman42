@@ -1,7 +1,10 @@
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import PelletState
-from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager, GhostName
-from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import GhostCollision
+from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
+    GhostManager,
+    GhostName)
+from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (
+    GhostCollision)
 from src.PacMan.game_logic.player import Player
 from src.PacMan.game_logic.ingame.characters.pacman import Pacman
 from src.PacMan.game_logic.score_mng import ScoreManager
@@ -18,9 +21,7 @@ class CollisionDetector:
         pos2: tuple[float, float]
     ) -> bool:
         """Detect if two entities collide based on position."""
-        if ((abs(pos1[0] - pos2[0]) < 0.5) and pos1[1] == pos2[1]):
-            return True
-        if ((abs(pos1[1] - pos2[1]) < 0.5) and pos1[0] == pos2[0]):
+        if ((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)**(0.5) < 0.75:
             return True
         return False
 
@@ -63,11 +64,19 @@ class CollisionManager:
         pacman_pos = self.pacman.interpolated_position
         collisions = {}
         for ghost in self.ghostmng.ghosts.values():
-            if self.detector.check_positions_collide(ghost.interpolated_position, pacman_pos):
-                collisions[ghost.name] = ghost.collide_with_pacman_and_does_ghost_die()
+            ghost_pos = ghost.interpolated_position
+            if (self.detector.check_positions_collide(ghost_pos,
+                                                      pacman_pos)):
+                collisions[ghost.name] = (
+                    ghost
+                    .collide_with_pacman_and_does_ghost_die())
+
         return collisions
 
-    def _apply_ghost_collision_effects(self, collisions: dict[GhostName, GhostCollision]) -> UpdateOutcome:
+    def _apply_ghost_collision_effects(
+            self,
+            collisions: dict[GhostName, GhostCollision]
+    ) -> UpdateOutcome:
         """Handle the consequences of detected collisions."""
         result = UpdateOutcome.GAME_STILL_GOING
         for collision in collisions.values():

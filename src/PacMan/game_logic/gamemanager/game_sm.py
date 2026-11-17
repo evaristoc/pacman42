@@ -1,13 +1,15 @@
 from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
 from typing import Union
-from src.PacMan.validation_contracts.event_enums import (IEventEnums,
-                                                         InGameEvents,
-                                                         PauseMenuEvents,
-                                                         MainMenuEvents,
-                                                         InstructionMenuEvents,
-                                                         HighScoreMenuEvents,
-                                                         HighScoreRegisterEvents)
+from src.PacMan.validation_contracts.event_enums import (
+    IEventEnums,
+    InGameEvents,
+    PauseMenuEvents,
+    MainMenuEvents,
+    InstructionMenuEvents,
+    HighScoreMenuEvents,
+    HighScoreRegisterEvents
+)
 from typing import Any
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from src.PacMan.app_config.config import GAME_OVER_CD_TIME, LEVELS
@@ -155,7 +157,8 @@ class PauseMenuState(IGameState):
                     self.context.session.timemng.start()
                 else:
                     raise RuntimeError(
-                        "Somehow ended up in pausemenu, without a valid session.")
+                        "Somehow ended up in pausemenu"
+                        ", without a valid session.")
                 return InGameState(self.context)
             elif event == PauseMenuEvents.EXIT:
                 self.context.session = None
@@ -222,7 +225,9 @@ class InGameState(IGameState):
                              ) -> IGameState | None:
         if event in self.PACMAN_STEPS.keys():
             return self._normal_ingame_update(delta_ticks=delta_ticks,
-                                              pacman_move=self.PACMAN_STEPS.get(event))
+                                              pacman_move=self
+                                              .PACMAN_STEPS
+                                              .get(event))
         elif event == InGameEvents.PAUSE:
             return PauseMenuState(self.context)
 
@@ -243,8 +248,11 @@ class InGameState(IGameState):
                               pacman_move: tuple[int, int] | None = None
                               ) -> IGameState | None:
         if self.context.session:
-            outcome: UpdateOutcome = self.context.session.update(pacman_move=pacman_move,
-                                                                 delta_ticks=delta_ticks)
+            outcome: UpdateOutcome = (self
+                                      .context
+                                      .session
+                                      .update(pacman_move=pacman_move,
+                                              delta_ticks=delta_ticks))
             if not outcome.value[0]:
                 return None
             else:
@@ -285,7 +293,8 @@ class GameOverPlayerLost(IGameState):
         return None
 
     @staticmethod
-    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]) -> IEventEnums | None:
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums | None:
         pass
 
 
@@ -305,7 +314,8 @@ class GameOverPlayerWon(IGameState):
         return None
 
     @staticmethod
-    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]) -> IEventEnums | None:
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums | None:
         pass
 
 

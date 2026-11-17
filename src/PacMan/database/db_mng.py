@@ -2,6 +2,7 @@ from datetime import datetime
 from peewee import (SqliteDatabase, Model, CharField, IntegerField,
                     DateTimeField, DatabaseProxy, DoesNotExist)
 from src.PacMan.database.db_path import get_db_path
+from types import TracebackType
 
 db_proxy = DatabaseProxy()
 
@@ -26,10 +27,12 @@ class DatabaseManager:
         self._db.create_tables([Player])  # safe=True is the default
         return self
 
-    def __exit__(self,
-                 exc_type,
-                 exc_val,
-                 exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         if not self._db.is_closed():
             self._db.close()
 

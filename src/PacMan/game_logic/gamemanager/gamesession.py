@@ -1,12 +1,20 @@
-from src.PacMan.game_logic.ingame.maze.maze import Maze, MazeFactory, MazeSnapshot
+from src.PacMan.game_logic.ingame.maze.maze import (Maze,
+                                                    MazeFactory,
+                                                    MazeSnapshot)
 from src.PacMan.game_logic.ingame.time.time import TimeManager, TimeMngSnapshot
 from src.PacMan.game_logic.ingame.time.time_sm import LevelActiveState
-from src.PacMan.game_logic.ingame.characters.pacman import Pacman, PacmanSnapshot
-from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import GhostManager, GhostMngSnapshot
+from src.PacMan.game_logic.ingame.characters.pacman import (Pacman,
+                                                            PacmanSnapshot)
+from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
+    GhostManager,
+    GhostMngSnapshot)
 from src.PacMan.game_logic.ingame.collision import CollisionManager
 from src.PacMan.game_logic.score_mng import ScoreManager
 from src.PacMan.game_logic.player import Player
-from src.PacMan.app_config.config import PACMAN_SPEED_PER_LVL, GHOST_SPEED_PER_LVL, MAZE_NR_CELLS, MAZE_SEED
+from src.PacMan.app_config.config import (PACMAN_SPEED_PER_LVL,
+                                          GHOST_SPEED_PER_LVL,
+                                          MAZE_NR_CELLS,
+                                          MAZE_SEED)
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from dataclasses import dataclass
 
@@ -22,7 +30,8 @@ class GameSessionSnapshot:
 class GameSession:
     """
     The GameSession is responsible for holding the state of a single session.
-    It contains the character manager, the time manager, the maze and the collision manager. 
+    It contains the character manager, the time manager, the maze and the
+    collision manager.
     """
 
     def __init__(self, *, maze: Maze,
@@ -47,7 +56,10 @@ class GameSession:
             self.pacman.update(delta_ticks=delta_ticks,
                                new_direction=pacman_move)
             self.ghost_mng.update(delta_ticks,
-                                  self.pacman.new_position.get_position_from_tile(),
+                                  (self
+                                   .pacman
+                                   .new_position
+                                   .get_position_from_tile()),
                                   self.pacman.direction)
             outcome = self.collision_mng.update()
         return outcome
@@ -64,7 +76,11 @@ class GameSession:
 
 
 class GameSessionFactory:
-    def create_game_new_game(self, level: int, scoremng: ScoreManager, player: Player, friendly_ghosts: bool) -> GameSession:
+    def create_game_new_game(self,
+                             level: int,
+                             scoremng: ScoreManager,
+                             player: Player,
+                             friendly_ghosts: bool) -> GameSession:
         if type(level) is not int:
             raise ValueError("level-variable is not an int.")
         if level not in MAZE_SEED.keys():
