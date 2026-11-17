@@ -109,8 +109,12 @@ class InstructionMenuAction(IAction):
                 0,
                 0
             )
-            txt_ = gloop._registry.instructionsmenustate.img_assets["text"].get_source(
-                "instructions_text")
+            txt_ = gloop\
+                ._registry\
+                .instructionsmenustate\
+                .img_assets["text"].get_source(
+                    "instructions_text"
+                )
             if (txt_.metadata and txt_.metadata.x_pos_prop is not None
                     and txt_.metadata.y_pos_prop is not None):
                 gloop._mlx.pygmlx_put_image_to_window(
@@ -118,8 +122,12 @@ class InstructionMenuAction(IAction):
                     txt_.metadata.x_pos_prop,
                     txt_.metadata.y_pos_prop
                 )
-            b_ = gloop._registry.instructionsmenustate.img_assets["return"].get_source(
-                "RETURN")
+            b_ = gloop\
+                ._registry\
+                .instructionsmenustate\
+                .img_assets["return"].get_source(
+                    "RETURN"
+                    )
             if (b_.metadata and b_.metadata.x_pos_prop is not None
                     and b_.metadata.y_pos_prop is not None):
                 gloop._mlx.pygmlx_put_image_to_window(
@@ -276,7 +284,10 @@ class PlayingAction(IAction):
         # self.drawer.compute(gloop._assembler._config)
         # gloop._assembler.drawer.basic_calcs()
         # nb_cells = self.glm.session.maze.nb_cells
-        nb_cells = gloop._glm.session.maze.nb_cells
+        snapshot: GLMSnapshot = gloop._glm.view()
+        nb_cells = -1
+        if snapshot.session and snapshot.session.maze is not None:
+            nb_cells = snapshot.session.maze.nb_cells
         gloop._assembler._config = gloop._assembler._config.model_copy(
             update={"nb_cells": nb_cells})
         gloop._assembler.init_drawer()
@@ -317,7 +328,7 @@ class PlayingAction(IAction):
         if snapshot.session:
             gloop._assembler.drawer.draw(
                 board_.img,
-                gloop._glm.session.maze.grid,
+                snapshot.session.maze.grid,
                 None)
         if (board_.metadata and board_.metadata.x_pos_prop is not None
                 and board_.metadata.y_pos_prop is not None):
@@ -342,11 +353,13 @@ class PlayingAction(IAction):
             )
         for i in range(gloop._assembler._config.lives):
             l_ = assets.img_assets["live"].get_source(f"LIVE_{i}")
-            gloop._mlx.pygmlx_put_image_to_window(
-                l_.img,
-                l_.metadata.x_pos_prop,
-                l_.metadata.y_pos_prop
-            )
+            if (l_.metadata.x_pos_prop is not None
+                    and l_.metadata.y_pos_prop is not None):
+                gloop._mlx.pygmlx_put_image_to_window(
+                    l_.img,
+                    l_.metadata.x_pos_prop,
+                    l_.metadata.y_pos_prop
+                )
 
     def _update_state(
             self,
@@ -361,8 +374,9 @@ class PlayingAction(IAction):
             snapshot.session.timemng is not None and
             snapshot.session.pacman is not None
         ):
+            hub_top: ImgsAsset
             if snapshot.session.timemng.level_time is None:
-                hub_top: ImgsAsset = gloop._assembler\
+                hub_top = gloop._assembler\
                     .text_loader_factdispatcher(
                         "top_hub",
                         "     STARTING AT {:>4}    !!!! ".format(
@@ -398,7 +412,7 @@ class PlayingAction(IAction):
                 # MENUS ###
                 # # -- hub --
                 if not tick % 60:
-                    hub_top: ImgsAsset = gloop._assembler\
+                    hub_top = gloop._assembler\
                         .text_loader_factdispatcher(
                             "top_hub",
                             "Score: {:>8}   Remaining{:>4}secs".format(
@@ -418,11 +432,13 @@ class PlayingAction(IAction):
                     l_ = assets.img_assets["live"].get_source(
                         f"LIVE_{str(blacking)}")
                     blck_ = assets.img_assets["live"].get_source("blacking")
-                    gloop._mlx.pygmlx_put_image_to_window(
-                        blck_.img,
-                        l_.metadata.x_pos_prop,
-                        l_.metadata.y_pos_prop
-                    )
+                    if (l_.metadata.x_pos_prop is not None
+                            and l_.metadata.y_pos_prop is not None):
+                        gloop._mlx.pygmlx_put_image_to_window(
+                            blck_.img,
+                            l_.metadata.x_pos_prop,
+                            l_.metadata.y_pos_prop
+                        )
                 # # PACMAN ###
                 pacman_steps = getattr(InGameState, 'PACMAN_STEPS')
                 if not snapshot.session.pacman.direction:
@@ -450,7 +466,8 @@ class PlayingAction(IAction):
                                     .session
                                     .pacman
                                     .next_tile
-                                    .cell_position_y) + gloop._assembler.drawer.bottom_h
+                                    .cell_position_y) +
+                    gloop._assembler.drawer.bottom_h
                 )
                 if tick % 5 % snapshot.session.maze.nb_cells:
                     p_animations.append(p_nextmove)
@@ -458,7 +475,8 @@ class PlayingAction(IAction):
                     p_animations.appendleft(p_nextmove)
 
                 # # GHOSTS ###
-                for g, ss in snapshot.session.ghost_mng.ghost_snapshots.items():
+                for g, ss in snapshot\
+                        .session.ghost_mng.ghost_snapshots.items():
                     if ss.state == 'FrightenedGhostState':
                         g_ = assets.img_assets["ghosts"].get_source('POWERUP')
                     elif ss.state == 'EatenGhostState':

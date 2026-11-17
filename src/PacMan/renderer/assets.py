@@ -94,6 +94,6 @@ class AssetRegistry:
     pausemenustate: Assets = field(default_factory=Assets)
     instructionsmenustate: Assets = field(default_factory=Assets)
     gameoverplayerlost: Assets = field(default_factory=Assets)
-    gameoverplayerwon: Assets = field(default_factory=Assets)    
+    gameoverplayerwon: Assets = field(default_factory=Assets)
     highscoremenustate: Assets = field(default_factory=Assets)
     highscoreregisterstate: Assets = field(default_factory=Assets)
