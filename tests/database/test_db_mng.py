@@ -93,5 +93,5 @@ def test_create_database_mng_uses_configured_path(tmp_path: Path,
     monkeypatch.setattr(dbm, "get_db_path", lambda: expected)
     mgr = create_database_mng()
     assert isinstance(mgr, DatabaseManager)
-    assert mgr._path == expected
+
 

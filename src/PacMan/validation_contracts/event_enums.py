@@ -21,6 +21,7 @@ class HighScoreMenuEvents(IEventEnums):
 
 
 class PauseMenuEvents(IEventEnums):
+    PAUSED = auto()
     CONTINUE = auto()
     EXIT = auto()
 
@@ -31,8 +32,17 @@ class InGameEvents(IEventEnums):
     PACMAN_SOUTH = auto()
     PACMAN_WEST = auto()
     PAUSE = auto()
+    LEVEL_SKIP = auto()
 
 
 class HighScoreRegisterEvents(IEventEnums):
     REGISTER = auto()
     CANCEL = auto()
+
+
+class GameOverPlayerLostEvents(IEventEnums):
+    LOST = auto()
+
+
+class GameOverPlayerWonEvents(IEventEnums):
+    WON = auto()

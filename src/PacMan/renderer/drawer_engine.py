@@ -134,7 +134,20 @@ class BoardDrawerEngine:
     def resized(self) -> int:
         return int(self.corrected_size[0] / (2 * self._nb_cells))
 
-    def next_char_coord(self, v: int) -> int:
+    # def move_interpolation(self, v: int, interp: float) -> int:
+    #     img_size = self.resized
+    #     tot_cell_size = self.tot_cell_size[0]
+    #     # internal placing of the image on the cell
+    #     refpos = int((tot_cell_size - img_size) / 2)
+    #     unit_step = (self.interior_cell_size[0]
+    #                  + self.wall_thickness[0])
+    #     margin = self.margin
+    #     return refpos + unit_step * v * inter + margin
+
+    def next_char_coord(self,
+                        v: int,
+                        isinterp: bool = False,
+                        interp: float = 1.0) -> int:
         img_size = self.resized
         tot_cell_size = self.tot_cell_size[0]
         # internal placing of the image on the cell
@@ -142,6 +155,8 @@ class BoardDrawerEngine:
         unit_step = (self.interior_cell_size[0]
                      + self.wall_thickness[0])
         margin = self.margin
+        if isinterp:
+            return refpos + int(unit_step * (v + interp)) + margin
         return refpos + unit_step * v + margin
 
     def draw(
@@ -237,7 +252,7 @@ class BoardDrawerEngine:
         # start_y = y_cell * inter + (2 * wall - wall) * y_cell
         start_x = x_cell * (total - wall)
         start_y = y_cell * (total - wall)
-        print(start_x)
+        # print(start_x)
         if cell.wall_north.value != 1:
             for dx in range(total):
                 for dy in range(wall):

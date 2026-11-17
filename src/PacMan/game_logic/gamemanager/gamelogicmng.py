@@ -6,11 +6,9 @@ from src.PacMan.game_logic.player import Player, PlayerSnapshot
 from src.PacMan.game_logic.score_mng import ScoreManager
 from src.PacMan.database.db_mng import DatabaseManager
 from src.PacMan.game_logic.highscore import HighScoreSnapshot, db_highsc_to_snapshot
+from src.PacMan.app_config.config import LEVELS
 from typing import Any, Callable
 from dataclasses import dataclass
-
-MAX_LEVEL = 2
-
 
 @dataclass(frozen=True)
 class GLMSnapshot:
@@ -25,11 +23,13 @@ class GameLogicManager:
     def __init__(self, *,
                  databasemng: DatabaseManager,
                  friendly_ghosts: bool = False,
+                 level_skip: bool = False,
                  start_state: Callable[["GameLogicManager"],
                                        IGameState] = InGameState,
                  ) -> None:
         self.ticks: int = 0
         self.friendly_ghosts: bool = friendly_ghosts
+        self.level_skip: bool = level_skip
         self.player = Player()
         self.scoremng = ScoreManager(self.player)
         self.dbm: DatabaseManager = databasemng
@@ -72,16 +72,14 @@ class GameLogicManager:
                                                          self.player,
                                                          self.friendly_ghosts)
 
-    def end_game_session(self) -> None:
-        self.session = None
-
     def reset_player(self) -> None:
         self.player = Player()
+        self.scoremng = ScoreManager(self.player)
 
     def toggle_friendly_ghosts(self) -> None:
         return
 
     def final_level(self) -> bool:
-        if self.player.level == MAX_LEVEL:
+        if self.player.level == LEVELS:
             return True
         return False

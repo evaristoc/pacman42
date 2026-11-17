@@ -10,6 +10,8 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
     InstructionsMenuState,
     MainMenuState,
     PauseMenuState,
+    GameOverPlayerLost,
+    GameOverPlayerWon
 )
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from src.PacMan.validation_contracts.event_enums import (
@@ -40,7 +42,8 @@ def make_context(session: Mock | None = None) -> Any:
         final_level=Mock(return_value=False),
         create_game_session=Mock(),
         state=None,
-        dbm=dbm
+        dbm=dbm,
+        reset_player=Mock()
     )
 
 
@@ -176,10 +179,9 @@ def test_level_win_advances_level_and_replaces_session() -> None:
 
     result = state.update_logic(None, 1)
 
-    assert result is None
+    assert isinstance(result, InGameState)
     assert context.player.level == 2
     assert context.session is replacement_session
-    assert isinstance(context.state, InGameState)
     context.create_game_session.assert_called_once_with()
 
 
@@ -201,14 +203,17 @@ def test_game_end_clears_session_and_requests_high_score(
 
     result = state.update_logic(None, 1)
 
-    assert isinstance(result, HighScoreRegisterState)
-    assert context.session is None
+    if outcome == UpdateOutcome.ALL_LIVES_LOST:
+        assert isinstance(result, GameOverPlayerLost)
+    if outcome == UpdateOutcome.ALL_PELLETS_EATEN:
+        assert isinstance(result, GameOverPlayerWon)
 
 
 def test_menu_to_game_pause_resume_game_over_and_registration() -> None:
     session = make_session()
     context = make_context()
     context.create_game_session.return_value = session
+    db = Mock()
 
     state = MainMenuState(context).update_logic(
         {MainMenuEvents.START: None}, 1
@@ -223,14 +228,23 @@ def test_menu_to_game_pause_resume_game_over_and_registration() -> None:
 
     session.update.return_value = UpdateOutcome.ALL_LIVES_LOST
     state = state.update_logic(None, 4)
-    assert isinstance(state, HighScoreRegisterState)
+    assert isinstance(state, GameOverPlayerLost)
 
-    state = state.update_logic(
-        {HighScoreRegisterEvents.REGISTER: {"name": "Ada"}},
-        5,
-    )
+    import time
+    time.sleep(7)
+
+    state = state.update_logic(None, 5)
+
+    context.dbm.__enter__.return_value = db
+    db.player_exists.return_value = False
+
+    if state:
+        state = state.update_logic(
+            {HighScoreRegisterEvents.REGISTER: {"name": "Ada"}},
+            6,
+        )
     assert isinstance(state, MainMenuState)
-    context.player.set_name.assert_called_once_with("Ada")
+    db.add_player.assert_called_once_with("Ada", 300)
 
 
 def test_high_score_cancel_returns_to_menu_without_setting_name() -> None:

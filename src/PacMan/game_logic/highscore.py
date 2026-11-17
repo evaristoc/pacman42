@@ -18,9 +18,9 @@ def db_highsc_to_snapshot(highscores: list[Player]
                           ) -> HighScoreSnapshot | None:
     if not highscores:
         return None
-    hs_players: list[HSPlayerSnapshot] = [HSPlayerSnapshot(rank=i, 
-                                                           name=player.name, 
+    hs_players: list[HSPlayerSnapshot] = [HSPlayerSnapshot(rank=i,
+                                                           name=player.name,
                                                            score=player.score)
-                                          for i, player in enumerate(highscores, 
+                                          for i, player in enumerate(highscores,
                                                                      start=1)]
     return HighScoreSnapshot(highscores=hs_players)

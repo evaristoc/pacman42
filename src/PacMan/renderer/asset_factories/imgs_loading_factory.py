@@ -66,6 +66,7 @@ class BackgroundLoader(ImageLoader):
         source = Source(
             img=PyGMLXImageEmulator(w, h),
             metadata=metadata,
+            type='computed'
         )
         for y in range(h):
             for x in range(w):
@@ -95,14 +96,17 @@ class LivesLoader(ImageLoader):
                          "strategy")
             raise SystemExit(1)
         if (assembler is None or
+                assembler.drawer is None or
                 assembler._config.hub_panels_prop is None or
                 assembler._config.size is None):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
-        _names = [folder.split('/')[-1].upper() for i in range(3)]
+        _names = [folder.split('/')[-1].upper()
+                  for _ in range(assembler._config.lives)]
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         try:
+            init_x_pos = int(assembler._config.size / 3 * 2)
             for i, stem in enumerate(_names):
                 path = _assets / Path(stem + '.png')
                 if not path.is_file():
@@ -120,27 +124,24 @@ class LivesLoader(ImageLoader):
                             str(path)
                         )
                 if (assembler is not None or
-                        assembler._config is not None or
-                        assembler._config.nb_cells is not None and
-                        assembler._config.size is not None or
-                        assembler._config.hub_panels_prop is not None):
-                    if assembler._config.nb_cells is not None:
-                        metadata.resize_w_prop = 1/(2 * assembler
-                                                    ._config.nb_cells)
-                        metadata.resize_h_prop = 1/(2 * assembler
-                                                    ._config.nb_cells)
-                        rsize_w = int(org_w * metadata.resize_w_prop)
-                        rsize_h = int(org_h * metadata.resize_h_prop)
-                    metadata.x_pos_prop = int(assembler._config.size / 2)
-                    num_slots = len(_names) + 4
-                    metadata.x_pos_prop += int(i * 2 *
-                                               assembler
-                                               ._config.size / num_slots)
+                        assembler.drawer is not None):
+                    metadata.resize_w_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .4)
+                    metadata.resize_h_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .4)
+                    rsize_w = metadata.resize_w_prop
+                    rsize_h = metadata.resize_h_prop
+                    if (rsize_w > assembler._config.size
+                            or rsize_h > assembler._config.size):
+                        raise
+                    metadata.x_pos_prop = init_x_pos +\
+                        (metadata.resize_w_prop +
+                         int(metadata.resize_w_prop / 2)) * i
                     metadata.y_pos_prop = (
                         assembler
                             ._config.size + int(assembler._config.size /
                                                 assembler
-                                                ._config.hub_panels_prop))
+                                                ._config.hub_panels_prop) + 5)
                 img.pygll_resize(
                             rsize_w,
                             rsize_h
@@ -153,9 +154,34 @@ class LivesLoader(ImageLoader):
                 )
                 imgassets.sources.update(
                     {
-                        stem: source
+                        str(stem + '_' + str(i)): source
                     }
                 )
+            imgblack = PyMLXPNGEmulator(
+                        int(assembler.drawer.interior_cell_size[0] * .4),
+                        int(assembler.drawer.interior_cell_size[0] * .4)
+                    )
+            bmetadata: ImgMetadata = ImgMetadata()
+            bmetadata.bg_color = 0xFF000000
+            for y in range(int(assembler.drawer.interior_cell_size[0] * .4)):
+                for x in range(
+                        int(assembler.drawer.interior_cell_size[0] * .4)):
+                    if bmetadata.bg_color is not None:
+                        imgblack.pygput_pixel(
+                            x,
+                            y,
+                            bmetadata.bg_color
+                        )
+            blacksource = Source(
+                img=imgblack,
+                metadata=bmetadata,
+                type='computed'
+            )
+            imgassets.sources.update(
+                {
+                    "blacking": blacksource
+                }
+            )
             return imgassets
         except Exception as err:
             logger.exception(f"FATAL: we could not load images : {err}")
@@ -169,28 +195,39 @@ class BoardLoader(ImageLoader):
             assembler: 'RendererAssembler',
             configurator: ConfiguratorT | None = None
     ) -> ImgsAsset:
-        assert configurator is not None
+        # assert configurator is not None
         if (assembler is None or
+                assembler.drawer is None or
                 assembler._config is None or
                 assembler._config.nb_cells is None and
                 assembler._config.size is None or
                 assembler._config.hub_panels_prop is None):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
-        if (isinstance(configurator, BoardDrawerEngine)
-                and assembler._config.size is not None):
-            source = Source(
-                img=PyGMLXImageEmulator(
-                        configurator.corrected_size[0],
-                        configurator.corrected_size[0]
-                    ),
-                metadata=ImgMetadata(
-                    x_pos_prop=int(configurator.margin / 2),
-                    y_pos_prop=(int(configurator.margin / 2)
+        if assembler._config.size is not None:
+            metadata: ImgMetadata = ImgMetadata(
+                    x_pos_prop=int(assembler.drawer.margin / 2),
+                    y_pos_prop=(int(assembler.drawer.margin / 2)
                                 + int(assembler._config.size /
                                       assembler._config.hub_panels_prop)),
+                    bg_color=0xFF000000
                 )
+            source = Source(
+                img=PyGMLXImageEmulator(
+                        assembler.drawer.corrected_size[0],
+                        assembler.drawer.corrected_size[0]
+                    ),
+                metadata=metadata,
+                type='computed'
             )
+            for y in range(assembler.drawer.corrected_size[0]):
+                for x in range(assembler.drawer.corrected_size[0]):
+                    if metadata.bg_color is not None:
+                        source.img.pygput_pixel(
+                            x,
+                            y,
+                            metadata.bg_color
+                        )
         return ImgsAsset(
             asset_name=folder,
             sources={
@@ -216,14 +253,18 @@ class MenuLoader(ImageLoader):
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
-            _names = getattr(configurator, '_member_names_')
+            _names = getattr(configurator, '_member_names_')[:]
         except Exception as err:
             logger.exception("FATAL: a specific configurator type is required"
                              f" : {err}")
             raise SystemExit(1)
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
+        # max_w: float = assembler._config.size * .7
+        # max_wpb: int = int(max_w / len(_names))
+        max_h: int = int(assembler._config.size / (10 + len(_names)))
         try:
             for i, stem in enumerate(_names):
+                print(folder, stem)
                 path = _assets / Path(stem + '.png')
                 if not path.is_file():
                     logger.exception("FATAL: we could not load image"
@@ -239,19 +280,171 @@ class MenuLoader(ImageLoader):
                 img.pygput_from_png(
                             str(path)
                         )
-                metadata.resize_w_prop = 1/3
-                metadata.resize_h_prop = 1/4
-                rsize_w = int(org_w * metadata.resize_w_prop)
-                rsize_h = int(org_h * metadata.resize_h_prop)
+                rsize_h = int(sum([max_h, org_h]) / 2)
+                wh_ratio: float = org_w / org_h
+                rsize_w: int = int(wh_ratio * max_h)
                 if assembler._config.size is not None:
                     metadata.x_pos_prop = (
                         int(assembler._config.size / 2) - int(rsize_w / 2))
                     metadata.y_pos_prop = (int(assembler._config.size /
                                                assembler
                                                ._config.hub_panels_prop))
-                    num_slots = len(_names) + 11
+                    num_slots = 2 * len(_names) + 3
                     metadata.y_pos_prop += (int((i + 1) * 2 * assembler
                                                 ._config.size / num_slots))
+                img.pygll_resize(
+                            rsize_w,
+                            rsize_h
+                        )
+                source = Source(
+                    event_name=stem,
+                    path=path,
+                    img=img,
+                    metadata=metadata,
+                    type='png'
+                )
+                imgassets.sources.update(
+                    {
+                        stem: source
+                    }
+                )
+            return imgassets
+        except Exception as err:
+            logger.exception(f"FATAL: we could not load images : {err}")
+            raise SystemExit(1)
+
+
+class GameOverLoader(ImageLoader):
+    def load(
+            self,
+            folder: str,
+            assembler: 'RendererAssembler',
+            configurator: ConfiguratorT | None = None
+    ) -> ImgsAsset:
+        assert configurator is not None
+        if (assembler is None or
+                assembler._config is None or
+                assembler._config.size is None or
+                assembler._config.hub_panels_prop is None):
+            logger.error(f"Parameters of {folder} loader should have a value")
+            raise SystemExit(1)
+        _assets = assembler.cwd.parent / 'assets' / folder
+        try:
+            _names = getattr(configurator, '_member_names_')[:]
+        except Exception as err:
+            logger.exception("FATAL: a specific configurator type is required"
+                             f" : {err}")
+            raise SystemExit(1)
+        imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
+        if (assembler._config.size is not None
+                and assembler._config.hub_panels_prop is not None):
+            max_w: float = assembler._config.size * .7
+            total_h = assembler._config.size + int(
+                2 * assembler._config.size / assembler._config.hub_panels_prop)
+        try:
+            for i, stem in enumerate(_names):
+                print(folder, stem)
+                path = _assets / Path(stem + '.png')
+                if not path.is_file():
+                    logger.exception("FATAL: we could not load image"
+                                     f" : {path}")
+                    raise SystemExit(1)
+                with Image.open(path) as imgf:
+                    org_w, org_h = imgf.size
+                metadata: ImgMetadata = ImgMetadata()
+                img = PyMLXPNGEmulator(
+                            org_w,
+                            org_h
+                        )
+                img.pygput_from_png(
+                            str(path)
+                        )
+                rsize_w = int(max_w)
+                wh_ratio: float = org_w / org_h
+                rsize_h: int = int(wh_ratio * max_w * .7)
+                if assembler._config.size is not None:
+                    metadata.resize_w_prop = rsize_w
+                    metadata.resize_h_prop = rsize_h
+                    metadata.x_pos_prop = int(
+                        assembler._config.size / 2 - rsize_w / 2)
+                    metadata.y_pos_prop = int(
+                        total_h / 2 - rsize_h / 2)
+                img.pygll_resize(
+                            rsize_w,
+                            rsize_h
+                        )
+                source = Source(
+                    event_name=stem,
+                    path=path,
+                    img=img,
+                    metadata=metadata,
+                    type='png'
+                )
+                imgassets.sources.update(
+                    {
+                        stem: source
+                    }
+                )
+            return imgassets
+        except Exception as err:
+            logger.exception(f"FATAL: we could not load images : {err}")
+            raise SystemExit(1)
+
+
+class ReturnLoader(ImageLoader):
+    def load(
+            self,
+            folder: str,
+            assembler: 'RendererAssembler',
+            configurator: ConfiguratorT | None = None
+    ) -> ImgsAsset:
+        assert configurator is not None
+        if (assembler is None or
+                assembler._config is None or
+                assembler._config.size is None):
+            logger.error(f"Parameters of {folder} loader should have a value")
+            raise SystemExit(1)
+        _assets = assembler.cwd.parent / 'assets' / folder
+        try:
+            _names = getattr(configurator, '_member_names_')[:]
+        except Exception as err:
+            logger.exception("FATAL: a specific configurator type is required"
+                             f" : {err}")
+            raise SystemExit(1)
+        imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
+        if (assembler._config.size is not None
+                and assembler._config.hub_panels_prop is not None):
+            max_w: float = assembler._config.size / 5
+            total_h = assembler._config.size + int(
+                2 * assembler._config.size / assembler._config.hub_panels_prop)
+        try:
+            for i, stem in enumerate(_names):
+                print(folder, stem)
+                path = _assets / Path(stem + '.png')
+                if not path.is_file():
+                    logger.exception("FATAL: we could not load image"
+                                     f" : {path}")
+                    raise SystemExit(1)
+                with Image.open(path) as imgf:
+                    org_w, org_h = imgf.size
+                metadata: ImgMetadata = ImgMetadata()
+                img = PyMLXPNGEmulator(
+                            org_w,
+                            org_h
+                        )
+                img.pygput_from_png(
+                            str(path)
+                        )
+                rsize_w = int(max_w)
+                hw_ratio: float = org_h / org_w
+                rsize_h: int = int(hw_ratio * max_w)
+                if assembler._config.size is not None:
+                    metadata.resize_w_prop = rsize_w
+                    metadata.resize_h_prop = rsize_h
+                    metadata.x_pos_prop = int(
+                        assembler._config.size / 10 * 7)
+                    metadata.y_pos_prop = int(
+                        total_h / 10 * 7)
                 img.pygll_resize(
                             rsize_w,
                             rsize_h
@@ -281,18 +474,14 @@ class GhostsLoader(ImageLoader):
             assembler: 'RendererAssembler',
             configurator: ConfiguratorT | None = None
     ) -> ImgsAsset:
-        assert configurator is not None
         if (assembler is None or
-                assembler._config is None or
-                assembler._config.nb_cells is None and
-                assembler._config.size is None or
-                assembler._config.hub_panels_prop is None):
+                assembler.drawer is None):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
-            print(folder, vars(configurator))
-            _names = getattr(configurator, '_member_names_')
+            # print(folder, vars(configurator))
+            _names = getattr(configurator, '_member_names_')[:]
             if configurator is GhostName:
                 _names = _names + ['DEAD', 'POWERUP']
             else:
@@ -303,8 +492,9 @@ class GhostsLoader(ImageLoader):
             raise SystemExit(1)
         imgassets: ImgsAsset = ImgsAsset(asset_name=folder.split('/')[-1])
         try:
+            print(assembler.drawer.interior_cell_size)
             for stem in _names:
-                print(folder, stem)
+                # print(folder, stem)
                 path = _assets / Path(stem + '.png')
                 if not path.is_file():
                     logger.exception("FATAL: we could not load image"
@@ -321,11 +511,15 @@ class GhostsLoader(ImageLoader):
                             str(path)
                         )
                 metadata: ImgMetadata = ImgMetadata()
-                if assembler._config.nb_cells is not None:
-                    metadata.resize_w_prop = 1/(2 * assembler._config.nb_cells)
-                    metadata.resize_h_prop = 1/(2 * assembler._config.nb_cells)
-                    rsize_w = int(org_w * metadata.resize_w_prop)
-                    rsize_h = int(org_h * metadata.resize_h_prop)
+                metadata.resize_w_prop = int(assembler.drawer
+                                             .interior_cell_size[0] * .8)
+                metadata.resize_h_prop = int(assembler.drawer
+                                             .interior_cell_size[0] * .8)
+                rsize_w = metadata.resize_w_prop
+                rsize_h = metadata.resize_h_prop
+                if (rsize_w > assembler._config.size
+                        or rsize_h > assembler._config.size):
+                    raise
                 img.pygll_resize(
                             rsize_w,
                             rsize_h
@@ -356,17 +550,15 @@ class PacManLoader(ImageLoader):
     ) -> ImgsAsset:
         assert configurator is not None
         if (assembler is None or
-                assembler._config is None or
-                assembler._config.nb_cells is None and
-                assembler._config.size is None or
-                assembler._config.hub_panels_prop is None):
+                assembler.drawer is None):
             logger.error(f"Parameters of {folder} loader should have a value")
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
-        print(folder, vars(configurator))
+        # folder, vars(configurator))
         try:
-            _names = getattr(configurator, '_member_names_')
+            _names = getattr(configurator, '_member_names_')[:]
             _names.remove('PAUSE')
+            _names.remove('LEVEL_SKIP')
             _temp_sources: list[Source] = []
             _files = [f'{n}-{str(v)}' for v in range(1, 4, 1) for n in _names]
         except Exception as err:
@@ -396,13 +588,15 @@ class PacManLoader(ImageLoader):
                                 str(path)
                             )
                     metadata: ImgMetadata = ImgMetadata()
-                    if assembler._config.nb_cells is not None:
-                        metadata.resize_w_prop = 1/(2 *
-                                                    assembler._config.nb_cells)
-                        metadata.resize_h_prop = 1/(2 *
-                                                    assembler._config.nb_cells)
-                        rsize_w = int(org_w * metadata.resize_w_prop)
-                        rsize_h = int(org_h * metadata.resize_h_prop)
+                    metadata.resize_w_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .8)
+                    metadata.resize_h_prop = int(assembler.drawer
+                                                 .interior_cell_size[0] * .8)
+                    rsize_w = metadata.resize_w_prop
+                    rsize_h = metadata.resize_h_prop
+                    if (rsize_w > assembler._config.size
+                            or rsize_h > assembler._config.size):
+                        raise
                     img.pygll_resize(
                                 rsize_w,
                                 rsize_h

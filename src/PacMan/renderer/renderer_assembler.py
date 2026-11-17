@@ -11,13 +11,16 @@ from src.PacMan.renderer.asset_factories.imgs_loading_factory import (
                                             BackgroundLoader,
                                             BoardLoader,
                                             ImageLoader,
+                                            ReturnLoader,
                                             LivesLoader,
                                             MenuLoader,
+                                            GameOverLoader,
                                             GhostsLoader,
                                             PacManLoader)
 from src.PacMan.renderer.asset_factories.text_loading_factory import (
                                             TextLoader,
-                                            HubTextLoader)
+                                            HubTextLoader,
+                                            InstructionsTextLoader)
 from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
 
 
@@ -27,35 +30,42 @@ logger = logging.getLogger(__name__)
 class RendererAssembler:
     def __init__(self, config: ValidBoardConfig) -> None:
         self._config = config
+        self.drawer: BoardDrawerEngine = BoardDrawerEngine()
         self.cwd = Path(__file__).resolve().parent
         self._imgasset_map: dict[str, ImageLoader] = {
             "background": BackgroundLoader(),
             "board": BoardLoader(),
             "lives": LivesLoader(),
+            "instructions": ReturnLoader(),
             "menus": MenuLoader(),
             "ghosts": GhostsLoader(),
-            "pacman": PacManLoader()
+            "pacman": PacManLoader(),
+            "gameoverlost": GameOverLoader(),
+            "gameoverwon": GameOverLoader()
         }
         self._textasset_map: dict[str, TextLoader] = {
-            'hub': HubTextLoader()
+            'hub': HubTextLoader(),
+            'instructions': InstructionsTextLoader()
         }
 
     def init_glm(
             self,
             databasemng: DatabaseManager,
             cheat: bool = False,
+            level_skip: bool = False,
             state: type[IGameState] = InGameState) -> GameLogicManager:
         try:
             return GameLogicManager(databasemng=databasemng,
                                     friendly_ghosts=cheat,
+                                    level_skip=level_skip,
                                     start_state=state)
         except Exception:
             logger.error("FATAL: maze couldnot be made with following params: "
                          f"perfect True, seed 42, config: {self._config}")
             raise SystemExit(1)
 
-    def init_drawer(self) -> BoardDrawerEngine:
-        return BoardDrawerEngine()
+    def init_drawer(self) -> None:
+        self.drawer.compute(self._config)
 
     def init_engine(self) -> PyGMiniLibXEmulator:
         if self._config and self._config.size and self._config.hub_panels_prop:
@@ -76,12 +86,19 @@ class RendererAssembler:
     ) -> ImgsAsset:
         if 'live' in folder:
             return self._imgasset_map['lives'].load(folder, self)
+        if 'gameoverlost' in folder:
+            return self._imgasset_map['gameoverlost'].load(folder, self, event)
+        if 'gameoverwon' in folder:
+            return self._imgasset_map['gameoverwon'].load(folder, self, event)
+        if 'instructions' in folder:
+            return self._imgasset_map['instructions'].load(folder, self, event)
+        # above the ones that ALSO might contain 'menus' word in folder
+        if 'menus' in folder:
+            return self._imgasset_map['menus'].load(folder, self, event)
         if 'background' in folder:
             return self._imgasset_map['background'].load(folder, self)
         if 'board' in folder:
-            return self._imgasset_map['board'].load(folder, self, event)
-        if 'menus' in folder:
-            return self._imgasset_map['menus'].load(folder, self, event)
+            return self._imgasset_map['board'].load(folder, self)
         if 'ghosts' in folder:
             return self._imgasset_map['ghosts'].load(folder, self, event)
         if 'pacman' in folder:
@@ -95,6 +112,12 @@ class RendererAssembler:
             ) -> ImgsAsset:
         if 'hub' in folder:
             return self._textasset_map['hub'].upload_text(
+                folder,
+                msg,
+                self
+            )
+        if 'instructions' in folder:
+            return self._textasset_map['instructions'].upload_text(
                 folder,
                 msg,
                 self

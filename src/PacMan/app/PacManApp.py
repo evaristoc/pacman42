@@ -1,6 +1,6 @@
 import logging
 from types import MethodType
-from src.PacMan.app_config.config import MAZE_NR_CELLS
+from src.PacMan.app_config.config import MAZE_NR_CELLS, PLAYER_LIVES
 from src.PacMan.validation_contracts.valid_game_config import (
     ValidAppEntriesConfig,
     ValidBoardConfig)
@@ -45,17 +45,22 @@ class PacManApp:
                                             InGameEvents,
                                             MainMenuEvents,
                                             PauseMenuEvents,
+                                            InstructionMenuEvents,
+                                            GameOverPlayerLostEvents,
+                                            GameOverPlayerWonEvents,
                                             HighScoreRegisterEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
-                                                menuwithexit_eh,
-                                                # mainmenu_eh,
-                                                # pausemenu_eh
+                                                returns_eh,
+                                                menugeneral_eh
                                                 )
         from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState,
                                                 MainMenuState,
                                                 PauseMenuState,
+                                                GameOverPlayerLost,
+                                                GameOverPlayerWon,
+                                                InstructionsMenuState,
                                                 HighScoreRegisterState)
         from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
                                                 GhostName)
@@ -66,14 +71,18 @@ class PacManApp:
             # it will also paint the canvas
             self.dbm = create_database_mng()
             self.glm = self.assembler.init_glm(self.dbm,
-                                               self.assembler._config.cheat,
+                                               self
+                                               .assembler
+                                               ._config.cheat,
+                                               self
+                                               .assembler
+                                               ._config.level_skip,
                                                MainMenuState)
-            nb_cells = MAZE_NR_CELLS
             self.assembler._config = self.assembler._config.model_copy(
-                update={"nb_cells": nb_cells})
-            self.drawer = self.assembler.init_drawer()
-            # NOTE I need to compute before loading, need those values
-            self.drawer.compute(self.assembler._config)
+                update={"nb_cells": MAZE_NR_CELLS,
+                        "lives": PLAYER_LIVES})
+            # NOTE: now assembler is also a drawer (strongly related)
+            self.assembler.init_drawer()
             self.pygmlx = self.assembler.init_engine()
             # self.maze = self.glm.session.maze
             background: ImgsAsset = self.assembler\
@@ -83,12 +92,15 @@ class PacManApp:
             board: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "board",
-                                        self.drawer)
-            # rsized = self.drawer.resized
+                                        None)
+            print(board)
             ghosts: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "ghosts",
                                         GhostName)
+            print(ghosts)
+        # finally:
+        #     sys.exit(1)
             pacman: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "pacman",
@@ -98,16 +110,47 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "menus/main",
                                         MainMenuEvents)
-            main_menu.event_handler = MethodType(menuwithexit_eh, main_menu)
+            main_menu.event_handler = MethodType(menugeneral_eh, main_menu)
             pause_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/pause",
                                         PauseMenuEvents)
-            pause_menu.event_handler = MethodType(menuwithexit_eh, pause_menu)
+            pause_menu.event_handler = MethodType(menugeneral_eh, pause_menu)
+            instructions: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
+                                        "instructions_text",
+                                        """
+      --- INSTRUCTIONS ---
+
+    --> right arrow == move right
+    <-- left arrow == move left
+    ^   up arrow == move up
+    v   down arrow == move down
+
+    'p' pause game
+    'c' cheat the level
+                                        """
+                                        )
+            instructions_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
+                                        "menus/instructions",
+                                        InstructionMenuEvents)
+            instructions_menu.event_handler = MethodType(returns_eh,
+                                                         instructions_menu)
             register_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/register",
                                         HighScoreRegisterEvents)
+            register_menu.event_handler = MethodType(menugeneral_eh,
+                                                     register_menu)
+            gameoverlost_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
+                                        "menus/gameoverlost",
+                                        GameOverPlayerLostEvents)
+            gameoverwon_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
+                                        "menus/gameoverwon",
+                                        GameOverPlayerWonEvents)
             # three lives
             hub_bottom_img: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
@@ -152,6 +195,25 @@ class PacManApp:
                     pause_menu.asset_name: pause_menu
                 }
             )
+            instructions_assets: Assets = Assets(
+                state_name=InstructionsMenuState.__name__,
+                img_assets={
+                    "text": instructions,
+                    "return": instructions_menu
+                }
+            )
+            gameoverlost_assets: Assets = Assets(
+                state_name=GameOverPlayerLost.__name__,
+                img_assets={
+                    gameoverlost_menu.asset_name: gameoverlost_menu
+                }
+            )
+            gameoverwon_assets: Assets = Assets(
+                state_name=GameOverPlayerWon.__name__,
+                img_assets={
+                    gameoverwon_menu.asset_name: gameoverwon_menu
+                }
+            )
             register_assets: Assets = Assets(
                 state_name=HighScoreRegisterState.__name__,
                 img_assets={
@@ -163,6 +225,9 @@ class PacManApp:
                ingamestate=ingame_assets,
                mainmenustate=main_assets,
                pausemenustate=pause_assets,
+               instructionsmenustate=instructions_assets,
+               gameoverplayerlost=gameoverlost_assets,
+               gameoverplayerwon=gameoverwon_assets,
                highscoreregisterstate=register_assets
             )
         except Exception as err:
@@ -176,13 +241,11 @@ class PacManApp:
         if (
             self.pygmlx is not None
             and self.glm is not None
-            and self.drawer is not None
             and self.assembler is not None
             and self.assetregistry is not None
         ):
             gameloop = GameLoop(self.pygmlx,
                                 self.glm,
-                                self.drawer,
                                 self.assembler,
                                 self.assetregistry)
             self.pygmlx.pygmlx_loop(gameloop)

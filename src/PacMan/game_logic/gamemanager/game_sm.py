@@ -10,13 +10,11 @@ from src.PacMan.validation_contracts.event_enums import (IEventEnums,
                                                          HighScoreRegisterEvents)
 from typing import Any
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
+from src.PacMan.app_config.config import GAME_OVER_CD_TIME, LEVELS
 import time
 if TYPE_CHECKING:
     from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
 import sys
-
-MAX_LEVEL = 3
-GAMEOVER_TIMER = 5
 
 
 class GameStateError(Exception):
@@ -101,17 +99,17 @@ class InstructionsMenuState(IGameState):
             if event == InstructionMenuEvents.RETURN:
                 return MainMenuState(self.context)
 
-#         return None
+        return None
 
     @staticmethod
     def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums | None:
         priority_order = [InstructionMenuEvents.RETURN]
 
-#         for event in priority_order:
-#             if event in events:
-#                 return event
-#         return list(events.keys())[0]
+        for event in priority_order:
+            if event in events:
+                return event
+        return list(events.keys())[0]
 
 
 class HighScoreMenuState(IGameState):
@@ -156,10 +154,11 @@ class PauseMenuState(IGameState):
                 if self.context.session:
                     self.context.session.timemng.start()
                 else:
-                    raise RuntimeError("Somehow ended up in pausemenu, without a valid session.")
+                    raise RuntimeError(
+                        "Somehow ended up in pausemenu, without a valid session.")
                 return InGameState(self.context)
             elif event == PauseMenuEvents.EXIT:
-                self.context.end_game_session()
+                self.context.session = None
                 return HighScoreRegisterState(self.context)
         return None
 
@@ -187,7 +186,6 @@ class InGameState(IGameState):
         super().__init__(context=context)
         if not self.context.session:
             self.context.session = self.context.create_game_session()
-            
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
@@ -207,12 +205,12 @@ class InGameState(IGameState):
     @staticmethod
     def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums | None:
-        priority_order = [InGameEvents.PAUSE,
+        priority_order = [InGameEvents.LEVEL_SKIP,
+                          InGameEvents.PAUSE,
                           InGameEvents.PACMAN_NORTH,
                           InGameEvents.PACMAN_EAST,
                           InGameEvents.PACMAN_SOUTH,
                           InGameEvents.PACMAN_WEST]
-
         for event in priority_order:
             if event in events:
                 return event
@@ -227,6 +225,15 @@ class InGameState(IGameState):
                                               pacman_move=self.PACMAN_STEPS.get(event))
         elif event == InGameEvents.PAUSE:
             return PauseMenuState(self.context)
+
+        elif event == InGameEvents.LEVEL_SKIP:
+            if self.context.level_skip:
+                if not self.context.final_level():
+                    return self._increment_level()
+                else:
+                    return GameOverPlayerWon(self.context)
+            else:
+                return None
         else:
             raise ValueError(f"Passed invalid event: {event} to"
                              " InGameState._process_event_enums.")
@@ -245,11 +252,11 @@ class InGameState(IGameState):
         return None
 
     def _increment_level(self) -> IGameState:
-        if self.context.player.level == MAX_LEVEL:
+        if self.context.player.level == LEVELS:
             raise RuntimeError(
                 "Can't increment level. Level is already final level.")
         self.context.player.level += 1
-        self.context.end_game_session()
+        self.context.session = None
         return InGameState(self.context)
 
     def _process_level_over(self, *,
@@ -265,7 +272,7 @@ class InGameState(IGameState):
 class GameOverPlayerLost(IGameState):
     def __init__(self, context: "GameLogicManager"):
         super().__init__(context=context)
-        self._timer: float = time.time() + GAMEOVER_TIMER
+        self._timer: float = time.time() + GAME_OVER_CD_TIME
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
@@ -285,7 +292,7 @@ class GameOverPlayerLost(IGameState):
 class GameOverPlayerWon(IGameState):
     def __init__(self, context: "GameLogicManager"):
         super().__init__(context=context)
-        self._timer: float = time.time() + GAMEOVER_TIMER
+        self._timer: float = time.time() + GAME_OVER_CD_TIME
 
     def update_logic(self,
                      events: dict[IEventEnums, dict[str, Any] | None] | None,
@@ -313,6 +320,7 @@ class HighScoreRegisterState(InGameState):
         if events:
             event = self._validate_events(events, HighScoreRegisterEvents)
             if event == HighScoreRegisterEvents.CANCEL:
+                self.context.session = None
                 return MainMenuState(self.context)
             elif event == HighScoreRegisterEvents.REGISTER:
                 payload = events.get(HighScoreRegisterEvents.REGISTER)
@@ -331,8 +339,8 @@ class HighScoreRegisterState(InGameState):
                         db.update_if_better_score(name, score)
                     else:
                         db.add_player(name, score)
-                        
-                self.context.end_game_session()
+
+                self.context.session = None
                 return MainMenuState(self.context)
 
         return None
