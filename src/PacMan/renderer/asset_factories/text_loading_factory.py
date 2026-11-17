@@ -27,6 +27,68 @@ class TextLoader(ABC):
         ...
 
 
+class InputTextLoader(TextLoader):
+    def upload_text(
+            self,
+            folder: str,
+            msg: str,
+            assembler: 'RendererAssembler'
+            ) -> ImgsAsset:
+        if (assembler is None or
+                assembler._config is None or
+                assembler._config.nb_cells is None and
+                assembler._config.size is None or
+                assembler._config.hub_panels_prop is None):
+            logger.error(f"Parameters of {folder} loader should have a value")
+            raise SystemExit(1)
+        imgasset: ImgsAsset = ImgsAsset(asset_name=folder)
+        metadata: TextMetadata = TextMetadata()
+        metadata.text_template = msg
+        metadata.text = msg
+        metadata.font_path = 'CHANGO.TTF'
+        metadata.font_size_prop = 22.8
+        metadata.color = 0xF6303F
+        metadata.text_x_prop = 5
+        metadata.text_y_prop = 5
+        if assembler._config.size is not None:
+            metadata.x_pos_prop = int(assembler._config.size / 2)
+            metadata.y_pos_prop = int(assembler._config.size / 2) +\
+                int(assembler._config.size / assembler._config.hub_panels_prop)
+            font_size = int(assembler._config.size /
+                            metadata.font_size_prop)
+            h = font_size
+            w = 15 * font_size
+            source = Source(
+                img=PyGMLXTextEmulator(
+                                width=w,
+                                height=h,
+                                font_path=metadata.font_path,
+                                font_size=font_size,
+                                color=metadata.color
+                                ),
+                metadata=metadata,
+            )
+        if metadata and metadata.bg_color is not None:
+            for y in range(h):
+                for x in range(w):
+                    source.img.pygput_pixel(
+                        x,
+                        y,
+                        metadata.bg_color
+                    )
+        if isinstance(source.img, PyGMLXTextEmulator):
+            source.img.pygput_from_text(
+                                metadata.text_x_prop,
+                                metadata.text_y_prop,
+                                metadata.text)
+        imgasset.sources.update(
+            {
+                folder: source,
+            }
+        )
+        return imgasset
+
+
 class HubTextLoader(TextLoader):
     def upload_text(
             self,
@@ -92,13 +154,14 @@ class HubTextLoader(TextLoader):
         return imgasset
 
 
-class InstructionsTextLoader(TextLoader):
+class InfoTextLoader(TextLoader):
     def upload_text(
             self,
             folder: str,
             msg: str,
             assembler: 'RendererAssembler'
             ) -> ImgsAsset:
+        print(1111)
         if (assembler is None or
                 assembler._config is None or
                 assembler._config.size is None or
@@ -124,6 +187,7 @@ class InstructionsTextLoader(TextLoader):
             font_size = int(assembler._config.size /
                             metadata.font_size_prop)
             source = Source(
+                event_name=folder,
                 img=PyGMLXTextEmulator(
                                 width=w,
                                 height=h,

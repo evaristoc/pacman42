@@ -5,6 +5,7 @@ from src.PacMan.validation_contracts.event_enums import (
                                         InGameEvents,
                                         MainMenuEvents,
                                         InstructionMenuEvents,
+                                        HighScoreMenuEvents,
                                         HighScoreRegisterEvents,
                                         PauseMenuEvents)
 if TYPE_CHECKING:
@@ -16,15 +17,16 @@ EventMsg: TypeAlias = dict[IEventEnums, dict[str, Any] | None] | None
 
 
 EVENT_REGISTRY: dict[str, IEventEnums] = {
+    # based on event
     "START": MainMenuEvents.START,
     "CONTINUE": PauseMenuEvents.CONTINUE,
     "INSTRUCTIONS": MainMenuEvents.INSTRUCTIONS,
     "HIGHSCORES": MainMenuEvents.HIGHSCORES,
     "REGISTER": HighScoreRegisterEvents.REGISTER,
-    "RETURN": InstructionMenuEvents.RETURN,
     "CANCEL": HighScoreRegisterEvents.CANCEL,
-    # "RETURN-HIGHSCORE": ??
-    # "RETURN-REGISTERED": ??
+    # based on info page
+    "instructions": InstructionMenuEvents.RETURN,
+    "leaderboard": HighScoreMenuEvents.RETURN,
 }
 
 
@@ -125,6 +127,6 @@ def returns_eh(
                                    y,
                                    start_x,
                                    start_y):
-                    msgs[getattr(EVENT_REGISTRY[sk.event_name],
+                    msgs[getattr(EVENT_REGISTRY[self.asset_name],
                                  sk.event_name)] = None
                     break

@@ -254,6 +254,8 @@ class MenuLoader(ImageLoader):
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
             _names = getattr(configurator, '_member_names_')[:]
+            if folder == 'register':
+                _names.remove('INPUT')
         except Exception as err:
             logger.exception("FATAL: a specific configurator type is required"
                              f" : {err}")
@@ -406,6 +408,7 @@ class ReturnLoader(ImageLoader):
             raise SystemExit(1)
         _assets = assembler.cwd.parent / 'assets' / folder
         try:
+            print(type(configurator))
             _names = getattr(configurator, '_member_names_')[:]
         except Exception as err:
             logger.exception("FATAL: a specific configurator type is required"

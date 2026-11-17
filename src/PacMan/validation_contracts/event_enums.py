@@ -38,6 +38,7 @@ class InGameEvents(IEventEnums):
 class HighScoreRegisterEvents(IEventEnums):
     REGISTER = auto()
     CANCEL = auto()
+    # INPUT = auto()
 
 
 class GameOverPlayerLostEvents(IEventEnums):

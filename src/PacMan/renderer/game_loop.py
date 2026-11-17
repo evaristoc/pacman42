@@ -12,14 +12,15 @@ from src.PacMan.validation_contracts.event_enums import (
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
     GhostName)
 from src.PacMan.game_logic.gamemanager.game_sm import (
-    IGameState,
-    MainMenuState,
-    InGameState,
-    GameOverPlayerLost,
-    GameOverPlayerWon,
-    PauseMenuState,
-    InstructionsMenuState,
-    HighScoreRegisterState)
+                                            IGameState,
+                                            MainMenuState,
+                                            InGameState,
+                                            GameOverPlayerLost,
+                                            GameOverPlayerWon,
+                                            PauseMenuState,
+                                            InstructionsMenuState,
+                                            HighScoreRegisterState,
+                                            HighScoreMenuState)
 from src.PacMan.renderer.event_handlers import pacman_eh
 if TYPE_CHECKING:  # only required for parameter type assignment
     from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
@@ -121,6 +122,103 @@ class InstructionMenuAction(IAction):
                     txt_.img,
                     txt_.metadata.x_pos_prop,
                     txt_.metadata.y_pos_prop
+                )
+            b_ = gloop\
+                ._registry\
+                .instructionsmenustate\
+                .img_assets["return"].get_source(
+                    "RETURN"
+                    )
+            if (b_.metadata and b_.metadata.x_pos_prop is not None
+                    and b_.metadata.y_pos_prop is not None):
+                gloop._mlx.pygmlx_put_image_to_window(
+                    b_.img,
+                    b_.metadata.x_pos_prop,
+                    b_.metadata.y_pos_prop
+                )
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
+
+
+class LeaderboardMenuAction(IAction):
+    def action(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        if gloop._statechanged:
+            self._init_state(gloop)
+
+    def _init_state(
+            self,
+            gloop: GameLoop
+    ) -> None:
+        try:
+            snapshop = gloop._glm.view()
+            bg_ = gloop._registry.init.img_assets['background']\
+                .get_source('background')
+            gloop._mlx.pygmlx_put_image_to_window(
+                bg_.img,
+                0,
+                0
+            )
+            # txt_ = gloop\
+            #     ._registry\
+            #     .highscoremenustate\
+            #     .img_assets["text"].get_source(
+            #         "leaderboard_table"
+            #     )
+            header = f"     {'rank':<3} | {'username':<10} | {'score':<5}"
+            separator = "     " + "-" * len(header)
+            # print(snapshop.game_state)
+            # leader_list = [f"{rank:<3} | {username:<10} | {score:05d}"
+            #                for rank, username, score
+            #                in snapshop.highscores]
+            mock_scores = [
+                (1, "Alice", 1500),
+                (2, "Bob", 1200),
+                (3, "Charlie", 950),
+            ]
+            # NOTE for size === 750
+            header_txt = "\n".join([header, separator])
+            header_: ImgsAsset = gloop\
+                ._assembler.text_loader_factdispatcher(
+                        "leaderboard",
+                        header_txt,
+                )
+            h_ = header_.get_source("leaderboard")
+            rank_list = [f"    {alldata[0]:<3}"
+                         for alldata
+                         in mock_scores]
+            h_.img.pygput_from_text(
+                10,
+                100,
+                "\n".join(rank_list)
+            )
+            user_list = [f"{alldata[1]:<10}"
+                         for alldata
+                         in mock_scores]
+            h_.img.pygput_from_text(
+                200,
+                100,
+                "\n".join(user_list)
+            )
+            score_list = [f"{' ' * (10 - len(str(alldata[2])))}{alldata[2]}"
+                          for alldata
+                          in mock_scores]
+            h_.img.pygput_from_text(
+                400,
+                100,
+                "\n".join(score_list)
+            )
+            if (h_.metadata and h_.metadata.x_pos_prop is not None
+                    and h_.metadata.y_pos_prop is not None):
+                gloop._mlx.pygmlx_put_image_to_window(
+                    h_.img,
+                    h_.metadata.x_pos_prop,
+                    h_.metadata.y_pos_prop
                 )
             b_ = gloop\
                 ._registry\
@@ -522,7 +620,8 @@ HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     GameOverPlayerWon: GameOverWonAction,
     HighScoreRegisterState: RegisterMenuAction,
     PauseMenuState: PauseMenuAction,
-    InstructionsMenuState: InstructionMenuAction
+    InstructionsMenuState: InstructionMenuAction,
+    HighScoreMenuState: LeaderboardMenuAction
 }
 
 

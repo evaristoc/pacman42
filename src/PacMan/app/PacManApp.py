@@ -48,6 +48,7 @@ class PacManApp:
                                             InstructionMenuEvents,
                                             GameOverPlayerLostEvents,
                                             GameOverPlayerWonEvents,
+                                            HighScoreMenuEvents,
                                             HighScoreRegisterEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
@@ -61,6 +62,7 @@ class PacManApp:
                                                 GameOverPlayerLost,
                                                 GameOverPlayerWon,
                                                 InstructionsMenuState,
+                                                HighScoreMenuState,
                                                 HighScoreRegisterState)
         from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
                                                 GhostName)
@@ -127,8 +129,8 @@ class PacManApp:
     ^   up arrow == move up
     v   down arrow == move down
 
-    'p' pause game
-    'c' cheat the level
+    'space' pause game
+    'c'     cheat the level
                                         """
                                         )
             instructions_menu: ImgsAsset = self.assembler\
@@ -137,10 +139,26 @@ class PacManApp:
                                         InstructionMenuEvents)
             instructions_menu.event_handler = MethodType(returns_eh,
                                                          instructions_menu)
+            leaderboard_menu: ImgsAsset = self.assembler\
+                .img_loader_factdispatcher(
+                                        "menus/leaderboard",
+                                        HighScoreMenuEvents)
+            leaderboard: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
+                                    "leaderboard_table",
+                                    f"{'username':<10} | {'score':<5}"
+                )
+            leaderboard_menu.event_handler = MethodType(returns_eh,
+                                                        leaderboard_menu)
             register_menu: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
                                         "menus/register",
                                         HighScoreRegisterEvents)
+            # register_input: ImgsAsset = self.assembler\
+            #     .text_loader_factdispatcher(
+            #                             "reg_input",
+            #                             "{}_"
+            #     )
             register_menu.event_handler = MethodType(menugeneral_eh,
                                                      register_menu)
             gameoverlost_menu: ImgsAsset = self.assembler\
@@ -202,6 +220,13 @@ class PacManApp:
                     "return": instructions_menu
                 }
             )
+            leaderboard_assets: Assets = Assets(
+                state_name=HighScoreMenuState.__name__,
+                img_assets={
+                    'text': leaderboard,
+                    "return": leaderboard_menu
+                }
+            )
             gameoverlost_assets: Assets = Assets(
                 state_name=GameOverPlayerLost.__name__,
                 img_assets={
@@ -226,6 +251,7 @@ class PacManApp:
                mainmenustate=main_assets,
                pausemenustate=pause_assets,
                instructionsmenustate=instructions_assets,
+               highscoremenustate=leaderboard_assets,
                gameoverplayerlost=gameoverlost_assets,
                gameoverplayerwon=gameoverwon_assets,
                highscoreregisterstate=register_assets
