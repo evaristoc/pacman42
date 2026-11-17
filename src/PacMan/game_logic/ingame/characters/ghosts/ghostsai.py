@@ -1,9 +1,10 @@
+import random
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
-from src.PacMan.game_logic.ingame.characters.ghosts.a_star import AStar_next_move
-import random
+from src.PacMan.game_logic.ingame.characters.ghosts.a_star import (
+    AStar_next_move)
 
 if TYPE_CHECKING:
     from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import Ghost
@@ -57,7 +58,7 @@ class AIStrategy(ABC):
         easier to catch.
 
         Returns:
-            A random direction vector: one of (1, 0), (-1, 0), (0, 1), or 
+            A random direction vector: one of (1, 0), (-1, 0), (0, 1), or
             (0, -1).
         """
         temp_tile = self.maze.grid[ghost_pos[1]][ghost_pos[0]]
@@ -84,7 +85,9 @@ class BlinkyAI(AIStrategy):
         pacman_pos: tuple[int, int],
         pacman_direction: tuple[int, int]
     ) -> tuple[int, int]:
-        return AStar_next_move(position=ghost_pos, target=pacman_pos, maze=self.maze)
+        return AStar_next_move(position=ghost_pos,
+                               target=pacman_pos,
+                               maze=self.maze)
 
 
 class PinkyAI(AIStrategy):
@@ -98,9 +101,14 @@ class PinkyAI(AIStrategy):
     ) -> tuple[int, int]:
         target = self._aim_ahead(pacman_pos=pacman_pos,
                                  pacman_direction=pacman_direction)
-        return AStar_next_move(position=ghost_pos, target=target, maze=self.maze)
+        return AStar_next_move(position=ghost_pos,
+                               target=target,
+                               maze=self.maze)
 
-    def _aim_ahead(self, pacman_pos: tuple[int, int], pacman_direction: tuple[int, int]) -> tuple[int, int]:
+    def _aim_ahead(self,
+                   pacman_pos: tuple[int, int],
+                   pacman_direction: tuple[int, int]
+                   ) -> tuple[int, int]:
         """Predict where Pacman will be."""
         pos_x, pos_y = pacman_pos
         dir_x, dir_y = pacman_direction
@@ -115,7 +123,10 @@ class PinkyAI(AIStrategy):
 class InkyAI(AIStrategy):
     """Complex: use Blinky's position to triangulate."""
 
-    def __init__(self, spawn_pos: tuple[int, int], maze: Maze, blinky: "Ghost") -> None:
+    def __init__(self,
+                 spawn_pos: tuple[int, int],
+                 maze: Maze,
+                 blinky: "Ghost") -> None:
         super().__init__(spawn_pos=spawn_pos, maze=maze)
         self.blinky = blinky
 
@@ -127,9 +138,14 @@ class InkyAI(AIStrategy):
     ) -> tuple[int, int]:
         target = self._triangulate(
             pacman_pos=pacman_pos, pacman_direction=pacman_direction)
-        return AStar_next_move(position=ghost_pos, target=target, maze=self.maze)
+        return AStar_next_move(position=ghost_pos,
+                               target=target,
+                               maze=self.maze)
 
-    def _triangulate(self, pacman_pos: tuple[int, int], pacman_direction: tuple[int, int]) -> tuple[int, int]:
+    def _triangulate(self,
+                     pacman_pos: tuple[int, int],
+                     pacman_direction: tuple[int, int]
+                     ) -> tuple[int, int]:
         """Inky-specific chase logic."""
         pos_x, pos_y = pacman_pos
         dir_x, dir_y = pacman_direction
@@ -140,7 +156,8 @@ class InkyAI(AIStrategy):
             if temp_tile:
                 break
         if not temp_tile:
-            raise RuntimeError("Problem while getting origin for triangulation.")
+            raise RuntimeError(
+                "Problem while getting origin for triangulation.")
         origin: tuple[int, int] = temp_tile.get_position_from_tile()
         blinky_pos = self.blinky.new_position.get_position_from_tile()
         vector_O_to_blinky = (

@@ -1,4 +1,5 @@
-from src.PacMan.game_logic.ingame.time.time_sm import ITimeState, CountDownState
+from src.PacMan.game_logic.ingame.time.time_sm import (ITimeState,
+                                                       CountDownState)
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from dataclasses import dataclass
 

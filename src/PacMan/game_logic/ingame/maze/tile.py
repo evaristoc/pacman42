@@ -37,8 +37,11 @@ class TileError(Exception):
 
 @dataclass(frozen=True)
 class TileSnapshot:
-    open_walls: dict
-    pellet_state: str
+    wall_north: WallState
+    wall_south: WallState
+    wall_west: WallState
+    wall_east: WallState
+    pellet_state: PelletState
     cell_position_x: int
     cell_position_y: int
 
@@ -88,12 +91,11 @@ class Tile:
         self._tilebyte = tilebyte
 
     def view(self) -> TileSnapshot:
-        walls = {'N': self.wall_north.value,
-                 'E': self.wall_east.value,
-                 'S': self.wall_south.value,
-                 'W': self.wall_west.value}
-        return TileSnapshot(open_walls=walls,
-                            pellet_state=self.pellet_state.name,
+        return TileSnapshot(wall_east=self.wall_east,
+                            wall_north=self.wall_north,
+                            wall_south=self.wall_south,
+                            wall_west=self.wall_west,
+                            pellet_state=self.pellet_state,
                             cell_position_x=self.cell_position_x,
                             cell_position_y=self.cell_position_y)
 

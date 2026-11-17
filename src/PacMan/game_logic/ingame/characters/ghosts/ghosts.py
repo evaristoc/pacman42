@@ -1,15 +1,17 @@
-from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import (AIStrategy,
-                                                                     BlinkyAI,
-                                                                     ClydeAI,
-                                                                     PinkyAI,
-                                                                     InkyAI)
-from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (IGhostState,
-                                                                    ChasingGhostState,
-                                                                    GhostCollision)
+from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import (
+    AIStrategy,
+    BlinkyAI,
+    ClydeAI,
+    PinkyAI,
+    InkyAI)
+from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (
+    IGhostState,
+    ChasingGhostState,
+    FrightenedGhostState,
+    GhostCollision)
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
 from dataclasses import dataclass
-import random
 from enum import Enum
 
 
@@ -43,6 +45,7 @@ class Ghost:
                  maze: Maze,
                  speed: int,
                  ai_strategy: AIStrategy,
+                 start_state: type[IGhostState] = ChasingGhostState,
                  spawn_point: tuple[int, int]) -> None:
         """Initializes a Ghost with a name, default state, and AI strategy.
 
@@ -54,18 +57,29 @@ class Ghost:
         self.maze: Maze = maze
         self.spawn_point: tuple[int, int] = spawn_point
         self.strategy: AIStrategy = ai_strategy
-        self.new_position: Tile = self.maze.return_tile_from_pos_with_validation(
-            position=self.spawn_point)
-        self.old_position: Tile = self.maze.return_tile_from_pos_with_validation(
-            position=self.spawn_point)
+        self.new_position: Tile = (self
+                                   .maze
+                                   .return_tile_from_pos_with_validation(
+                                       position=self.spawn_point))
+        self.old_position: Tile = (self
+                                   .maze
+                                   .return_tile_from_pos_with_validation(
+                                       position=self.spawn_point))
         self.interpolated_position: tuple[float,
-                                          float] = self.old_position.get_position_from_tile()
+                                          float] = (self
+                                                    .old_position
+                                                    .get_position_from_tile())
         self.interpolation: tuple[float, float] = (0, 0)
-        self.speed: int = speed
-        self.state: IGhostState = ChasingGhostState(self)
+        self.normal_speed: int = speed
+        self.speed: int = self.normal_speed
+        self.state: IGhostState = start_state(self)
         self.first_run = True
 
-    def update(self, *, delta_ticks: int, pacman_position: tuple[int, int], pacman_direction: tuple[int, int]) -> None:
+    def update(self, *,
+               delta_ticks: int,
+               pacman_position: tuple[int, int],
+               pacman_direction: tuple[int, int]
+               ) -> None:
         """Updates the ghost's position and state based on game time.
 
         Args:
@@ -85,7 +99,9 @@ class Ghost:
             self.old_position = self.new_position
             self.first_run = False
             self._process_move(move)
-            self.interpolated_position = self.old_position.get_position_from_tile()
+            self.interpolated_position = (self
+                                          .old_position
+                                          .get_position_from_tile())
             self.interpolation = (0, 0)
         else:
             self._move_interpolate(delta_ticks=delta_ticks)
@@ -136,13 +152,17 @@ class Ghost:
             interpolated_x = direction_x * interpolation_amount
             interpolated_y = direction_y * interpolation_amount
             self.interpolation = (interpolated_x, interpolated_y)
-            old_position_x, old_position_y = self.old_position.get_position_from_tile()
+            old_position_x, old_position_y = (self
+                                              .old_position
+                                              .get_position_from_tile())
 
             self.interpolated_position = (
                 old_position_x + interpolated_x,
                 old_position_y + interpolated_y)
         else:
-            self.interpolated_position = self.old_position.get_position_from_tile()
+            self.interpolated_position = (self
+                                          .old_position
+                                          .get_position_from_tile())
 
 
 class GhostFactory:
@@ -151,10 +171,9 @@ class GhostFactory:
               GhostName.INKY,
               GhostName.PINKY]
 
-    GHOST_AI = {GhostName.BLINKY: BlinkyAI,
-                GhostName.CLYDE: ClydeAI,
-                GhostName.INKY: InkyAI,
-                GhostName.PINKY: PinkyAI}
+    GHOST_AI: dict[GhostName, type[AIStrategy]] = {GhostName.BLINKY: BlinkyAI,
+                                                   GhostName.CLYDE: ClydeAI,
+                                                   GhostName.PINKY: PinkyAI}
 
     def __init__(self, maze: Maze, speed: int):
         self.maze: Maze = maze
@@ -168,21 +187,22 @@ class GhostFactory:
     def create_ghosts(self) -> dict[GhostName, Ghost]:
         ghosts: dict[GhostName, Ghost] = {}
         for ghost in self.GHOSTS:
+            new_ghost_spawn = self.ghost_spawn[ghost]
             if ghost == GhostName.INKY:
-
-                new_ghost_spawn = self.ghost_spawn[ghost]
-                new_ghost_ai = self.GHOST_AI[ghost](maze=self.maze,
-                                                    spawn_pos=new_ghost_spawn,
-                                                    blinky=ghosts[GhostName.BLINKY])
+                inky_strat = InkyAI(spawn_pos=new_ghost_spawn,
+                                    maze=self.maze,
+                                    blinky=ghosts[GhostName.BLINKY])
+                new_ghost_ai: AIStrategy = inky_strat
             else:
-                new_ghost_spawn = self.ghost_spawn[ghost]
                 new_ghost_ai = self.GHOST_AI[ghost](spawn_pos=new_ghost_spawn,
                                                     maze=self.maze)
             ghosts[ghost] = Ghost(name=ghost,
                                   maze=self.maze,
                                   speed=self.speed,
                                   ai_strategy=new_ghost_ai,
+                                  start_state=FrightenedGhostState,
                                   spawn_point=new_ghost_spawn)
+
         return ghosts
 
 
@@ -207,7 +227,10 @@ class GhostManager:
                          pacman_direction=pacman_direction)
 
     def view(self) -> GhostMngSnapshot:
-        return GhostMngSnapshot(ghost_snapshots={ghost_name.name: ghost.view() for ghost_name, ghost in self.ghosts.items()})
+        return GhostMngSnapshot(ghost_snapshots=({ghost_name.name:
+                                                  ghost.view()
+                                                  for ghost_name, ghost
+                                                  in self.ghosts.items()}))
 
     def big_pellet_activated(self) -> None:
         for ghost in self.ghosts.values():
@@ -216,10 +239,3 @@ class GhostManager:
     def reset(self) -> None:
         for ghost in self.ghosts.values():
             ghost.pacman_dies_reset()
-
-
-if __name__ == '__main__':
-    from src.PacMan.game_logic.ingame.maze.maze import MazeFactory
-    mf = MazeFactory(nb_cells=12)
-    gm = GhostManager(maze=mf.make_maze(), speed=10)
-    print(gm.view())

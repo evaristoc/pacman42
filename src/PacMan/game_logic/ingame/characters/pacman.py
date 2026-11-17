@@ -40,7 +40,9 @@ class Pacman:
         self.spawn_point = self._get_spawn_point()
         self.interpolation: tuple[float, float] = (0, 0)
         self.interpolated_position: tuple[float,
-                                          float] = self.spawn_point.get_position_from_tile()
+                                          float] = (self
+                                                    .spawn_point
+                                                    .get_position_from_tile())
         self.new_position: Tile = self.spawn_point
         self.old_position: Tile = self.spawn_point
         self.first_run: bool = True
@@ -80,7 +82,9 @@ class Pacman:
             if self.new_direction:
                 self.direction = self.new_direction
             self._process_move(self._direction)
-            self.interpolated_position = self.old_position.get_position_from_tile()
+            self.interpolated_position = (self
+                                          .old_position
+                                          .get_position_from_tile())
             self.interpolation = (0, 0)
         else:
             self._move_interpolate(delta_ticks=delta_ticks)
@@ -113,12 +117,17 @@ class Pacman:
             interpolated_x = direction_x * interpolation_amount
             interpolated_y = direction_y * interpolation_amount
             self.interpolation = (interpolated_x, interpolated_y)
-            old_position_x, old_position_y = self.old_position.get_position_from_tile()
+            old_position_x, old_position_y = (self
+                                              .old_position
+                                              .get_position_from_tile())
 
             self.interpolated_position = (
-                old_position_x + interpolated_x, old_position_y + interpolated_y)
+                old_position_x + interpolated_x,
+                old_position_y + interpolated_y)
         else:
-            self.interpolated_position = self.old_position.get_position_from_tile()
+            self.interpolated_position = (self
+                                          .old_position
+                                          .get_position_from_tile())
 
     def _process_move(self, move: tuple[int, int]) -> None:
         valid_moves = self.old_position.get_open_walls()

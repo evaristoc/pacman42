@@ -61,7 +61,8 @@ class CountDownState(ITimeState):
             self.context._countdown_time_remaining = COUNTDOWN_TIME
         else:
             raise TimeStateError(
-                "Tried to set countdown time remaining with value already set.")
+                "Tried to set countdown time "
+                "remaining with value already set.")
         if not self.context._discrete_cd_time:
             self.context._discrete_cd_time = COUNTDOWN_TIME
         else:
@@ -183,7 +184,9 @@ class LevelPauseState(ITimeState):
                 self.context.state = LevelActiveState(
                     self.context, from_pause=True)
         else:
-            time_remaining_cd: float | None = self.context._countdown_time_remaining
+            time_remaining_cd: float | None = (self
+                                               .context
+                                               ._countdown_time_remaining)
             if not time_remaining_cd:
                 raise TimeStateError("Got level_active == "
                                      "False, but no valid countdown end time.")
