@@ -1,14 +1,20 @@
 from src.PacMan.game_logic.gamemanager.game_sm import IGameState, InGameState
 from src.PacMan.game_logic.menu.menu import IMenu, MenuSnapshot
 from src.PacMan.validation_contracts.event_enums import IEventEnums
-from src.PacMan.game_logic.gamemanager.gamesession import GameSession, GameSessionFactory, GameSessionSnapshot
+from src.PacMan.game_logic.gamemanager.gamesession import (
+    GameSession,
+    GameSessionFactory,
+    GameSessionSnapshot)
 from src.PacMan.game_logic.player import Player, PlayerSnapshot
 from src.PacMan.game_logic.score_mng import ScoreManager
 from src.PacMan.database.db_mng import DatabaseManager
-from src.PacMan.game_logic.highscore import HighScoreSnapshot, db_highsc_to_snapshot
+from src.PacMan.game_logic.highscore import (
+    HighScoreSnapshot,
+    db_highsc_to_snapshot)
 from src.PacMan.app_config.config import LEVELS
 from typing import Any, Callable
 from dataclasses import dataclass
+
 
 @dataclass(frozen=True)
 class GLMSnapshot:

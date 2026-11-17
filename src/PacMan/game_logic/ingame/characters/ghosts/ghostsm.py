@@ -1,7 +1,10 @@
 from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
 from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import AIStrategy
-from src.PacMan.app_config.config import EATEN_GHOST_SPEED, CHASING_GHOST_TIME, FRIGHTENED_GHOST_TIME, SCATTER_GHOST_TIME
+from src.PacMan.app_config.config import (EATEN_GHOST_SPEED,
+                                          CHASING_GHOST_TIME,
+                                          FRIGHTENED_GHOST_TIME,
+                                          SCATTER_GHOST_TIME)
 from enum import Enum, auto
 import time
 from typing import Union
@@ -35,7 +38,9 @@ class IGhostState(ABC):
         pass
 
     @abstractmethod
-    def collide_with_pacman_does_ghost_die(self) -> tuple[Union["IGhostState", None], GhostCollision]:
+    def collide_with_pacman_does_ghost_die(
+        self
+    ) -> tuple[Union["IGhostState", None], GhostCollision]:
         pass
 
 
@@ -63,7 +68,9 @@ class ChasingGhostState(IGhostState):
     def big_pellet_activated(self) -> IGhostState:
         return FrightenedGhostState(self.context)
 
-    def collide_with_pacman_does_ghost_die(self) -> tuple[Union["IGhostState", None], GhostCollision]:
+    def collide_with_pacman_does_ghost_die(
+        self
+    ) -> tuple[Union["IGhostState", None], GhostCollision]:
         return None, GhostCollision.GHOSTWINS
 
 
@@ -71,7 +78,7 @@ class FrightenedGhostState(IGhostState):
     def __init__(self, context: "Ghost") -> None:
         super().__init__(context=context)
         self.frightened_timer: float = time.time() + FRIGHTENED_GHOST_TIME
-        self.context.speed: int = self.context.normal_speed
+        self.context.speed = self.context.normal_speed
 
     def update(self, *,
                delta_ticks: int,
@@ -89,7 +96,9 @@ class FrightenedGhostState(IGhostState):
     def big_pellet_activated(self) -> IGhostState:
         return FrightenedGhostState(self.context)
 
-    def collide_with_pacman_does_ghost_die(self) -> tuple[Union["IGhostState", None], GhostCollision]:
+    def collide_with_pacman_does_ghost_die(
+        self
+    ) -> tuple[Union["IGhostState", None], GhostCollision]:
         print("Ghost Dies")
         return EatenGhostState(self.context), GhostCollision.GHOSTDIES
 
@@ -121,7 +130,9 @@ class EatenGhostState(IGhostState):
     def big_pellet_activated(self) -> IGhostState:
         return self
 
-    def collide_with_pacman_does_ghost_die(self) -> tuple[Union["IGhostState", None], GhostCollision]:
+    def collide_with_pacman_does_ghost_die(
+        self
+    ) -> tuple[Union["IGhostState", None], GhostCollision]:
         return None, GhostCollision.NOTHING
 
 
@@ -146,5 +157,7 @@ class ScatterGhostState(IGhostState):
     def big_pellet_activated(self) -> IGhostState:
         return FrightenedGhostState(self.context)
 
-    def collide_with_pacman_does_ghost_die(self) -> tuple[Union["IGhostState", None], GhostCollision]:
+    def collide_with_pacman_does_ghost_die(
+        self
+    ) -> tuple[Union["IGhostState", None], GhostCollision]:
         return None, GhostCollision.GHOSTWINS

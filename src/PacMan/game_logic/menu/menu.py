@@ -13,4 +13,3 @@ class IMenu(ABC):
     @abstractmethod
     def view(self) -> MenuSnapshot:
         pass
-
