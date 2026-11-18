@@ -99,7 +99,6 @@ class FrightenedGhostState(IGhostState):
     def collide_with_pacman_does_ghost_die(
         self
     ) -> tuple[Union["IGhostState", None], GhostCollision]:
-        print("Ghost Dies")
         return EatenGhostState(self.context), GhostCollision.GHOSTDIES
 
 
@@ -147,7 +146,11 @@ class ScatterGhostState(IGhostState):
                pacman_direction: tuple[int, int],
                ghost_position: tuple[int, int]
                ) -> tuple[tuple[int, int] | None, Union[IGhostState, None]]:
-        if time.time() > self.frightened_timer:
+        if ((time.time() > self.frightened_timer)
+            or
+                (self.context.old_position.get_position_from_tile()) == (
+                    self.context.spawn_point
+                    )):
             return None, ChasingGhostState(self.context)
         if delta_ticks % self.context.speed == 0:
             move = self.strategy.return_to_spawn(ghost_pos=ghost_position)
