@@ -89,12 +89,15 @@ class GameLogicManager:
 
 
 def test():
-    from src.PacMan.validation_contracts.event_enums import HighScoreRegisterEvents
+    from src.PacMan.validation_contracts.event_enums import HighScoreRegisterEvents, RegisterMenuEvents
     from src.PacMan.game_logic.gamemanager.game_sm import HighScoreRegisterState
     from src.PacMan.database.db_mng import create_database_mng
     dbm = create_database_mng()
     glm = GameLogicManager(databasemng=dbm, start_state=HighScoreRegisterState)
     glm.update_logic(
-        events={HighScoreRegisterEvents.REGISTER: {'name': 'BLabla'}})
+        events={HighScoreRegisterEvents.REGISTER: None})
+    snapshot = glm.view()
+    print(snapshot.highscores)
+    glm.update_logic(events={RegisterMenuEvents.REGISTER_NAME: {'name': 'asfdsadfsa'}})
     snapshot = glm.view()
     print(snapshot.highscores)
