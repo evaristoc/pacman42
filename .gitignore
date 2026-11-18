@@ -8,7 +8,7 @@
 *.private_key
 id_rsa
 id_ed25519
-
+storage/*
 build/*
 dist/*
 
