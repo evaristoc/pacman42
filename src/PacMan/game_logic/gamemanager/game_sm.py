@@ -8,7 +8,8 @@ from src.PacMan.validation_contracts.event_enums import (
     MainMenuEvents,
     InstructionMenuEvents,
     HighScoreMenuEvents,
-    HighScoreRegisterEvents
+    HighScoreRegisterEvents,
+    RegisterMenuEvents
 )
 from typing import Any
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
@@ -333,7 +334,37 @@ class HighScoreRegisterState(InGameState):
                 self.context.session = None
                 return MainMenuState(self.context)
             elif event == HighScoreRegisterEvents.REGISTER:
-                payload = events.get(HighScoreRegisterEvents.REGISTER)
+                self.context.session = None
+                return RegisterMenuState(self.context)
+        return None
+
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums | None:
+        priority_order = [HighScoreRegisterEvents.CANCEL,
+                          HighScoreRegisterEvents.REGISTER]
+
+        for event in priority_order:
+            if event in events:
+                return event
+        return list(events.keys())[0]
+
+
+class RegisterMenuState(IGameState):
+    def __init__(self, context: "GameLogicManager"):
+        self.context: "GameLogicManager" = context
+
+    def update_logic(self,
+                     events: dict[IEventEnums, dict[str, Any] | None] | None,
+                     delta_ticks: int
+                     ) -> Union["IGameState", None]:
+        if events:
+            event = self._validate_events(events, RegisterMenuEvents)
+            if event == RegisterMenuEvents.CANCEL:
+                self.context.session = None
+                return MainMenuState(self.context)
+            elif event == RegisterMenuEvents.REGISTER_NAME:
+                payload = events.get(RegisterMenuEvents.REGISTER_NAME)
                 if payload is None:
                     raise RuntimeError("Tried to register without a payload.")
 
@@ -352,14 +383,13 @@ class HighScoreRegisterState(InGameState):
 
                 self.context.session = None
                 return MainMenuState(self.context)
-
         return None
 
     @staticmethod
     def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums | None:
-        priority_order = [HighScoreRegisterEvents.CANCEL,
-                          HighScoreRegisterEvents.REGISTER]
+        priority_order = [RegisterMenuEvents.CANCEL,
+                          RegisterMenuEvents.REGISTER_NAME]
 
         for event in priority_order:
             if event in events:

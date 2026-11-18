@@ -46,3 +46,8 @@ class GameOverPlayerLostEvents(IEventEnums):
 
 class GameOverPlayerWonEvents(IEventEnums):
     WON = auto()
+
+
+class RegisterMenuEvents(IEventEnums):
+    REGISTER_NAME = auto()
+    CANCEL = auto()
