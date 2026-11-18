@@ -7,7 +7,6 @@ from src.PacMan.game_logic.ingame.characters.ghosts.ghostsai import (
 from src.PacMan.game_logic.ingame.characters.ghosts.ghostsm import (
     IGhostState,
     ChasingGhostState,
-    FrightenedGhostState,
     GhostCollision)
 from src.PacMan.game_logic.ingame.maze.maze import Maze
 from src.PacMan.game_logic.ingame.maze.tile import Tile
@@ -200,7 +199,7 @@ class GhostFactory:
                                   maze=self.maze,
                                   speed=self.speed,
                                   ai_strategy=new_ghost_ai,
-                                  start_state=FrightenedGhostState,
+                                  start_state=ChasingGhostState,
                                   spawn_point=new_ghost_spawn)
 
         return ghosts

@@ -3,7 +3,7 @@ from src.PacMan.game_logic.menu.menu import IMenu, MenuSnapshot
 from src.PacMan.validation_contracts.event_enums import IEventEnums
 from src.PacMan.game_logic.gamemanager.gamesession import (
     GameSession,
-    GameSessionFactory,
+    create_new_session,
     GameSessionSnapshot)
 from src.PacMan.game_logic.player import Player, PlayerSnapshot
 from src.PacMan.game_logic.score_mng import ScoreManager
@@ -73,17 +73,14 @@ class GameLogicManager:
         return db_highsc_to_snapshot(highscores=highscores)
 
     def create_game_session(self) -> GameSession:
-        return GameSessionFactory().create_game_new_game(self.player.level,
-                                                         self.scoremng,
-                                                         self.player,
-                                                         self.friendly_ghosts)
+        return create_new_session(self.player.level,
+                                  self.scoremng,
+                                  self.player,
+                                  self.friendly_ghosts)
 
     def reset_player(self) -> None:
         self.player = Player()
         self.scoremng = ScoreManager(self.player)
-
-    def toggle_friendly_ghosts(self) -> None:
-        return
 
     def final_level(self) -> bool:
         if self.player.level == LEVELS:

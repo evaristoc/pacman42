@@ -1,6 +1,6 @@
 ---
 name: 'SPRINT GOALS (iternum) : <short description>'
-about: Sprints Goals; an issue on its own; iternum is the iteration of that sprint
+about: Sprints Goals; an issue on its own; iternum is the iteration of that s
 title: 'SPRINT GOALS (iternum) : <short description>'
 labels: SPRINT GOALS
 assignees: ''

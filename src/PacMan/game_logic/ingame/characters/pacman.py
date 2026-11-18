@@ -142,7 +142,6 @@ class Pacman:
             self.new_position = self.old_position
 
     def pacman_dies(self) -> None:
-        print("Pacman Dies!")
         self.new_position = self.spawn_point
         self.old_position = self.spawn_point
         self.interpolated_position = self.old_position.get_position_from_tile()

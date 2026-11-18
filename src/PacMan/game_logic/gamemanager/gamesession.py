@@ -34,7 +34,8 @@ class GameSession:
     collision manager.
     """
 
-    def __init__(self, *, maze: Maze,
+    def __init__(self, *,
+                 maze: Maze,
                  timemng: TimeManager,
                  pacman: Pacman,
                  ghostmng: GhostManager,
@@ -75,31 +76,30 @@ class GameSession:
                                    maze=maze_ss)
 
 
-class GameSessionFactory:
-    def create_game_new_game(self,
-                             level: int,
-                             scoremng: ScoreManager,
-                             player: Player,
-                             friendly_ghosts: bool) -> GameSession:
-        if type(level) is not int:
-            raise ValueError("level-variable is not an int.")
-        if level not in MAZE_SEED.keys():
-            raise ValueError(f"level-variable is invalid number: {level}")
-        new_maze = MazeFactory(nb_cells=MAZE_NR_CELLS,
-                               seed=MAZE_SEED[level]).make_maze()
-        new_pacman = Pacman(new_maze, speed=PACMAN_SPEED_PER_LVL[level])
-        new_timemng = TimeManager()
-        new_ghostmng = GhostManager(
-            new_maze, speed=GHOST_SPEED_PER_LVL[level])
-        new_collisionmng = CollisionManager(maze=new_maze,
-                                            pacman=new_pacman,
-                                            ghostmng=new_ghostmng,
-                                            timemng=new_timemng,
-                                            player=player,
-                                            scoremng=scoremng,
-                                            friendly_ghosts=friendly_ghosts)
-        return GameSession(maze=new_maze,
-                           timemng=new_timemng,
-                           pacman=new_pacman,
-                           ghostmng=new_ghostmng,
-                           collisionmng=new_collisionmng)
+def create_new_session(level: int,
+                       scoremng: ScoreManager,
+                       player: Player,
+                       friendly_ghosts: bool) -> GameSession:
+    if type(level) is not int:
+        raise ValueError("level-variable is not an int.")
+    if level not in MAZE_SEED.keys():
+        raise ValueError(f"level-variable is invalid number: {level}")
+    new_maze: Maze = MazeFactory(nb_cells=MAZE_NR_CELLS,
+                                 seed=MAZE_SEED[level]).make_maze()
+    new_pacman: Pacman = Pacman(new_maze, speed=PACMAN_SPEED_PER_LVL[level])
+    new_timemng: TimeManager = TimeManager()
+    new_ghostmng: GhostManager = GhostManager(
+        new_maze, speed=GHOST_SPEED_PER_LVL[level])
+    new_collisionmng: CollisionManager = CollisionManager(
+        maze=new_maze,
+        pacman=new_pacman,
+        ghostmng=new_ghostmng,
+        timemng=new_timemng,
+        player=player,
+        scoremng=scoremng,
+        friendly_ghosts=friendly_ghosts)
+    return GameSession(maze=new_maze,
+                       timemng=new_timemng,
+                       pacman=new_pacman,
+                       ghostmng=new_ghostmng,
+                       collisionmng=new_collisionmng)

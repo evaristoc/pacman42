@@ -147,10 +147,10 @@ class InkyAI(AIStrategy):
                      pacman_direction: tuple[int, int]
                      ) -> tuple[int, int]:
         """Inky-specific chase logic."""
+        temp_tile: Tile | None = None
         pos_x, pos_y = pacman_pos
         dir_x, dir_y = pacman_direction
-        temp_tile: Tile | None = None
-        for x in range(3, -1, -1):
+        for x in range(2, -1, -1):
             temp_tile = self.maze.return_tile_from_position(
                 position=((pos_x + (dir_x * x)), (pos_y + (dir_y * x))))
             if temp_tile:
@@ -162,7 +162,6 @@ class InkyAI(AIStrategy):
         blinky_pos = self.blinky.new_position.get_position_from_tile()
         vector_O_to_blinky = (
             (blinky_pos[0] - origin[0]), (blinky_pos[1] - origin[1]))
-
         negative_x = 1
         negative_y = 1
         if vector_O_to_blinky[0] < 0:
@@ -172,8 +171,8 @@ class InkyAI(AIStrategy):
 
         for x in range(abs(vector_O_to_blinky[0]), -1, -1):
             for y in range(abs(vector_O_to_blinky[1]), -1, -1):
-                new_target = ((origin[0] + (negative_x * x)),
-                              (origin[1] + (negative_y * y)))
+                new_target = ((origin[0] - (negative_x * x)),
+                              (origin[1] - (negative_y * y)))
                 temp_tile = self.maze.return_tile_from_position(
                     position=new_target)
                 if temp_tile:
