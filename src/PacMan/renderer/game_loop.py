@@ -1,13 +1,16 @@
 from __future__ import annotations
 import logging
 import pygame
+from functools import partial
 from pygame import Event
+from dataclasses import dataclass
 from types import MethodType
-from typing import TypeVar, Type, Protocol, TYPE_CHECKING
+from typing import TypeVar, Type, Protocol, Callable, Optional, Self, Any, TYPE_CHECKING
 from src.PacMan.game_logic.gamemanager.gamelogicmng import (
     GameLogicManager,
     GLMSnapshot)
 from src.PacMan.validation_contracts.event_enums import (
+    IEventEnums,
     InGameEvents)
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
     GhostName)
@@ -33,6 +36,13 @@ logger = logging.getLogger(__name__)
 
 
 T = TypeVar("T", bound="IAction")
+
+
+@dataclass
+class InputDTO:
+    handler: Optional[Callable[[ImgsAsset, pygame.event.Event, dict[IEventEnums, dict[str, Any] | None] | None], None]] = None
+    event: Optional[pygame.event.Event] = None
+    msgs: Optional[EventMsg] = None
 
 
 class IAction(Protocol):
@@ -157,7 +167,9 @@ class LeaderboardMenuAction(IAction):
             gloop: GameLoop
     ) -> None:
         try:
-            snapshop = gloop._glm.view()
+            snapshot = gloop._glm.view()
+            # snapshot.highscore
+            # if highscore empty, show a message is empty
             bg_ = gloop._registry.init.img_assets['background']\
                 .get_source('background')
             gloop._mlx.pygmlx_put_image_to_window(
@@ -389,10 +401,6 @@ class InputAction(IAction):
                 .img_assets["input_text"].get_source(
                     "input_text"
                 )
-            handler = gloop\
-                ._registry\
-                .registermenustate\
-                .img_assets["input_text"].event_handler
             if (txt_.metadata and txt_.metadata.x_pos_prop is not None
                     and txt_.metadata.y_pos_prop is not None):
                 gloop._mlx.pygmlx_put_image_to_window(
@@ -725,6 +733,7 @@ class GameLoop:
         self._currentlevel: int = 0
         self._levelchanged: bool = False
         self.event_queue: list[Event] = []
+        self.bus: InputDTO = InputDTO()
 
     def _actions(self,
                  msgs: EventMsg | None,
@@ -769,9 +778,7 @@ class GameLoop:
                     else:
                         # TODO MAKE A SMALL BUS HERE...
                         # I need a vehicle that keep the data and it is run by the action, so THIS could be an observer...
-                        inputdata = {"handler": handler,
-                                     "event": event,
-                                     "msg": msgs}
+                        i = 0
         self._actions(msgs, tick)
         return True
 

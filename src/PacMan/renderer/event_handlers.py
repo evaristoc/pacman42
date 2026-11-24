@@ -134,14 +134,16 @@ def returns_eh(
                     break
 
 
-def input_eh(
-        self: "ImgsAsset",
-        event: pygame.event.Event,
-        msgs: EventMsg,
-        payload: dict[str, Any]) -> None:
-    if msgs is None:
-        return
-    _ = self
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_RETURN:
-            msgs[RegisterMenuEvents.REGISTER_NAME] = payload
+# def input_eh(
+#         self: "ImgsAsset",
+#         event: pygame.event.Event,
+#         msgs: EventMsg,
+#         char) -> None:
+#     if msgs is None:
+#         return
+#     if event.type == pygame.KEYDOWN:
+#         if event.key == pygame.K_RETURN:
+#             msgs[RegisterMenuEvents.REGISTER_NAME] = None
+#         else:
+#             # save in payload
+#             msgs[RegisterMenuEvents.ENTRY] = char
