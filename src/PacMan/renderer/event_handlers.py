@@ -7,7 +7,8 @@ from src.PacMan.validation_contracts.event_enums import (
                                         InstructionMenuEvents,
                                         HighScoreMenuEvents,
                                         HighScoreRegisterEvents,
-                                        PauseMenuEvents)
+                                        PauseMenuEvents,
+                                        RegisterMenuEvents)
 if TYPE_CHECKING:
     from src.PacMan.renderer.assets import (
                                         ImgsAsset
@@ -24,6 +25,7 @@ EVENT_REGISTRY: dict[str, IEventEnums] = {
     "HIGHSCORES": MainMenuEvents.HIGHSCORES,
     "REGISTER": HighScoreRegisterEvents.REGISTER,
     "CANCEL": HighScoreRegisterEvents.CANCEL,
+    "REGISTER_NAME": RegisterMenuEvents.REGISTER_NAME,
     # based on info page
     "instructions": InstructionMenuEvents.RETURN,
     "leaderboard": HighScoreMenuEvents.RETURN,
@@ -130,3 +132,16 @@ def returns_eh(
                     msgs[getattr(EVENT_REGISTRY[self.asset_name],
                                  sk.event_name)] = None
                     break
+
+
+def input_eh(
+        self: "ImgsAsset",
+        event: pygame.event.Event,
+        msgs: EventMsg,
+        payload: dict[str, Any]) -> None:
+    if msgs is None:
+        return
+    _ = self
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_RETURN:
+            msgs[RegisterMenuEvents.REGISTER_NAME] = payload

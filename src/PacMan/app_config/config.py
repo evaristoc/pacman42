@@ -8,7 +8,7 @@ DATABASE_NAME = 'score.db'
 ########
 # Game #
 ########
-PLAYER_LIVES = 3
+PLAYER_LIVES = 1
 LEVELS = 10
 PACMAN_SPEED_PER_LVL = {1: 10, 2: 10, 3: 10, 4: 9, 5: 9,
                         6: 9, 7: 8, 8: 8, 9: 7, 10: 5}

@@ -53,7 +53,8 @@ class PacManApp:
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
                                                 returns_eh,
-                                                menugeneral_eh
+                                                menugeneral_eh,
+                                                input_eh
                                                 )
         from src.PacMan.game_logic.gamemanager.game_sm import (
                                                 InGameState,
@@ -63,7 +64,8 @@ class PacManApp:
                                                 GameOverPlayerWon,
                                                 InstructionsMenuState,
                                                 HighScoreMenuState,
-                                                HighScoreRegisterState)
+                                                HighScoreRegisterState,
+                                                RegisterMenuState)
         from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
                                                 GhostName)
         try:
@@ -169,6 +171,15 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "menus/gameoverwon",
                                         GameOverPlayerWonEvents)
+            inputs: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
+                                        "input_text",
+                                        """
+      _
+                                        """
+                                        )
+            inputs.event_handler = MethodType(input_eh,
+                                              inputs)
             # three lives
             hub_bottom_img: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
@@ -245,6 +256,12 @@ class PacManApp:
                     register_menu.asset_name: register_menu
                 }
             )
+            inputs_assets: Assets = Assets(
+                state_name=RegisterMenuState.__name__,
+                img_assets={
+                    inputs.asset_name: inputs
+                }
+            )
             self.assetregistry = AssetRegistry(
                init=init_assets,
                ingamestate=ingame_assets,
@@ -254,7 +271,8 @@ class PacManApp:
                highscoremenustate=leaderboard_assets,
                gameoverplayerlost=gameoverlost_assets,
                gameoverplayerwon=gameoverwon_assets,
-               highscoreregisterstate=register_assets
+               highscoreregisterstate=register_assets,
+               registermenustate=inputs_assets
             )
         except Exception as err:
             logger.exception(err)

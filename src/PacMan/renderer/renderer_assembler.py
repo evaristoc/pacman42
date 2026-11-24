@@ -45,6 +45,7 @@ class RendererAssembler:
         self._textasset_map: dict[str, TextLoader] = {
             'hub': HubTextLoader(),
             'info': InfoTextLoader(),
+            'inputs': InfoTextLoader()
         }
 
     def init_glm(
@@ -113,7 +114,9 @@ class RendererAssembler:
                 msg,
                 self
             )
-        if 'instructions' in folder or 'leaderboard' in folder:
+        if ('instructions' in folder
+                or 'leaderboard' in folder
+                or 'input' in folder):
             return self._textasset_map['info'].upload_text(
                 folder,
                 msg,

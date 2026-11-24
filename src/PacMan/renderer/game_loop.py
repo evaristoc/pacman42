@@ -20,7 +20,8 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
                                             PauseMenuState,
                                             InstructionsMenuState,
                                             HighScoreRegisterState,
-                                            HighScoreMenuState)
+                                            HighScoreMenuState,
+                                            RegisterMenuState)
 from src.PacMan.renderer.event_handlers import pacman_eh
 if TYPE_CHECKING:  # only required for parameter type assignment
     from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
@@ -321,23 +322,87 @@ class RegisterMenuAction(IAction):
             raise SystemExit(1)
 
 
-class GameOverLostAction(IAction):
+# class RegisterMenuAction(IAction):
+#     def action(
+#             self,
+#             gloop: GameLoop,
+#             tick: int
+#     ) -> None:
+#         _ = tick
+#         if gloop._statechanged:
+#             self._init_state(gloop)
+
+#     def _init_state(
+#             self,
+#             gloop: GameLoop
+#     ) -> None:
+#         try:
+#             background = gloop._mlx.pygmlx_new_image(
+#                 gloop._mlx.view_w,
+#                 gloop._mlx.view_h
+#             )
+#             gloop._mlx.pygmlx_put_image_to_window(
+#                 background,
+#                 0,
+#                 0
+#             )
+#             buttons = list(
+#                 gloop._registry
+#                 .highscoreregisterstate.img_assets['register']
+#                 .sources.keys())
+#             for button in buttons:
+#                 b_ = gloop._registry\
+#                     .highscoreregisterstate.img_assets['register']\
+#                     .get_source(button)
+#                 if (b_.metadata and b_.metadata.x_pos_prop is not None
+#                         and b_.metadata.y_pos_prop is not None):
+#                     gloop._mlx.pygmlx_put_image_to_window(
+#                         b_.img,
+#                         b_.metadata.x_pos_prop,
+#                         b_.metadata.y_pos_prop
+#                     )
+#         except Exception as err:
+#             logger.error(f"FATAL: Exception trying to load menus: {err}")
+#             raise SystemExit(1)
+
+
+class InputAction(IAction):
     def action(
             self,
             gloop: GameLoop,
             tick: int
     ) -> None:
+        # TODO Handler for input should be INSIDE it s action!!!
+        # TODO Paint only a small piece! Not the whole background
         _ = tick
-        gol_ = gloop._registry\
-            .gameoverplayerlost.img_assets['gameoverlost']\
-                    .get_source('LOST')
-        if (gol_.metadata and gol_.metadata.x_pos_prop is not None
-                and gol_.metadata.y_pos_prop is not None):
+        try:
+            bg_ = gloop._registry.init.img_assets['background']\
+                .get_source('background')
             gloop._mlx.pygmlx_put_image_to_window(
-                gol_.img,
-                gol_.metadata.x_pos_prop,
-                gol_.metadata.y_pos_prop
+                bg_.img,
+                0,
+                0
             )
+            txt_ = gloop\
+                ._registry\
+                .registermenustate\
+                .img_assets["input_text"].get_source(
+                    "input_text"
+                )
+            handler = gloop\
+                ._registry\
+                .registermenustate\
+                .img_assets["input_text"].event_handler
+            if (txt_.metadata and txt_.metadata.x_pos_prop is not None
+                    and txt_.metadata.y_pos_prop is not None):
+                gloop._mlx.pygmlx_put_image_to_window(
+                    txt_.img,
+                    txt_.metadata.x_pos_prop,
+                    txt_.metadata.y_pos_prop
+                )
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
 
 
 class GameOverWonAction(IAction):
@@ -350,6 +415,25 @@ class GameOverWonAction(IAction):
         gow_ = gloop._registry\
             .gameoverplayerwon.img_assets['gameoverwon']\
                     .get_source('WON')
+        if (gow_.metadata and gow_.metadata.x_pos_prop is not None
+                and gow_.metadata.y_pos_prop is not None):
+            gloop._mlx.pygmlx_put_image_to_window(
+                gow_.img,
+                gow_.metadata.x_pos_prop,
+                gow_.metadata.y_pos_prop
+            )
+
+
+class GameOverLostAction(IAction):
+    def action(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        gow_ = gloop._registry\
+            .gameoverplayerlost.img_assets['gameoverlost']\
+                    .get_source('LOST')
         if (gow_.metadata and gow_.metadata.x_pos_prop is not None
                 and gow_.metadata.y_pos_prop is not None):
             gloop._mlx.pygmlx_put_image_to_window(
@@ -621,7 +705,8 @@ HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     HighScoreRegisterState: RegisterMenuAction,
     PauseMenuState: PauseMenuAction,
     InstructionsMenuState: InstructionMenuAction,
-    HighScoreMenuState: LeaderboardMenuAction
+    HighScoreMenuState: LeaderboardMenuAction,
+    RegisterMenuState: InputAction
 }
 
 
@@ -679,7 +764,14 @@ class GameLoop:
             for iass in img_assets:
                 handler = current_assets.img_assets[iass].event_handler
                 if handler is not None:
-                    handler(event, msgs)
+                    if self._currentstate != "registermenustate":
+                        handler(event, msgs)
+                    else:
+                        # TODO MAKE A SMALL BUS HERE...
+                        # I need a vehicle that keep the data and it is run by the action, so THIS could be an observer...
+                        inputdata = {"handler": handler,
+                                     "event": event,
+                                     "msg": msgs}
         self._actions(msgs, tick)
         return True
 
