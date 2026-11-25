@@ -11,6 +11,9 @@ from src.PacMan.database.db_mng import DatabaseManager
 from src.PacMan.game_logic.highscore import (
     HighScoreSnapshot,
     db_highsc_to_snapshot)
+from src.PacMan.game_logic.registration import (
+    RegistrationProcess,
+    RegistrationSnapshot)
 from src.PacMan.app_config.config import LEVELS
 from typing import Any, Callable
 from dataclasses import dataclass
@@ -23,6 +26,7 @@ class GLMSnapshot:
     session: GameSessionSnapshot | None
     menu: MenuSnapshot | None
     highscores: HighScoreSnapshot | None
+    registration: RegistrationSnapshot | None
 
 
 class GameLogicManager:
@@ -41,6 +45,7 @@ class GameLogicManager:
         self.dbm: DatabaseManager = databasemng
         self.session: GameSession | None = None
         self.menu: IMenu | None = None
+        self.registration: RegistrationProcess | None = None
         self.state: IGameState = start_state(self)
 
     def update_logic(self,
@@ -61,11 +66,17 @@ class GameLogicManager:
         else:
             session_ss = None
 
+        if self.registration:
+            registration_ss = self.registration.view()
+        else:
+            registration_ss = None
+
         return GLMSnapshot(player=self.player.view(),
                            game_state=self.state.__class__.__name__,
                            session=session_ss,
                            menu=menu_ss,
-                           highscores=self._get_hs_snapshot())
+                           highscores=self._get_hs_snapshot(),
+                           registration=registration_ss)
 
     def _get_hs_snapshot(self) -> HighScoreSnapshot | None:
         with self.dbm as db:
@@ -88,16 +99,40 @@ class GameLogicManager:
         return False
 
 
-def test():
-    from src.PacMan.validation_contracts.event_enums import HighScoreRegisterEvents, RegisterMenuEvents
-    from src.PacMan.game_logic.gamemanager.game_sm import HighScoreRegisterState
+def test() -> None:
+    from src.PacMan.validation_contracts.event_enums import (
+        HighScoreRegisterEvents,
+        RegisterMenuEvents)
+    from src.PacMan.game_logic.gamemanager.game_sm import (
+        HighScoreRegisterState)
     from src.PacMan.database.db_mng import create_database_mng
+    import random
+    import time
     dbm = create_database_mng()
-    glm = GameLogicManager(databasemng=dbm, start_state=HighScoreRegisterState)
+    glm = GameLogicManager(databasemng=dbm,
+                           start_state=HighScoreRegisterState)
     glm.update_logic(
         events={HighScoreRegisterEvents.REGISTER: None})
+    alphabet = 'abcdefghijklmnopqrstuvwxyz '
+    for _ in range(20):
+        char = random.choice(alphabet)
+        glm.update_logic(
+            events={RegisterMenuEvents.ENTRY: {'character': char}})
+        snapshot = glm.view()
+        print(f"{_}.", snapshot.game_state, snapshot.registration)
+    glm.update_logic(events={RegisterMenuEvents.REGISTER_NAME: None})
     snapshot = glm.view()
-    print(snapshot.highscores)
-    glm.update_logic(events={RegisterMenuEvents.REGISTER_NAME: {'name': 'asfdsadfsa'}})
+    print(snapshot.registration)
+    glm.update_logic(events={RegisterMenuEvents.REGISTER_NAME: None})
     snapshot = glm.view()
+    print(snapshot.registration)
+    glm.update_logic(events={RegisterMenuEvents.REGISTER_NAME: None})
+    snapshot = glm.view()
+    print(snapshot.registration)
+    print(snapshot.game_state)
     print(snapshot.highscores)
+    time.sleep(7)
+    glm.update_logic(events=None)
+    snapshot = glm.view()
+    print(snapshot.game_state)
+

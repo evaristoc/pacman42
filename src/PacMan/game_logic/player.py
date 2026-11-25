@@ -31,6 +31,3 @@ class Player:
         else:
             self.lives -= 1
         return 1
-
-    def set_name(self, new_name: str) -> None:
-        self.name = new_name

@@ -36,3 +36,8 @@ MAZE_NR_CELLS = 8
 COUNTDOWN_TIME = 4
 LEVEL_TIME = 90
 GAME_OVER_CD_TIME = 5
+
+################
+# Registration #
+################
+REGISTRATION_TRIES = 3
