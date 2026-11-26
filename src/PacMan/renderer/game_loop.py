@@ -206,24 +206,24 @@ class LeaderboardMenuAction(IAction):
                          for alldata
                          in mock_scores]
             h_.img.pygput_from_text(
-                10,
-                100,
+                int(gloop._assembler._config.size / 75),
+                int(gloop._assembler._config.size / 7.5),
                 "\n".join(rank_list)
             )
             user_list = [f"{alldata[1]:<10}"
                          for alldata
                          in mock_scores]
             h_.img.pygput_from_text(
-                200,
-                100,
+                int(gloop._assembler._config.size / 3.75),
+                int(gloop._assembler._config.size / 7.5),
                 "\n".join(user_list)
             )
             score_list = [f"{' ' * (10 - len(str(alldata[2])))}{alldata[2]}"
                           for alldata
                           in mock_scores]
             h_.img.pygput_from_text(
-                400,
-                100,
+                int(gloop._assembler._config.size / 1.88),
+                int(gloop._assembler._config.size / 7.5),
                 "\n".join(score_list)
             )
             if (h_.metadata and h_.metadata.x_pos_prop is not None
@@ -384,10 +384,18 @@ class InputAction(IAction):
             gloop: GameLoop,
             tick: int
     ) -> None:
-        # TODO Handler for input should be INSIDE it s action!!!
-        # TODO Paint only a small piece! Not the whole background
-        _ = tick
+        if gloop._statechanged:
+            self._init_state(gloop)
+        else:
+            self._update_state(gloop, tick)
+
+    def _init_state(
+            self,
+            gloop: GameLoop
+    ) -> None:
         try:
+            # snapshot.highscore
+            # if highscore empty, show a message is empty
             bg_ = gloop._registry.init.img_assets['background']\
                 .get_source('background')
             gloop._mlx.pygmlx_put_image_to_window(
@@ -395,19 +403,56 @@ class InputAction(IAction):
                 0,
                 0
             )
-            txt_ = gloop\
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
+
+    def _update_state(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        try:
+            snapshot = gloop._glm.view()
+            entry_ = gloop\
                 ._registry\
                 .registermenustate\
-                .img_assets["input_text"].get_source(
-                    "input_text"
+                .img_assets["input_entry"].get_source(
+                    "input_entry"
                 )
-            if (txt_.metadata and txt_.metadata.x_pos_prop is not None
-                    and txt_.metadata.y_pos_prop is not None):
+            if (entry_.metadata and entry_.metadata.x_pos_prop is not None
+                    and entry_.metadata.y_pos_prop is not None):
+                print(entry_.metadata)
+                entry_.img.pygput_from_text(
+                    entry_.metadata.text_x_prop,
+                    entry_.metadata.text_y_prop,
+                    snapshot.registration.payload + '_',
+                )
                 gloop._mlx.pygmlx_put_image_to_window(
-                    txt_.img,
-                    txt_.metadata.x_pos_prop,
-                    txt_.metadata.y_pos_prop
+                    entry_.img,
+                    entry_.metadata.x_pos_prop,
+                    entry_.metadata.y_pos_prop
                 )
+            msg_ = gloop\
+                ._registry\
+                .registermenustate\
+                .img_assets["input_msg"].get_source(
+                    "input_msg"
+                )
+            if (msg_.metadata and msg_.metadata.x_pos_prop is not None
+                    and msg_.metadata.y_pos_prop is not None):
+                print(msg_.metadata)
+                msg_.img.pygput_from_text(
+                    msg_.metadata.text_x_prop,
+                    msg_.metadata.text_y_prop,
+                    snapshot.registration.message,
+                )
+                gloop._mlx.pygmlx_put_image_to_window(
+                    msg_.img,
+                    msg_.metadata.x_pos_prop,
+                    msg_.metadata.y_pos_prop
+                )   
         except Exception as err:
             logger.error(f"FATAL: Exception trying to load menus: {err}")
             raise SystemExit(1)

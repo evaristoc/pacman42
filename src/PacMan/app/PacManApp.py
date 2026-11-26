@@ -49,7 +49,8 @@ class PacManApp:
                                             GameOverPlayerLostEvents,
                                             GameOverPlayerWonEvents,
                                             HighScoreMenuEvents,
-                                            HighScoreRegisterEvents)
+                                            HighScoreRegisterEvents,
+                                            RegisterMenuEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
                                                 returns_eh,
@@ -171,15 +172,20 @@ class PacManApp:
                 .img_loader_factdispatcher(
                                         "menus/gameoverwon",
                                         GameOverPlayerWonEvents)
-            inputs: ImgsAsset = self.assembler\
+            input_entry: ImgsAsset = self.assembler\
                 .text_loader_factdispatcher(
-                                        "input_text",
+                                        "input_entry",
                                         """
       _
                                         """
                                         )
-            inputs.event_handler = MethodType(input_eh,
-                                              inputs)
+            input_msg: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
+                                        "input_msg",
+                                        ""
+                                        )
+            input_entry.event_handler = MethodType(input_eh,
+                                                   input_entry)
             # three lives
             hub_bottom_img: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
@@ -259,7 +265,8 @@ class PacManApp:
             inputs_assets: Assets = Assets(
                 state_name=RegisterMenuState.__name__,
                 img_assets={
-                    inputs.asset_name: inputs
+                    "input_entry": input_entry,
+                    "input_msg": input_msg
                 }
             )
             self.assetregistry = AssetRegistry(

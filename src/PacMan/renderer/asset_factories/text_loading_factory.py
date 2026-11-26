@@ -48,12 +48,88 @@ class InputTextLoader(TextLoader):
         metadata.font_path = 'CHANGO.TTF'
         metadata.font_size_prop = 22.8
         metadata.color = 0xF6303F
+        metadata.bg_color = 0xFF000000
         metadata.text_x_prop = 5
         metadata.text_y_prop = 5
         if assembler._config.size is not None:
-            metadata.x_pos_prop = int(assembler._config.size / 2)
-            metadata.y_pos_prop = int(assembler._config.size / 2) +\
-                int(assembler._config.size / assembler._config.hub_panels_prop)
+            tot_w = assembler._config.size
+            hub = int(assembler._config.size /
+                      assembler._config.hub_panels_prop)
+            tot_h = tot_w + 2 * hub
+            font_size = int(assembler._config.size /
+                            metadata.font_size_prop)
+            h = font_size
+            w = 15 * font_size
+            metadata.x_pos_prop = int(tot_w / 2) - int(w / 2)
+            metadata.y_pos_prop = int(tot_h / 2) - int(h / 2) - h
+            source = Source(
+                img=PyGMLXTextEmulator(
+                                width=w,
+                                height=h,
+                                font_path=metadata.font_path,
+                                font_size=font_size,
+                                color=metadata.color
+                                ),
+                metadata=metadata,
+                type='computed'
+            )
+        if metadata and metadata.bg_color is not None:
+            for y in range(h):
+                for x in range(w):
+                    source.img.pygput_pixel(
+                        x,
+                        y,
+                        metadata.bg_color
+                    )
+        # if isinstance(source.img, PyGMLXTextEmulator):
+        #     source.img.pygput_from_text(
+        #                         metadata.text_x_prop,
+        #                         metadata.text_y_prop,
+        #                         metadata.text)
+        imgasset.sources.update(
+            {
+                folder: source,
+            }
+        )
+        return imgasset
+
+
+class MsgTextLoader(TextLoader):
+    def upload_text(
+            self,
+            folder: str,
+            msg: str,
+            assembler: 'RendererAssembler'
+            ) -> ImgsAsset:
+        if (assembler is None or
+                assembler._config is None or
+                assembler._config.nb_cells is None and
+                assembler._config.size is None or
+                assembler._config.hub_panels_prop is None):
+            logger.error(f"Parameters of {folder} loader should have a value")
+            raise SystemExit(1)
+        imgasset: ImgsAsset = ImgsAsset(asset_name=folder)
+        metadata: TextMetadata = TextMetadata()
+        metadata.text_template = msg
+        metadata.text = msg
+        metadata.font_path = 'CHANGO.TTF'
+        metadata.font_size_prop = 26.8
+        metadata.color = 0xF6303F
+        metadata.bg_color = 0xFFFFFFFF
+        metadata.text_x_prop = 5
+        metadata.text_y_prop = 5
+        if assembler._config.size is not None:
+            tot_w = assembler._config.size
+            hub = int(assembler._config.size /
+                      assembler._config.hub_panels_prop)
+            tot_h = tot_w + 2 * hub
+            font_size = int(assembler._config.size /
+                            metadata.font_size_prop)
+            h = int(3 * font_size)
+            w = int(tot_w * 2 / 3)
+            above_fontsize = 23 * font_size
+            metadata.x_pos_prop = int(tot_w / 2) - int(w / 2)
+            metadata.y_pos_prop = int(tot_h / 2) - int(h / 2) + above_fontsize
             font_size = int(assembler._config.size /
                             metadata.font_size_prop)
             h = font_size
@@ -67,6 +143,7 @@ class InputTextLoader(TextLoader):
                                 color=metadata.color
                                 ),
                 metadata=metadata,
+                type='computed'
             )
         if metadata and metadata.bg_color is not None:
             for y in range(h):
@@ -76,11 +153,11 @@ class InputTextLoader(TextLoader):
                         y,
                         metadata.bg_color
                     )
-        if isinstance(source.img, PyGMLXTextEmulator):
-            source.img.pygput_from_text(
-                                metadata.text_x_prop,
-                                metadata.text_y_prop,
-                                metadata.text)
+        # if isinstance(source.img, PyGMLXTextEmulator):
+        #     source.img.pygput_from_text(
+        #                         metadata.text_x_prop,
+        #                         metadata.text_y_prop,
+        #                         metadata.text)
         imgasset.sources.update(
             {
                 folder: source,
@@ -132,6 +209,7 @@ class HubTextLoader(TextLoader):
                                 color=metadata.color
                                 ),
                 metadata=metadata,
+                type='computed'
             )
         if metadata and metadata.bg_color is not None:
             for y in range(h):
@@ -161,7 +239,6 @@ class InfoTextLoader(TextLoader):
             msg: str,
             assembler: 'RendererAssembler'
             ) -> ImgsAsset:
-        print(1111)
         if (assembler is None or
                 assembler._config is None or
                 assembler._config.size is None or
@@ -196,6 +273,7 @@ class InfoTextLoader(TextLoader):
                                 color=metadata.color
                                 ),
                 metadata=metadata,
+                type='computed'
             )
         if metadata and metadata.bg_color is not None:
             for y in range(h):

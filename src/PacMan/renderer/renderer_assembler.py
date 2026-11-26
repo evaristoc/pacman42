@@ -20,7 +20,9 @@ from src.PacMan.renderer.asset_factories.imgs_loading_factory import (
 from src.PacMan.renderer.asset_factories.text_loading_factory import (
                                             TextLoader,
                                             HubTextLoader,
-                                            InfoTextLoader)
+                                            InfoTextLoader,
+                                            MsgTextLoader,
+                                            InputTextLoader)
 from src.PacMan.renderer.drawer_engine import BoardDrawerEngine
 
 
@@ -40,12 +42,13 @@ class RendererAssembler:
             "menus": MenuLoader(),
             "ghosts": GhostsLoader(),
             "pacman": PacManLoader(),
-            "gameover": GameOverLoader(),
+            "gameover": GameOverLoader()
         }
         self._textasset_map: dict[str, TextLoader] = {
             'hub': HubTextLoader(),
             'info': InfoTextLoader(),
-            'inputs': InfoTextLoader()
+            'input_entry': InputTextLoader(),
+            'input_msg': MsgTextLoader(),
         }
 
     def init_glm(
@@ -115,9 +118,20 @@ class RendererAssembler:
                 self
             )
         if ('instructions' in folder
-                or 'leaderboard' in folder
-                or 'input' in folder):
+                or 'leaderboard' in folder):
             return self._textasset_map['info'].upload_text(
+                folder,
+                msg,
+                self
+            )
+        if ('input_msg' in folder):
+            return self._textasset_map['input_msg'].upload_text(
+                folder,
+                msg,
+                self
+            )
+        if ('input_entry' in folder):
+            return self._textasset_map['input_entry'].upload_text(
                 folder,
                 msg,
                 self

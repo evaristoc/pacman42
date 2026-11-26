@@ -344,8 +344,7 @@ class HighScoreRegisterState(InGameState):
     @staticmethod
     def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums | None:
-        priority_order = [RegisterMenuEvents.CANCEL,
-                          RegisterMenuEvents.REGISTER_NAME]
+        priority_order = [RegisterMenuEvents.REGISTER_NAME]
 
         for event in priority_order:
             if event in events:
