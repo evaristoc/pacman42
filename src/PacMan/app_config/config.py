@@ -8,7 +8,7 @@ DATABASE_NAME = 'score.db'
 ########
 # Game #
 ########
-PLAYER_LIVES = 1
+PLAYER_LIVES = 3
 LEVELS = 10
 PACMAN_SPEED_PER_LVL = {1: 10, 2: 10, 3: 10, 4: 9, 5: 9,
                         6: 9, 7: 8, 8: 8, 9: 7, 10: 5}
@@ -36,3 +36,8 @@ MAZE_NR_CELLS = 8
 COUNTDOWN_TIME = 4
 LEVEL_TIME = 90
 GAME_OVER_CD_TIME = 5
+
+################
+# Registration #
+################
+REGISTRATION_TRIES = 3

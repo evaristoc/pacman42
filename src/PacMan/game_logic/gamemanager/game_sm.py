@@ -14,6 +14,9 @@ from src.PacMan.validation_contracts.event_enums import (
 from typing import Any
 from src.PacMan.game_logic.ingame.update_outcome import UpdateOutcome
 from src.PacMan.app_config.config import GAME_OVER_CD_TIME, LEVELS
+from src.PacMan.game_logic.registration import (
+    RegistrationProcess,
+    TriesError)
 import time
 if TYPE_CHECKING:
     from src.PacMan.game_logic.gamemanager.gamelogicmng import GameLogicManager
@@ -341,53 +344,6 @@ class HighScoreRegisterState(InGameState):
     @staticmethod
     def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
                             ) -> IEventEnums | None:
-        priority_order = [HighScoreRegisterEvents.CANCEL,
-                          HighScoreRegisterEvents.REGISTER]
-
-        for event in priority_order:
-            if event in events:
-                return event
-        return list(events.keys())[0]
-
-
-class RegisterMenuState(IGameState):
-    def __init__(self, context: "GameLogicManager"):
-        self.context: "GameLogicManager" = context
-
-    def update_logic(self,
-                     events: dict[IEventEnums, dict[str, Any] | None] | None,
-                     delta_ticks: int
-                     ) -> Union["IGameState", None]:
-        if events:
-            event = self._validate_events(events, RegisterMenuEvents)
-            if event == RegisterMenuEvents.CANCEL:
-                self.context.session = None
-                return MainMenuState(self.context)
-            elif event == RegisterMenuEvents.REGISTER_NAME:
-                payload = events.get(RegisterMenuEvents.REGISTER_NAME)
-                if payload is None:
-                    raise RuntimeError("Tried to register without a payload.")
-
-                name = payload.get("name")
-                if not isinstance(name, str) or not name.strip():
-                    raise RuntimeError("Passed payload without a valid name.")
-
-                name = name.strip().lower().capitalize()
-                score = self.context.player.score
-
-                with self.context.dbm as db:
-                    if db.player_exists(name):
-                        db.update_if_better_score(name, score)
-                    else:
-                        db.add_player(name, score)
-
-                self.context.session = None
-                return MainMenuState(self.context)
-        return None
-
-    @staticmethod
-    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
-                            ) -> IEventEnums | None:
         priority_order = [RegisterMenuEvents.CANCEL,
                           RegisterMenuEvents.REGISTER_NAME]
 
@@ -395,3 +351,117 @@ class RegisterMenuState(IGameState):
             if event in events:
                 return event
         return list(events.keys())[0]
+
+
+class RegistrationFailedState(IGameState):
+    def __init__(self, context: "GameLogicManager"):
+        super().__init__(context=context)
+        self._timer: float = time.time() + GAME_OVER_CD_TIME
+
+    def update_logic(self,
+                     events: dict[IEventEnums, dict[str, Any] | None] | None,
+                     delta_ticks: int
+                     ) -> Union["IGameState", None]:
+        if events:
+            raise RuntimeError("This state does not accept events.")
+        if time.time() > self._timer:
+            return MainMenuState(self.context)
+        return None
+
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums | None:
+        pass
+
+
+class RegistrationSuccesState(IGameState):
+    def __init__(self, context: "GameLogicManager"):
+        super().__init__(context=context)
+        self._timer: float = time.time() + GAME_OVER_CD_TIME
+
+    def update_logic(self,
+                     events: dict[IEventEnums, dict[str, Any] | None] | None,
+                     delta_ticks: int
+                     ) -> Union["IGameState", None]:
+        if events:
+            raise RuntimeError("This state does not accept events.")
+        if time.time() > self._timer:
+            return MainMenuState(self.context)
+        return None
+
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums | None:
+        pass
+
+
+class RegisterMenuState(IGameState):
+    def __init__(self, context: "GameLogicManager"):
+        self.context: "GameLogicManager" = context
+        self.context.registration = RegistrationProcess()
+
+    def update_logic(self,
+                     events: dict[IEventEnums, dict[str, Any] | None] | None,
+                     delta_ticks: int
+                     ) -> Union["IGameState", None]:
+        if events:
+            event = self._validate_events(events, RegisterMenuEvents)
+            if event == RegisterMenuEvents.ENTRY:
+                self._process_entry_event(events)
+            elif event == RegisterMenuEvents.REGISTER_NAME:
+                return self._process_register_event()
+        return None
+
+    @staticmethod
+    def _get_priority_event(events: dict[IEventEnums, dict[str, Any] | None]
+                            ) -> IEventEnums | None:
+        priority_order = [RegisterMenuEvents.ENTRY,
+                          RegisterMenuEvents.REGISTER_NAME]
+
+        for event in priority_order:
+            if event in events:
+                return event
+        return list(events.keys())[0]
+
+    def _process_entry_event(self,
+                             events: dict[IEventEnums, dict[str, Any] | None]
+                             ) -> None:
+        full_payload = events.get(RegisterMenuEvents.ENTRY)
+        if full_payload is None:
+            raise RuntimeError("Passed RegisterMenuEvents.ENTRY "
+                               "without a payload.")
+        if not isinstance(full_payload, dict):
+            raise ValueError("Payload is not a dictionary.")
+        char: str = str(full_payload.get("character"))
+        if self.context.registration:
+            self.context.registration.add_char_to_payload(char=char)
+        else:
+            raise RuntimeError("Somehow ended processing registration entries"
+                               "without an active RegistrationProcess-object.")
+
+    def _process_register_event(self) -> Union["IGameState", None]:
+        try:
+            if self.context.registration:
+                name = self.context.registration.get_name()
+            else:
+                raise RuntimeError("Somehow ended processing a register event"
+                                   "without an active "
+                                   "RegistrationProcess-object.")
+        except TriesError:
+            self.context.session = None
+            self.context.registration = None
+            return RegistrationFailedState(self.context)
+
+        if name:
+            name_clean = name.strip().lower().capitalize()
+            score = self.context.player.score
+
+            with self.context.dbm as db:
+                if db.player_exists(name_clean):
+                    db.update_if_better_score(name_clean, score)
+                else:
+                    db.add_player(name_clean, score)
+            self.context.session = None
+            self.context.registration = None
+            return RegistrationSuccesState(self.context)
+        return None
