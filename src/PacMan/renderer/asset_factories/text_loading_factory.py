@@ -46,9 +46,9 @@ class InputTextLoader(TextLoader):
         metadata.text_template = msg
         metadata.text = msg
         metadata.font_path = 'CHANGO.TTF'
-        metadata.font_size_prop = 22.8
-        metadata.color = 0xF6303F
-        metadata.bg_color = 0xFF000000
+        metadata.font_size_prop = 18.8
+        metadata.color = 0x2D2D2D
+        metadata.bg_color = 0xFFFFFFFF
         metadata.text_x_prop = 5
         metadata.text_y_prop = 5
         if assembler._config.size is not None:
@@ -58,10 +58,10 @@ class InputTextLoader(TextLoader):
             tot_h = tot_w + 2 * hub
             font_size = int(assembler._config.size /
                             metadata.font_size_prop)
-            h = font_size
+            h = 2 * font_size
             w = 15 * font_size
             metadata.x_pos_prop = int(tot_w / 2) - int(w / 2)
-            metadata.y_pos_prop = int(tot_h / 2) - int(h / 2) - h
+            metadata.y_pos_prop = int(tot_h / 2)
             source = Source(
                 img=PyGMLXTextEmulator(
                                 width=w,
@@ -113,11 +113,11 @@ class MsgTextLoader(TextLoader):
         metadata.text_template = msg
         metadata.text = msg
         metadata.font_path = 'CHANGO.TTF'
-        metadata.font_size_prop = 26.8
-        metadata.color = 0xF6303F
-        metadata.bg_color = 0xFFFFFFFF
-        metadata.text_x_prop = 5
-        metadata.text_y_prop = 5
+        metadata.font_size_prop = 40.8
+        metadata.color = 0xCBCBCB
+        metadata.bg_color = 0xFF000000
+        metadata.text_x_prop = 0
+        metadata.text_y_prop = 0
         if assembler._config.size is not None:
             tot_w = assembler._config.size
             hub = int(assembler._config.size /
@@ -125,15 +125,11 @@ class MsgTextLoader(TextLoader):
             tot_h = tot_w + 2 * hub
             font_size = int(assembler._config.size /
                             metadata.font_size_prop)
-            h = int(3 * font_size)
+            h = int(30 * font_size)
             w = int(tot_w * 2 / 3)
-            above_fontsize = 23 * font_size
+            above_fontsize = int(assembler._config.size / 23)
             metadata.x_pos_prop = int(tot_w / 2) - int(w / 2)
-            metadata.y_pos_prop = int(tot_h / 2) - int(h / 2) + above_fontsize
-            font_size = int(assembler._config.size /
-                            metadata.font_size_prop)
-            h = font_size
-            w = 15 * font_size
+            metadata.y_pos_prop = int(tot_h / 2) + 3 * above_fontsize
             source = Source(
                 img=PyGMLXTextEmulator(
                                 width=w,

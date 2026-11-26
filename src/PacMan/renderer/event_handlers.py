@@ -137,8 +137,7 @@ def returns_eh(
 def input_eh(
         self: "ImgsAsset",
         event: pygame.event.Event,
-        msgs: EventMsg,
-        char) -> None:
+        msgs: EventMsg) -> None:
     if msgs is None:
         return
     if event.type == pygame.KEYDOWN:
@@ -146,4 +145,11 @@ def input_eh(
             msgs[RegisterMenuEvents.REGISTER_NAME] = None
         else:
             # save in payload
-            msgs[RegisterMenuEvents.ENTRY] = pygame.key.name(event.key)
+            print(pygame.key.name(event.key))
+            char = pygame.key.name(event.key)
+            if char.isalnum() or char == ' ':
+                msgs[RegisterMenuEvents.ENTRY] = {
+                    "character": pygame.key.name(event.key)
+                }
+            else:
+                msgs[RegisterMenuEvents.ENTRY] = None           

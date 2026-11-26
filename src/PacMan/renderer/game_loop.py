@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 import pygame
-from functools import partial
+import textwrap
 from pygame import Event
 from dataclasses import dataclass
 from types import MethodType
@@ -423,11 +423,19 @@ class InputAction(IAction):
                 )
             if (entry_.metadata and entry_.metadata.x_pos_prop is not None
                     and entry_.metadata.y_pos_prop is not None):
-                print(entry_.metadata)
+                # print(entry_.metadata)
+                # print(('_' if tick % 15 else ''))
+                for y in range(entry_.img.height):
+                    for x in range(entry_.img.height):
+                        entry_.img.pygput_pixel(
+                            x,
+                            y,
+                            entry_.metadata.bg_color
+                        )
                 entry_.img.pygput_from_text(
                     entry_.metadata.text_x_prop,
                     entry_.metadata.text_y_prop,
-                    snapshot.registration.payload + '_',
+                    snapshot.registration.payload + ('_' if tick % 15 else ''),
                 )
                 gloop._mlx.pygmlx_put_image_to_window(
                     entry_.img,
@@ -442,17 +450,21 @@ class InputAction(IAction):
                 )
             if (msg_.metadata and msg_.metadata.x_pos_prop is not None
                     and msg_.metadata.y_pos_prop is not None):
-                print(msg_.metadata)
+                txt = "".join([t + '\n' for t in
+                               textwrap.wrap(
+                                             snapshot.registration.message,
+                                             int(len(snapshot.registration.message)/3))])
+                print(txt)
                 msg_.img.pygput_from_text(
-                    msg_.metadata.text_x_prop,
-                    msg_.metadata.text_y_prop,
-                    snapshot.registration.message,
+                    2,
+                    0,
+                    txt,
                 )
                 gloop._mlx.pygmlx_put_image_to_window(
                     msg_.img,
                     msg_.metadata.x_pos_prop,
                     msg_.metadata.y_pos_prop
-                )   
+                )
         except Exception as err:
             logger.error(f"FATAL: Exception trying to load menus: {err}")
             raise SystemExit(1)
@@ -818,12 +830,7 @@ class GameLoop:
             for iass in img_assets:
                 handler = current_assets.img_assets[iass].event_handler
                 if handler is not None:
-                    if self._currentstate != "registermenustate":
-                        handler(event, msgs)
-                    else:
-                        # TODO MAKE A SMALL BUS HERE...
-                        # I need a vehicle that keep the data and it is run by the action, so THIS could be an observer...
-                        i = 0
+                    handler(event, msgs)
         self._actions(msgs, tick)
         return True
 

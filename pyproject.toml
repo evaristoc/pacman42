@@ -39,7 +39,7 @@ req = [
     "fire==0.7.0",
     "numpy==2.4.6",
     "Pillow==12.3.0",
-    "pydantic==2.14.3",
+    "pydantic==2.14.3"
 ]
 
 dev = [
