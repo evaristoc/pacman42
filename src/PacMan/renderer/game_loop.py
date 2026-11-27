@@ -165,23 +165,18 @@ class LeaderboardMenuAction(IAction):
                 0,
                 0
             )
-            # txt_ = gloop\
-            #     ._registry\
-            #     .highscoremenustate\
-            #     .img_assets["text"].get_source(
-            #         "leaderboard_table"
-            #     )
-            header = f"     {'rank':<3} | {'username':<10} | {'score':<5}"
+            header = f"     {'rank':<3} | {'username':<20} | {'score':<5}"
             separator = "     " + "-" * len(header)
-            # print(snapshop.game_state)
+            print(snapshot.highscores.highscores[0])
+            SystemExit(0)
             # leader_list = [f"{rank:<3} | {username:<10} | {score:05d}"
             #                for rank, username, score
             #                in snapshop.highscores]
-            mock_scores = [
-                (1, "Alice", 1500),
-                (2, "Bob", 1200),
-                (3, "Charlie", 950),
-            ]
+            # mock_scores = [
+            #     (1, "Alice", 1500),
+            #     (2, "Bob", 1200),
+            #     (3, "Charlie", 950),
+            # ]
             # NOTE for size === 750
             header_txt = "\n".join([header, separator])
             header_: ImgsAsset = gloop\
@@ -190,37 +185,40 @@ class LeaderboardMenuAction(IAction):
                         header_txt,
                 )
             h_ = header_.get_source("leaderboard")
-            rank_list = [f"    {alldata[0]:<3}"
-                         for alldata
-                         in mock_scores]
-            h_.img.pygput_from_text(
-                int(gloop._assembler._config.size / 75),
-                int(gloop._assembler._config.size / 7.5),
-                "\n".join(rank_list)
-            )
-            user_list = [f"{alldata[1]:<10}"
-                         for alldata
-                         in mock_scores]
-            h_.img.pygput_from_text(
-                int(gloop._assembler._config.size / 3.75),
-                int(gloop._assembler._config.size / 7.5),
-                "\n".join(user_list)
-            )
-            score_list = [f"{' ' * (10 - len(str(alldata[2])))}{alldata[2]}"
-                          for alldata
-                          in mock_scores]
-            h_.img.pygput_from_text(
-                int(gloop._assembler._config.size / 1.88),
-                int(gloop._assembler._config.size / 7.5),
-                "\n".join(score_list)
-            )
-            if (h_.metadata and h_.metadata.x_pos_prop is not None
-                    and h_.metadata.y_pos_prop is not None):
-                gloop._mlx.pygmlx_put_image_to_window(
-                    h_.img,
-                    h_.metadata.x_pos_prop,
-                    h_.metadata.y_pos_prop
+            if (snapshot.highscores
+                    and snapshot.highscores.highscores is not None):
+                rank_list = [f"    {hsplayer.rank:<3}"
+                             for hsplayer
+                             in snapshot.highscores.highscores]
+                h_.img.pygput_from_text(
+                    int(gloop._assembler._config.size / 75),
+                    int(gloop._assembler._config.size / 7.5),
+                    "\n".join(rank_list)
                 )
+                user_list = [f"{hsplayer.name:<20}"
+                             for hsplayer
+                             in snapshot.highscores.highscores]
+                h_.img.pygput_from_text(
+                    int(gloop._assembler._config.size / 4.75),
+                    int(gloop._assembler._config.size / 7.5),
+                    "\n".join(user_list)
+                )
+                # h_.metadata.font_size_prop
+                score_list = [f"{' ' * (10 - len(str(hsplayer.score)))}{hsplayer.score}"
+                              for hsplayer
+                              in snapshot.highscores.highscores]
+                h_.img.pygput_from_text(
+                    int(gloop._assembler._config.size / 1.4),
+                    int(gloop._assembler._config.size / 7.5),
+                    "\n".join(score_list)
+                )
+                if (h_.metadata and h_.metadata.x_pos_prop is not None
+                        and h_.metadata.y_pos_prop is not None):
+                    gloop._mlx.pygmlx_put_image_to_window(
+                        h_.img,
+                        h_.metadata.x_pos_prop,
+                        h_.metadata.y_pos_prop
+                    )
             b_ = gloop\
                 ._registry\
                 .instructionsmenustate\
@@ -434,18 +432,6 @@ class InputAction(IAction):
                             y,
                             entry_.metadata.bg_color
                         )
-                # entry_.img.pygput_from_text(
-                #     entry_.metadata.text_x_prop,
-                #     entry_.metadata.text_y_prop,
-                #     '',
-                # )
-                # for y in range(entry_.img.height):
-                #     for x in range(entry_.img.height):
-                #         entry_.img.pygput_pixel(
-                #             x,
-                #             y,
-                #             entry_.metadata.bg_color
-                #         )
                 gloop._mlx.pygmlx_put_image_to_window(
                     entry_.img,
                     entry_.metadata.x_pos_prop,
