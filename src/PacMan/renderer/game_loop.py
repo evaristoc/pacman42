@@ -2,15 +2,14 @@ from __future__ import annotations
 import logging
 import pygame
 import textwrap
+import copy
 from pygame import Event
-from dataclasses import dataclass
 from types import MethodType
-from typing import TypeVar, Type, Protocol, Callable, Optional, Self, Any, TYPE_CHECKING
+from typing import TypeVar, Type, Protocol, TYPE_CHECKING
 from src.PacMan.game_logic.gamemanager.gamelogicmng import (
     GameLogicManager,
     GLMSnapshot)
 from src.PacMan.validation_contracts.event_enums import (
-    IEventEnums,
     InGameEvents)
 from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
     GhostName)
@@ -24,7 +23,9 @@ from src.PacMan.game_logic.gamemanager.game_sm import (
                                             InstructionsMenuState,
                                             HighScoreRegisterState,
                                             HighScoreMenuState,
-                                            RegisterMenuState)
+                                            RegisterMenuState,
+                                            RegistrationSuccesState,
+                                            RegistrationFailedState)
 from src.PacMan.renderer.event_handlers import pacman_eh
 if TYPE_CHECKING:  # only required for parameter type assignment
     from src.PacMan.renderer.assets import ImgsAsset, Assets, AssetRegistry
@@ -38,13 +39,6 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T", bound="IAction")
 
 
-@dataclass
-class InputDTO:
-    handler: Optional[Callable[[ImgsAsset, pygame.event.Event, dict[IEventEnums, dict[str, Any] | None] | None], None]] = None
-    event: Optional[pygame.event.Event] = None
-    msgs: Optional[EventMsg] = None
-
-
 class IAction(Protocol):
     def action(
             self,
@@ -52,12 +46,6 @@ class IAction(Protocol):
             tick: int
     ) -> None:
         ...
-
-    # def _init_state(
-    #         self,
-    #         gloop: "GameLoop"
-    # ) -> None:
-    #     ...
 
 
 class MainMenuAction(IAction):
@@ -334,48 +322,61 @@ class RegisterMenuAction(IAction):
             raise SystemExit(1)
 
 
-# class RegisterMenuAction(IAction):
-#     def action(
-#             self,
-#             gloop: GameLoop,
-#             tick: int
-#     ) -> None:
-#         _ = tick
-#         if gloop._statechanged:
-#             self._init_state(gloop)
+class RegistrationStatusAction(IAction):
+    def action(
+            self,
+            gloop: GameLoop,
+            tick: int
+    ) -> None:
+        _ = tick
+        if gloop._statechanged:
+            self._init_state(gloop)
+        self._update_state(gloop)
 
-#     def _init_state(
-#             self,
-#             gloop: GameLoop
-#     ) -> None:
-#         try:
-#             background = gloop._mlx.pygmlx_new_image(
-#                 gloop._mlx.view_w,
-#                 gloop._mlx.view_h
-#             )
-#             gloop._mlx.pygmlx_put_image_to_window(
-#                 background,
-#                 0,
-#                 0
-#             )
-#             buttons = list(
-#                 gloop._registry
-#                 .highscoreregisterstate.img_assets['register']
-#                 .sources.keys())
-#             for button in buttons:
-#                 b_ = gloop._registry\
-#                     .highscoreregisterstate.img_assets['register']\
-#                     .get_source(button)
-#                 if (b_.metadata and b_.metadata.x_pos_prop is not None
-#                         and b_.metadata.y_pos_prop is not None):
-#                     gloop._mlx.pygmlx_put_image_to_window(
-#                         b_.img,
-#                         b_.metadata.x_pos_prop,
-#                         b_.metadata.y_pos_prop
-#                     )
-#         except Exception as err:
-#             logger.error(f"FATAL: Exception trying to load menus: {err}")
-#             raise SystemExit(1)
+    def _init_state(
+            self,
+            gloop: GameLoop
+    ) -> None:
+        try:
+            bg_ = gloop._registry.init.img_assets['background']\
+                .get_source('background')
+            gloop._mlx.pygmlx_put_image_to_window(
+                bg_.img,
+                0,
+                0
+            )
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
+
+    def _update_state(
+            self,
+            gloop: GameLoop
+    ) -> None:
+        try:
+            snapshot = gloop._glm.view()
+            regstatus_assets = getattr(gloop._registry,
+                                       snapshot.game_state.lower(),
+                                       None)
+            txt_ = regstatus_assets\
+                .img_assets[snapshot.game_state.lower()].get_source(
+                    snapshot.game_state.lower()
+                )
+            if (txt_.metadata and txt_.metadata.x_pos_prop is not None
+                    and txt_.metadata.y_pos_prop is not None):
+                txt_.img.pygput_from_text(
+                    txt_.metadata.text_x_prop,
+                    txt_.metadata.text_y_prop,
+                    txt_.metadata.text,
+                )
+                gloop._mlx.pygmlx_put_image_to_window(
+                    txt_.img,
+                    txt_.metadata.x_pos_prop,
+                    txt_.metadata.y_pos_prop
+                )
+        except Exception as err:
+            logger.error(f"FATAL: Exception trying to load menus: {err}")
+            raise SystemExit(1)
 
 
 class InputAction(IAction):
@@ -422,38 +423,59 @@ class InputAction(IAction):
                     "input_entry"
                 )
             if (entry_.metadata and entry_.metadata.x_pos_prop is not None
-                    and entry_.metadata.y_pos_prop is not None):
+                and entry_.metadata.y_pos_prop is not None
+                    and snapshot.registration.payload != entry_.metadata.text):
                 # print(entry_.metadata)
                 # print(('_' if tick % 15 else ''))
                 for y in range(entry_.img.height):
-                    for x in range(entry_.img.height):
+                    for x in range(entry_.img.width):
                         entry_.img.pygput_pixel(
                             x,
                             y,
                             entry_.metadata.bg_color
                         )
-                entry_.img.pygput_from_text(
-                    entry_.metadata.text_x_prop,
-                    entry_.metadata.text_y_prop,
-                    snapshot.registration.payload + ('_' if tick % 15 else ''),
-                )
+                # entry_.img.pygput_from_text(
+                #     entry_.metadata.text_x_prop,
+                #     entry_.metadata.text_y_prop,
+                #     '',
+                # )
+                # for y in range(entry_.img.height):
+                #     for x in range(entry_.img.height):
+                #         entry_.img.pygput_pixel(
+                #             x,
+                #             y,
+                #             entry_.metadata.bg_color
+                #         )
                 gloop._mlx.pygmlx_put_image_to_window(
                     entry_.img,
                     entry_.metadata.x_pos_prop,
                     entry_.metadata.y_pos_prop
                 )
-            msg_ = gloop\
-                ._registry\
-                .registermenustate\
-                .img_assets["input_msg"].get_source(
-                    "input_msg"
+                entry_.img.pygput_from_text(
+                    entry_.metadata.text_x_prop,
+                    entry_.metadata.text_y_prop,
+                    snapshot.registration.payload + '_'
+                    # snapshot.registration.payload + ('_' if tick % 15 else ''),
                 )
+                entry_.metadata.text = snapshot.registration.payload
+                gloop._mlx.pygmlx_put_image_to_window(
+                    entry_.img,
+                    entry_.metadata.x_pos_prop,
+                    entry_.metadata.y_pos_prop
+                )
+            msg_ = copy.deepcopy(
+                        gloop
+                        ._registry
+                        .registermenustate
+                        .img_assets["input_msg"].get_source(
+                            "input_msg"
+                        ))
             if (msg_.metadata and msg_.metadata.x_pos_prop is not None
                     and msg_.metadata.y_pos_prop is not None):
                 txt = "".join([t + '\n' for t in
                                textwrap.wrap(
                                              snapshot.registration.message,
-                                             int(len(snapshot.registration.message)/3))])
+                                             int(len(snapshot.registration.message)/4))])
                 print(txt)
                 msg_.img.pygput_from_text(
                     2,
@@ -771,7 +793,9 @@ HANDLER_REGISTRY: dict[Type[IGameState], Type[IAction]] = {
     PauseMenuState: PauseMenuAction,
     InstructionsMenuState: InstructionMenuAction,
     HighScoreMenuState: LeaderboardMenuAction,
-    RegisterMenuState: InputAction
+    RegisterMenuState: InputAction,
+    RegistrationFailedState: RegistrationStatusAction,
+    RegistrationSuccesState: RegistrationStatusAction
 }
 
 
@@ -790,7 +814,6 @@ class GameLoop:
         self._currentlevel: int = 0
         self._levelchanged: bool = False
         self.event_queue: list[Event] = []
-        self.bus: InputDTO = InputDTO()
 
     def _actions(self,
                  msgs: EventMsg | None,
@@ -799,9 +822,9 @@ class GameLoop:
         # ### introducing the game logic manager .view() function ###
         snapshot = self._glm.view()
         if isinstance(self._glm.state, IGameState):
-            if (self._glm.state.__class__.__name__.lower()
+            if (snapshot.game_state.lower()
                     != self._currentstate):
-                self._currentstate = self._glm.state.__class__.__name__.lower()
+                self._currentstate = snapshot.game_state.lower()
                 self._statechanged = True
             if snapshot.player.level != self._currentlevel:
                 self._currentlevel = snapshot.player.level

@@ -98,3 +98,6 @@ class AssetRegistry:
     registermenustate: Assets = field(default=Assets)
     highscoremenustate: Assets = field(default_factory=Assets)
     highscoreregisterstate: Assets = field(default_factory=Assets)
+    registrationsuccesstate: Assets = field(default_factory=Assets)
+    registrationfailedstate: Assets = field(default_factory=Assets)
+

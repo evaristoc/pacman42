@@ -118,7 +118,8 @@ class RendererAssembler:
                 self
             )
         if ('instructions' in folder
-                or 'leaderboard' in folder):
+                or 'leaderboard' in folder
+                or 'registration' in folder):
             return self._textasset_map['info'].upload_text(
                 folder,
                 msg,

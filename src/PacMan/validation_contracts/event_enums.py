@@ -59,4 +59,4 @@ class RegistrationFailedEvents(IEventEnums):
 
 
 class RegistrationSuccesEvents(IEventEnums):
-    SUCCES = auto()
+    SUCCESS = auto()

@@ -50,7 +50,8 @@ class PacManApp:
                                             GameOverPlayerWonEvents,
                                             HighScoreMenuEvents,
                                             HighScoreRegisterEvents,
-                                            RegisterMenuEvents)
+                                            RegistrationFailedEvents,
+                                            RegistrationSuccesEvents)
         from src.PacMan.renderer.event_handlers import (
                                                 pacman_eh,
                                                 returns_eh,
@@ -66,7 +67,9 @@ class PacManApp:
                                                 InstructionsMenuState,
                                                 HighScoreMenuState,
                                                 HighScoreRegisterState,
-                                                RegisterMenuState)
+                                                RegisterMenuState,
+                                                RegistrationFailedState,
+                                                RegistrationSuccesState)
         from src.PacMan.game_logic.ingame.characters.ghosts.ghosts import (
                                                 GhostName)
         try:
@@ -186,6 +189,26 @@ class PacManApp:
                                         )
             input_entry.event_handler = MethodType(input_eh,
                                                    input_entry)
+            regsuccess: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
+                                    "RegistrationSuccesState".lower(),
+                                    """
+      You have been successfully
+                  registered.
+        """)
+            regfailure: ImgsAsset = self.assembler\
+                .text_loader_factdispatcher(
+                                        "RegistrationFailedState".lower(),
+                                        """
+            Your registration
+                  failed.
+
+              Unfortunately
+            your data is lost
+                  :(.
+                                        """
+                                        )
+
             # three lives
             hub_bottom_img: ImgsAsset = self.assembler\
                 .img_loader_factdispatcher(
@@ -269,6 +292,18 @@ class PacManApp:
                     "input_msg": input_msg
                 }
             )
+            regfailed_assets: Assets = Assets(
+                state_name='RegistrationFailedState'.lower(),
+                img_assets={
+                    'RegistrationFailedState'.lower(): regfailure,
+                }
+            )
+            regsuccess_assets: Assets = Assets(
+                state_name='RegistrationSuccesState'.lower(),
+                img_assets={
+                    'RegistrationSuccesState'.lower(): regsuccess
+                }
+            )
             self.assetregistry = AssetRegistry(
                init=init_assets,
                ingamestate=ingame_assets,
@@ -279,7 +314,9 @@ class PacManApp:
                gameoverplayerlost=gameoverlost_assets,
                gameoverplayerwon=gameoverwon_assets,
                highscoreregisterstate=register_assets,
-               registermenustate=inputs_assets
+               registermenustate=inputs_assets,
+               registrationsuccesstate=regsuccess_assets,
+               registrationfailedstate=regfailed_assets
             )
         except Exception as err:
             logger.exception(err)

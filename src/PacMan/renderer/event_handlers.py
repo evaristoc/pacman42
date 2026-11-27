@@ -147,9 +147,14 @@ def input_eh(
             # save in payload
             print(pygame.key.name(event.key))
             char = pygame.key.name(event.key)
-            if char.isalnum() or char == ' ':
+            if (char.isascii() and (
+                char.isalnum()
+                    or event.key == pygame.K_BACKSPACE)):
                 msgs[RegisterMenuEvents.ENTRY] = {
-                    "character": pygame.key.name(event.key)
+                    "character": ('\b' if event.key == pygame.K_BACKSPACE
+                                  else pygame.key.name(event.key))
                 }
             else:
-                msgs[RegisterMenuEvents.ENTRY] = None           
+                msgs[RegisterMenuEvents.ENTRY] = {
+                    "character": ""
+                }

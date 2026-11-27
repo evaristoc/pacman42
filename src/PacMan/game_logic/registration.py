@@ -39,11 +39,14 @@ class RegistrationProcess:
             new_char = self._char_validity(char)
         except RegisterError as e:
             self.custom_message = str(e) + " "
-        if new_char == '\b':
-            self.payload = self.payload[:-1]
-        else:
-            self.payload += new_char
-
+        try:
+            if new_char == '\b':
+                self.payload = self.payload[:-1]
+            else:
+                self.payload += new_char
+        finally:
+            return
+            
     @staticmethod
     def _char_validity(char: str) -> str:
         if not isinstance(char, str):
